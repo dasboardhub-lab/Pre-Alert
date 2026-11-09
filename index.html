@@ -8,13 +8,11 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="ScanParcel Pro">
-  <title>ScanParcel Pro | Anteraja</title>
+  <meta name="apple-mobile-web-app-title" content="Helpdesk Scan Pro">
+  <title>Helpdesk Kendala Serah Terima | Anteraja</title>
   
   <!-- External Libraries -->
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
   <style>
@@ -46,101 +44,26 @@
       max-width: 720px;
       min-height: 100dvh;
       margin: auto;
-      padding: 16px 14px 112px;
+      padding: 20px 14px 40px;
     }
 
-    /* Desktop Navigation Styling */
-    .desktop-nav {
-      display: none;
-    }
-
-    @media(min-width: 650px) {
-      .desktop-nav {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-      }
-
-      .desktop-brand {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        font-weight: 900;
-        font-size: 18px;
-        color: var(--amber);
-        letter-spacing: 1px;
-      }
-
-      .desktop-links {
-        display: flex;
-        gap: 8px;
-      }
-
-      .desktop-link {
-        background: transparent;
-        border: 1px solid transparent;
-        color: var(--muted);
-        padding: 8px 18px;
-        border-radius: 12px;
-        font-weight: 800;
-        font-size: 14px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        transition: all 0.2s ease;
-      }
-
-      .desktop-link:hover {
-        color: var(--text);
-        background: var(--panel2);
-      }
-
-      .desktop-link.active {
-        background: #332713;
-        border-color: var(--amber);
-        color: #ffd05b;
-      }
-
-      .app {
-        padding-top: 24px;
-        padding-bottom: 40px;
-      }
-      
-      .bottom-nav {
-        display: none !important;
-      }
+    /* Header Styling */
+    .app-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 900;
+      font-size: 20px;
+      color: var(--amber);
+      letter-spacing: 1px;
+      margin-bottom: 6px;
     }
 
     .eyebrow {
       color: var(--amber);
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 900;
       letter-spacing: 1.5px;
-    }
-
-    .hero {
-      display: flex;
-      justify-content: space-between;
-      gap: 14px;
-      margin: 8px 0 34px;
-    }
-
-    .hero h1 {
-      font-size: clamp(26px, 7vw, 42px);
-      line-height: 1.1;
-      margin: 10px 0 18px;
-      letter-spacing: -1.5px;
-    }
-
-    .camera-card {
-      background: var(--panel);
-      border: 1px solid #202831;
-      border-radius: 20px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
     }
 
     .status {
@@ -171,33 +94,6 @@
       overflow: hidden;
       background: #14191e;
       border-radius: 14px;
-    }
-
-    .camera-placeholder {
-      text-align: center;
-      color: var(--muted);
-      padding: 16px;
-    }
-
-    .cam-icon {
-      font-size: 36px;
-      color: var(--amber);
-    }
-
-    .scan-frame video {
-      display: none;
-      width: 100%;
-      max-height: 300px;
-      object-fit: cover;
-      border-radius: 14px;
-    }
-
-    .scan-frame.active video {
-      display: block;
-    }
-
-    .scan-frame.active .camera-placeholder {
-      display: none;
     }
 
     .btn {
@@ -243,47 +139,6 @@
       color: var(--muted);
     }
 
-    .bottom-nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: #1b2026;
-      border-top: 1px solid #28303a;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      padding: 8px 14px calc(8px + env(safe-area-inset-bottom));
-      z-index: 5;
-    }
-
-    .nav {
-      border: 0;
-      background: none;
-      color: var(--muted);
-      font-weight: 850;
-      font-size: 12px;
-      padding: 6px;
-      cursor: pointer;
-    }
-
-    .nav span {
-      display: block;
-      font-size: 20px;
-      margin-bottom: 2px;
-    }
-
-    .nav.active {
-      color: var(--amber);
-    }
-
-    .page {
-      display: none;
-    }
-
-    .page.active {
-      display: block;
-    }
-
     /* Modal & Toast Styling */
     .modal {
       position: fixed;
@@ -314,7 +169,7 @@
     .toast {
       position: fixed;
       left: 50%;
-      bottom: calc(85px + env(safe-area-inset-bottom));
+      bottom: 24px;
       transform: translate(-50%, 14px);
       opacity: 0;
       pointer-events: none;
@@ -345,122 +200,31 @@
       gap: 10px;
     }
 
-    /* Pre-Alert Responsive Layout */
-    .pre-head h1 {
-      font-size: 24px;
-      margin: 4px 0 14px;
-    }
-
-    .pre-form-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-    }
-
-    @media (min-width: 550px) {
-      .pre-form-grid {
-        grid-template-columns: repeat(4, 1fr);
-      }
-    }
-
-    .pre-camera {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 14px;
-      margin-bottom: 14px;
-    }
-
-    .pre-camera .scan-frame {
-      min-height: 180px;
-      margin: 10px 0;
-    }
-
-    .pre-summary-box {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 12px 14px;
-      margin: 12px 0;
-    }
-
-    @media (min-width: 500px) {
-      .pre-summary-box {
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-between;
-      }
-    }
-
-    .pre-list {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 10px;
-    }
-
-    .pre-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 6px;
-      align-items: center;
-      padding: 10px 0;
-      border-bottom: 1px solid var(--line);
-    }
-
-    @media (min-width: 600px) {
-      .pre-row {
-        grid-template-columns: 1.1fr .5fr .5fr .9fr .9fr .9fr 35px;
-      }
-    }
-
-    .pre-row input, .pre-row select {
-      min-width: 0;
-      width: 100%;
-      background: #12171b;
-      border: 1px solid #343e49;
-      border-radius: 8px;
-      color: white;
-      padding: 8px 6px;
-      font: 600 12px system-ui, sans-serif;
-    }
-
-    .pre-colhead {
+    /* Step 2 Fullscreen Overlay Layout */
+    .step2-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 90;
+      overflow-y: auto;
+      padding: 16px 14px 40px;
       display: none;
     }
 
-    @media (min-width: 600px) {
-      .pre-colhead {
-        display: grid;
-        grid-template-columns: 1.1fr .5fr .5fr .9fr .9fr .9fr 35px;
-        gap: 7px;
-        padding: 5px 0 9px;
-        color: var(--muted);
-        font-size: 10px;
-        font-weight: 900;
-      }
+    .step2-overlay.active {
+      display: block;
     }
 
-    .pre-actions {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-top: 14px;
-    }
-
-    @media (min-width: 500px) {
-      .pre-actions {
-        flex-direction: row;
-      }
+    .step2-container {
+      max-width: 720px;
+      margin: 0 auto;
     }
 
     /* Helpdesk Section Styling */
     .help-head h1 {
-      font-size: 24px;
+      font-size: 26px;
       margin: 4px 0 14px;
+      letter-spacing: -0.5px;
     }
 
     .help-card {
@@ -586,116 +350,33 @@
       border: 1px solid #202831;
     }
 
+    .pre-summary {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 20px;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
     .help-footer {
-      padding-bottom: 95px;
+      margin-top: 10px;
     }
   </style>
 </head>
 
 <body>
   <main class="app">
-    <!-- Header Nav Bar (Tampilan Desktop) -->
-    <header class="desktop-nav">
-      <div class="desktop-brand">
-        <span>📦</span> ScanParcel Pro
-      </div>
-      <nav class="desktop-links">
-        <button class="desktop-link active" onclick="page('prealert')">📦 Pre-Alert Bagseal</button>
-        <button class="desktop-link" onclick="page('helpdesk')">🚨 Helpdesk Kendala</button>
-      </nav>
-    </header>
+    <!-- Brand Header -->
+    <div class="app-brand">
+      <span>🚨</span> Helpdesk Kendala Paket
+    </div>
 
-    <!-- Halaman 1: Pre-Alert Bagseal -->
-    <section id="pagePreAlert" class="page active">
-      <div class="pre-head">
-        <div>
-          <div class="eyebrow">STAGING & BAGSEAL LOGISTICS</div>
-          <h1>Pre-Alert Staging</h1>
-        </div>
-      </div>
-
-      <!-- Informasi Tanggal, Batch & PIC Pengirim -->
-      <div class="pre-form" style="margin-bottom: 12px; background: var(--panel); padding: 14px; border-radius: 16px;">
-        <div class="pre-form-grid">
-          <div>
-            <label style="color:var(--muted); font-size:11px; font-weight:900; display:block; margin-bottom:4px;">TANGGAL</label>
-            <input type="date" id="preDate" style="width:100%; background:#12171b; border:1px solid var(--line); border-radius:10px; color:white; padding:9px 10px; font-weight:700;">
-          </div>
-          <div>
-            <label style="color:var(--muted); font-size:11px; font-weight:900; display:block; margin-bottom:4px;">BATCH</label>
-            <input id="preBatch" placeholder="Contoh: BATCH 1" value="BATCH 1" style="width:100%; background:#12171b; border:1px solid var(--line); border-radius:10px; color:white; padding:9px 10px; font-weight:700;">
-          </div>
-          <div>
-            <label style="color:var(--muted); font-size:11px; font-weight:900; display:block; margin-bottom:4px;">PIC PENGIRIM (PEMBUAT)</label>
-            <input id="prePic" placeholder="Nama PIC Pembuat" value="LIONEL" style="width:100%; background:#12171b; border:1px solid var(--line); border-radius:10px; color:white; padding:9px 10px; font-weight:700;">
-          </div>
-          <div>
-            <label style="color:var(--muted); font-size:11px; font-weight:900; display:block; margin-bottom:4px;">VENDOR (OPTIONAL)</label>
-            <input id="preVendor" placeholder="Nama Vendor (cth: LIONEL)" style="width:100%; background:#12171b; border:1px solid var(--line); border-radius:10px; color:white; padding:9px 10px; font-weight:700;">
-          </div>
-        </div>
-      </div>
-
-      <!-- Selector Tujuan Active / HUB Utama -->
-      <div class="pre-form" style="margin-bottom: 14px;">
-        <div style="padding: 12px; background: #12171b; border: 1px dashed var(--amber); border-radius: 14px;">
-          <label style="color:var(--amber); font-weight:900; font-size:11px; display:block; margin-bottom:6px;">
-            🎯 TARGET TUJUAN / HUB SAAT INI (HASIL SCAN KAMERA AKAN MASUK KE SINI)
-          </label>
-          <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:4px;">
-            <input id="preStaging" placeholder="Ketik atau pilih HUB (cth: HUB JKT-WEST)" style="width:100%; font-weight:800; font-size:14px; color:#ffd05b; background:#1b2026; border:1px solid var(--amber); border-radius:10px; padding:10px;">
-            <button class="btn primary" id="btnQuickAddStaging" style="min-height:40px; padding:0 14px; font-size:12px; font-weight:800;">＋ Target HUB Baru</button>
-          </div>
-          <div style="margin-top:6px;">
-            <label style="color:var(--muted); font-size:10px; font-weight:900; display:block; margin-bottom:4px;">PENERIMA UNTUK TARGET HUB INI (OPTIONAL)</label>
-            <input id="preReceiver" placeholder="Nama / Kontak Penerima di Tujuan HUB ini" style="width:100%; background:#1b2026; border:1px solid var(--line); border-radius:10px; color:white; padding:8px 10px; font-size:12px; font-weight:600;">
-          </div>
-        </div>
-      </div>
-
-      <div class="pre-camera">
-        <div class="status">
-          <span class="dot"></span>
-          <span id="preCamStatus">Kamera Pemindai Off</span>
-        </div>
-        <div class="scan-frame" id="preScanFrame">
-          <div class="camera-placeholder">
-            <div class="cam-icon">🔍</div>
-            <p style="margin:4px 0 0;font-size:12px;">Arahkan Kamera ke Barcode Bagseal</p>
-          </div>
-          <video id="preWebcam" playsinline autoplay muted></video>
-        </div>
-        <div>
-          <button class="btn primary" id="btnPreCam">▶ Kamera Pre-Alert Scan</button>
-        </div>
-      </div>
-
-      <div class="pre-summary-box">
-        <div style="font-size:13px;">
-          <span>TERCATAT: <strong id="preBagCount" style="color:var(--text)">0 Bagseal</strong></span> |
-          <span>TOTAL PARCEL: <strong id="preParcelSum" style="color:var(--amber)">0 Parcel</strong></span> |
-          <span>BERAT: <strong id="preWeightSum" style="color:var(--green)">0 Kg</strong></span>
-        </div>
-        <button class="btn primary" id="btnExportPreTop" style="min-height:38px; padding:6px 14px; font-size:12px; font-weight:800;">📥 Unduh Excel Pra-Alert</button>
-      </div>
-
-      <div id="preGroupedRows">
-        <div class="pre-list">
-          <div class="pre-empty">Belum ada bagseal untuk trip ini.</div>
-        </div>
-      </div>
-
-      <div class="pre-actions">
-        <button class="btn danger" id="btnClearPre">🗑 Hapus Trip Tanggal Ini</button>
-        <button class="btn primary" id="btnExportPre" style="font-size:14px; font-weight:900;">📥 Unduh Excel Pra-Alert (CSC HLM)</button>
-      </div>
-    </section>
-
-    <!-- Halaman 2: Helpdesk Kendala Paket -->
-    <section id="pageHelpdesk" class="page">
+    <!-- Halaman Utama: Helpdesk Kendala Paket -->
+    <section id="pageHelpdesk">
       <div class="help-head">
         <div>
-          <div class="eyebrow">HELPDESK & KENDALA SERAH TERIMA</div>
+          <div class="eyebrow">PENCATATAN & KENDALA SERAH TERIMA</div>
           <h1>Laporan Kendala</h1>
         </div>
       </div>
@@ -719,6 +400,13 @@
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
           <div style="font-weight:900; color:var(--amber); font-size:16px;">STEP 1: Scan / Input Nomor Bagshield</div>
           <span id="editingBadge" style="display:none; background:var(--green); color:#fff; font-size:11px; padding:3px 8px; border-radius:6px; font-weight:800;">Mode Edit</span>
+        </div>
+
+        <!-- Google Sheets Sync Configuration Box -->
+        <div style="background:#17221e; border:1px solid #1a5336; border-radius:12px; padding:10px; margin-bottom:14px;">
+          <label style="color:var(--green); font-size:11px; font-weight:900; margin:0 0 4px; display:block;">📊 GOOGLE SHEETS SINKRONISASI OTOMATIS (TERHUBUNG)</label>
+          <input class="help-input" id="sheetsWebhookUrl" value="https://script.google.com/macros/s/AKfycbzXTyCoRm9j_uTlOFD1-1iPZthJHdQLfSQuG-lXhDxgaQR_REf9tZ0feEJ0lhohQuM/exec" style="font-size:11px; padding:8px 10px; border-color:#236140;" readonly>
+          <span style="font-size:10px; color:var(--muted); margin-top:4px; display:block;">✅ URL Webhook sudah dikunci secara otomatis. Data laporan seluruh tim akan otomatis masuk ke Google Spreadsheet.</span>
         </div>
 
         <!-- Pilihan Bagshield Yang Sudah Pernah Diproses -->
@@ -750,56 +438,48 @@
         <button class="btn primary pre-save" id="btnNextToAwb" style="margin-top:16px; font-weight:900; font-size:15px;">➡️ Lanjutkan ke Scan AWB</button>
       </section>
 
-      <!-- Step 2: Scan Barcode AWB & Detail List (Muncul setelah klik Lanjutkan) -->
-      <div id="helpStep2" style="display:none;">
-        <div class="help-card" style="border: 2px solid var(--amber);">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-            <div style="font-weight:900; color:var(--amber); font-size:15px;">🔒 BAGSHIELD: <span id="displayActiveBagshield" style="color:#fff;">-</span></div>
-            <button class="btn" id="btnBackToStep1" style="min-height:auto; padding:5px 10px; font-size:11px; background:#252c34;">⚙ Ubah Bagshield</button>
-          </div>
-          <div style="font-size:12px; color:var(--muted);">Silakan scan barcode AWB di dalam Bagshield ini. Hasil scan akan langsung masuk ke daftar di bawah.</div>
-          <div style="margin-top:10px;">
-            <button class="btn primary" id="btnHelpCam" style="width:100%; min-height:46px; font-size:14px; font-weight:800;">▶ Bukalah Kamera Scan AWB</button>
-          </div>
-        </div>
-
-        <div class="help-card">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-            <div style="font-weight:900;">Daftar AWB dalam Bagshield (<span id="awbListCount">0</span>)</div>
-            <button class="btn primary" id="btnAddManualAwb" style="min-height:auto; padding:6px 12px; font-size:12px;">＋ Tambah Manual</button>
+      <!-- Step 2: Fullscreen Overlay untuk Scan Barcode AWB & Detail List -->
+      <div id="helpStep2" class="step2-overlay">
+        <div class="step2-container">
+          <div class="help-card" style="border: 2px solid var(--amber);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <div style="font-weight:900; color:var(--amber); font-size:16px;">🔒 BAGSHIELD: <span id="displayActiveBagshield" style="color:#fff;">-</span></div>
+              <button class="btn" id="btnBackToStep1" style="min-height:auto; width:auto; padding:6px 14px; font-size:12px; background:#252c34; border-color:var(--line);">⬅ Kembali ke Step 1</button>
+            </div>
+            <div style="font-size:12px; color:var(--muted);">Silakan scan barcode AWB di dalam Bagshield ini. Hasil scan akan langsung masuk ke daftar di bawah.</div>
+            <div style="margin-top:10px;">
+              <button class="btn primary" id="btnHelpCam" style="width:100%; min-height:46px; font-size:14px; font-weight:800;">▶ Bukalah Kamera Scan AWB</button>
+            </div>
           </div>
 
-          <div id="helpAwbListContainer">
-            <div class="last-box" style="padding:16px;">Belum ada AWB di-scan. Nyalakan kamera atau tambah manual.</div>
-          </div>
+          <div class="help-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+              <div style="font-weight:900;">Daftar AWB dalam Bagshield (<span id="awbListCount">0</span>)</div>
+              <button class="btn primary" id="btnAddManualAwb" style="min-height:auto; width:auto; padding:6px 12px; font-size:12px;">＋ Tambah Manual</button>
+            </div>
 
-          <button class="btn primary pre-save" id="helpSave" style="margin-top:16px; font-size:15px; font-weight:900;">＋ Simpan Seluruh Laporan Bagshield</button>
+            <div id="helpAwbListContainer">
+              <div class="last-box" style="padding:16px;">Belum ada AWB di-scan. Nyalakan kamera atau tambah manual.</div>
+            </div>
+
+            <button class="btn primary pre-save" id="helpSave" style="margin-top:16px; font-size:15px; font-weight:900;">💾 Simpan Seluruh Laporan Bagshield Ini</button>
+          </div>
         </div>
       </div>
 
       <div class="pre-summary">
-        <span>RIWAYAT LAPORAN: <strong id="helpCount" style="color:var(--text)">0</strong></span>
+        <span>RIWAYAT LAPORAN TERMASUK: <strong id="helpCount" style="color:var(--text)">0 Bagshield</strong></span>
       </div>
 
       <div class="help-footer">
         <div id="helpReports">
           <div class="last-box">Belum ada laporan Helpdesk.</div>
         </div>
-        <button class="btn primary" id="btnExportHelp" style="width:100%;margin-top:14px;min-height:60px">
+        <button class="btn primary" id="btnExportHelp" style="width:100%;margin-top:14px;min-height:54px">
           ▣ Download Excel + Foto Bukti
         </button>
       </div>
     </section>
-
-    <!-- Bottom Navigation Bar (Mobile) -->
-    <nav class="bottom-nav">
-      <button class="nav active" onclick="page('prealert')" id="navPreAlert">
-        <span>📦</span>Pre-Alert
-      </button>
-      <button class="nav" onclick="page('helpdesk')" id="navHelpdesk">
-        <span>🚨</span>Helpdesk
-      </button>
-    </nav>
   </main>
 
   <!-- Modal Konfirmasi Download Helpdesk Kustom -->
@@ -834,13 +514,6 @@
     const $ = id => document.getElementById(id);
     const safe = str => (str || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 
-    // Global App State
-    let activePage = 'prealert';
-    let currentDateKey = new Date().toISOString().slice(0, 10);
-    let preAlertData = JSON.parse(localStorage.getItem('prealert_data_v2') || '{}');
-    let lastScannedBagseal = '';
-    let scanThrottleTimeout = null;
-    
     // Helpdesk State
     let helpDb = null;
     let helpReports = [];
@@ -851,8 +524,6 @@
 
     // Html5Qrcode Scanner Instances
     let html5QrScannerHelp = null;
-    let streamPre = null;
-    let preScanInterval = null;
     let lastScannedAwb = '';
     let helpAwbThrottle = null;
 
@@ -879,30 +550,7 @@
       setTimeout(() => t.classList.remove('show'), 2400);
     }
 
-    // Navigation System
-    window.page = function(p) {
-      activePage = p;
-      document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
-      document.querySelectorAll('.nav').forEach(el => el.classList.remove('active'));
-      document.querySelectorAll('.desktop-link').forEach(el => el.classList.remove('active'));
-
-      if (p === 'prealert') {
-        $('pagePreAlert').classList.add('active');
-        $('navPreAlert')?.classList.add('active');
-        document.querySelectorAll('.desktop-link')[0]?.classList.add('active');
-      } else if (p === 'helpdesk') {
-        $('pageHelpdesk').classList.add('active');
-        $('navHelpdesk')?.classList.add('active');
-        document.querySelectorAll('.desktop-link')[1]?.classList.add('active');
-      }
-
-      stopAllCameras();
-    };
-
     function stopAllCameras() {
-      if (preScanInterval) { clearInterval(preScanInterval); preScanInterval = null; }
-      if (streamPre) { streamPre.getTracks().forEach(t => t.stop()); streamPre = null; }
-      
       if (html5QrScannerHelp) {
         try {
           html5QrScannerHelp.stop().then(() => {
@@ -916,224 +564,8 @@
         }
       }
 
-      $('preScanFrame')?.classList.remove('active');
       if ($('helpCameraCard')) $('helpCameraCard').style.display = 'none';
-
-      if ($('btnPreCam')) $('btnPreCam').textContent = '▶ Kamera Pre-Alert Scan';
       if ($('btnHelpCam')) $('btnHelpCam').textContent = '▶ Bukalah Kamera Scan AWB';
-    }
-
-    // --- MODUL 1: PRE-ALERT ---
-    function renderPreAlert() {
-      const list = preAlertData[currentDateKey] || [];
-      const container = $('preGroupedRows');
-      
-      let totalBagseal = list.length;
-      let totalParcelSum = 0;
-      let totalWeightSum = 0;
-
-      list.forEach(x => {
-        totalParcelSum += (parseInt(x.total) || 0);
-        totalWeightSum += (parseFloat(x.weight) || 0);
-      });
-
-      $('preBagCount').textContent = totalBagseal + ' Bagseal';
-      $('preParcelSum').textContent = totalParcelSum + ' Parcel';
-      if ($('preWeightSum')) $('preWeightSum').textContent = totalWeightSum.toFixed(1) + ' Kg';
-
-      if (!list.length) {
-        container.innerHTML = '<div class="pre-list"><div class="pre-empty">Belum ada bagseal untuk tanggal ini. Aktifkan kamera lalu scan barcode.</div></div>';
-        return;
-      }
-
-      // Grouping data berdasarkan Staging / HUB
-      const grouped = {};
-      list.forEach((item, originalIndex) => {
-        const hubKey = (item.staging || 'TIDAK ADA TUJUAN HUB').toUpperCase();
-        if (!grouped[hubKey]) {
-          grouped[hubKey] = [];
-        }
-        grouped[hubKey].push({ ...item, originalIndex });
-      });
-
-      const currentSelectedHub = ($('preStaging').value || '').trim().toUpperCase();
-
-      let html = '';
-      Object.keys(grouped).forEach(hubName => {
-        const items = grouped[hubName];
-        let grpParcels = 0;
-        let grpWeight = 0;
-        items.forEach(it => {
-          grpParcels += (parseInt(it.total) || 0);
-          grpWeight += (parseFloat(it.weight) || 0);
-        });
-
-        const isSelected = hubName === currentSelectedHub;
-
-        html += `
-          <div style="margin-bottom: 16px; background: var(--panel); border: ${isSelected ? '2px solid var(--amber)' : '1px solid var(--line)'}; border-radius: 16px; padding: 12px; overflow: hidden;">
-            <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px solid #28303a;">
-              <div style="font-weight:900; color:var(--amber); font-size:15px; display:flex; align-items:center; gap:6px;">
-                <span>🎯</span> HUB: <span>${safe(hubName)}</span>
-                <button onclick="selectHubTarget('${safe(hubName)}')" style="margin-left:8px; background:${isSelected ? 'var(--amber)' : '#252c34'}; color:${isSelected ? '#111' : '#fff'}; border:none; padding:3px 8px; border-radius:6px; font-size:11px; font-weight:800; cursor:pointer;">
-                  ${isSelected ? '✓ Target Aktif' : 'Pilih Sebagai Target'}
-                </button>
-              </div>
-              <div style="font-size:12px; color:var(--muted); font-weight:800;">
-                <span style="color:var(--text); margin-right:8px;">${items.length} Bagseal</span>
-                <span style="color:var(--green); margin-right:8px;">${grpWeight.toFixed(1)} Kg</span>
-                <span style="color:var(--amber);">${grpParcels} Pcs</span>
-              </div>
-            </div>
-            <div class="pre-colhead" style="grid-template-columns: 1.1fr .5fr .5fr .9fr .9fr .9fr 35px;">
-              <span>NO BAGSEAL</span>
-              <span>BERAT (KG)</span>
-              <span>QTY (PCS)</span>
-              <span>KATEGORI</span>
-              <span>CATATAN</span>
-              <span>PENERIMA</span>
-              <span></span>
-            </div>
-
-            ${items.map(item => `
-              <div class="pre-row" style="grid-template-columns: 1.1fr .5fr .5fr .9fr .9fr .9fr 35px;">
-                <input value="${safe(item.bagseal)}" onchange="updatePreItem(${item.originalIndex}, 'bagseal', this.value)" placeholder="No. Bagseal">
-                <input type="number" step="0.1" value="${item.weight !== undefined && item.weight !== null ? item.weight : ''}" onchange="updatePreItem(${item.originalIndex}, 'weight', this.value)" placeholder="0.0">
-                <input type="number" value="${item.total}" onchange="updatePreItem(${item.originalIndex}, 'total', this.value)" placeholder="0">
-                <select onchange="updatePreItem(${item.originalIndex}, 'category', this.value)" style="min-width:0; width:100%; background:#12171b; border:1px solid #343e49; border-radius:8px; color:white; padding:9px 5px; font:600 11px system-ui, sans-serif;">
-                  <option value="Reg" ${item.category === 'Reg' ? 'selected' : ''}>Reg</option>
-                  <option value="HV/Dok/Al-Qur'an" ${item.category === "HV/Dok/Al-Qur'an" ? 'selected' : ''}>HV/Dok/Al-Qur'an</option>
-                  <option value="Cairan" ${item.category === 'Cairan' ? 'selected' : ''}>Cairan</option>
-                  <option value="BP" ${item.category === 'BP' ? 'selected' : ''}>BP</option>
-                </select>
-                <input value="${safe(item.notes)}" onchange="updatePreItem(${item.originalIndex}, 'notes', this.value)" placeholder="Catatan">
-                <input value="${safe(item.receiver || '')}" onchange="updatePreItem(${item.originalIndex}, 'receiver', this.value)" placeholder="Penerima">
-                <button onclick="deletePreItem(${item.originalIndex})" style="background:none; border:none; color:var(--red); cursor:pointer; font-weight:bold; font-size:16px;">✕</button>
-              </div>
-            `).join('')}
-          </div>
-        `;
-      });
-
-      container.innerHTML = html;
-    }
-
-    window.selectHubTarget = function(hubName) {
-      $('preStaging').value = hubName;
-      renderPreAlert();
-      toast('Target Scan: ' + hubName);
-    };
-
-    function addScannedBagseal(bagsealCode) {
-      const staging = $('preStaging').value.trim();
-      const receiver = $('preReceiver').value.trim();
-      if (!staging) {
-        toast('PILIH/INPUT TUJUAN HUB DAHULU SEBELUM SCAN!');
-        return;
-      }
-
-      if (!preAlertData[currentDateKey]) preAlertData[currentDateKey] = [];
-
-      const existing = preAlertData[currentDateKey].find(x => x.bagseal === bagsealCode);
-      if (existing) {
-        if (navigator.vibrate) navigator.vibrate([150, 80, 150]);
-        toast('❌ Bagseal ' + bagsealCode + ' SUDAH ADA di HUB: ' + existing.staging);
-        return;
-      }
-
-      if (lastScannedBagseal === bagsealCode) return;
-      lastScannedBagseal = bagsealCode;
-
-      clearTimeout(scanThrottleTimeout);
-      scanThrottleTimeout = setTimeout(() => { lastScannedBagseal = ''; }, 3000);
-
-      playBeep();
-      if (navigator.vibrate) navigator.vibrate(100);
-
-      preAlertData[currentDateKey].unshift({
-        staging: staging,
-        bagseal: bagsealCode,
-        total: 1,
-        weight: 0,
-        category: 'Reg',
-        notes: '-',
-        receiver: receiver || '-'
-      });
-
-      localStorage.setItem('prealert_data_v2', JSON.stringify(preAlertData));
-      renderPreAlert();
-      toast('✅ Added: ' + bagsealCode + ' ➔ ' + staging);
-    }
-
-    window.updatePreItem = function(index, field, value) {
-      if (preAlertData[currentDateKey] && preAlertData[currentDateKey][index]) {
-        if (field === 'bagseal') {
-          const duplicate = preAlertData[currentDateKey].find((x, i) => i !== index && x.bagseal === value.trim());
-          if (duplicate) {
-            toast('❌ Nomor Bagseal ' + value + ' sudah dipakai!');
-            renderPreAlert();
-            return;
-          }
-        }
-        preAlertData[currentDateKey][index][field] = field === 'total' || field === 'weight' ? Number(value) : value;
-        localStorage.setItem('prealert_data_v2', JSON.stringify(preAlertData));
-        renderPreAlert();
-      }
-    };
-
-    window.deletePreItem = function(index) {
-      if (preAlertData[currentDateKey] && preAlertData[currentDateKey][index]) {
-        preAlertData[currentDateKey].splice(index, 1);
-        localStorage.setItem('prealert_data_v2', JSON.stringify(preAlertData));
-        renderPreAlert();
-        toast('Bagseal dihapus.');
-      }
-    };
-
-    async function togglePreCam() {
-      if (streamPre) {
-        stopAllCameras();
-        return;
-      }
-
-      stopAllCameras();
-
-      try {
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-          toast('Kamera tidak didukung / perlukan koneksi HTTPS');
-          return;
-        }
-
-        streamPre = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
-        });
-
-        const video = $('preWebcam');
-        video.srcObject = streamPre;
-        video.play();
-        $('preScanFrame').classList.add('active');
-        $('btnPreCam').textContent = '⏹ Hentikan Kamera';
-        $('preCamStatus').textContent = 'Kamera Pemindai Aktif';
-
-        if ('BarcodeDetector' in window) {
-          const barcodeDetector = new BarcodeDetector({
-            formats: ['code_128', 'code_39', 'code_93', 'ean_13', 'qr_code', 'data_matrix']
-          });
-
-          preScanInterval = setInterval(async () => {
-            if (!streamPre) { clearInterval(preScanInterval); return; }
-            try {
-              const barcodes = await barcodeDetector.detect(video);
-              if (barcodes.length > 0 && barcodes[0].rawValue) {
-                addScannedBagseal(barcodes[0].rawValue.trim());
-              }
-            } catch (e) {}
-          }, 400);
-        }
-      } catch (err) {
-        toast('Gagal membuka kamera Pre-Alert.');
-        stopAllCameras();
-      }
     }
 
     // Robust Camera Handlers for Helpdesk (Html5Qrcode)
@@ -1251,7 +683,7 @@
                 <button onclick="takePhotoForAwb('${item.id}')" style="background:#252c34; border:none; color:white; padding:4px 8px; border-radius:6px; font-size:10px; margin-top:4px; cursor:pointer;">📷 Foto Ulang</button>
               </div>
             ` : `
-              <button class="btn primary" onclick="takePhotoForAwb('${item.id}')" style="min-height:36px; padding:6px 12px; font-size:11px; font-weight:800;">📷 Ambil Foto Resi Ini</button>
+              <button class="btn primary" onclick="takePhotoForAwb('${item.id}')" style="min-height:36px; padding:6px 12px; font-size:11px; font-weight:800; width:auto;">📷 Ambil Foto Resi Ini</button>
               <span style="color:var(--muted); font-size:11px;">Belum ada foto</span>
             `}
           </div>
@@ -1351,7 +783,7 @@
 
     function renderHelpReports() {
       const container = $('helpReports');
-      $('helpCount').textContent = helpReports.length;
+      $('helpCount').textContent = helpReports.length + ' Bagshield';
 
       if (!helpReports.length) {
         container.innerHTML = '<div class="last-box">Belum ada laporan Helpdesk.</div>';
@@ -1408,17 +840,17 @@
       currentBagshieldAwbs = (report.awbList || []).map(a => ({ ...a }));
 
       stopAllCameras();
-      $('helpStep1').style.display = 'none';
-      $('helpStep2').style.display = 'block';
+      $('helpStep2').classList.add('active');
       renderHelpAwbList();
       toast('📂 Membuka Bagshield: ' + activeBagshieldNo + ' untuk diedit.');
     };
 
-    function saveHelpdeskReport() {
+    async function saveHelpdeskReport() {
       const shipDate = $('helpShipDate').value;
       const staff = $('helpStaff').value.trim();
       const hub = $('helpHub').value.trim();
       const bagshield = activeBagshieldNo || $('helpBagshield').value.trim();
+      const webhookUrl = $('sheetsWebhookUrl')?.value.trim();
 
       if (!shipDate || !staff || !hub || !bagshield) {
         toast('❌ Lengkapi Tanggal, Nama Petugas, HUB, dan Bagshield!');
@@ -1439,6 +871,23 @@
         createdAt: new Date().toLocaleString('id-ID')
       };
 
+      // Auto Send to Google Sheets if Webhook URL is provided
+      if (webhookUrl) {
+        localStorage.setItem('saved_sheets_url', webhookUrl);
+        toast('⏳ Mengirim data ke Google Sheets...');
+        try {
+          await fetch(webhookUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(reportData)
+          });
+          toast('✅ Data terikirim ke Google Sheets!');
+        } catch (err) {
+          console.error('Error sending to Sheets:', err);
+        }
+      }
+
       const tx = helpDb.transaction('reports', 'readwrite');
       const store = tx.objectStore('reports');
 
@@ -1457,8 +906,7 @@
         renderHelpAwbList();
         loadHelpReports();
 
-        $('helpStep2').style.display = 'none';
-        $('helpStep1').style.display = 'block';
+        $('helpStep2').classList.remove('active');
         $('helpBagshield').value = '';
         stopAllCameras();
       };
@@ -1467,112 +915,70 @@
     // --- INITIALIZATION & EVENT LISTENERS ---
     window.addEventListener('load', () => {
       const today = new Date().toISOString().slice(0, 10);
-      if ($('preDate')) $('preDate').value = today;
       if ($('helpShipDate')) $('helpShipDate').value = today;
 
-      renderPreAlert();
+      // Default Webhook URL embedded directly for team deployment
+      const defaultWebhookUrl = 'https://script.google.com/macros/s/AKfycbzXTyCoRm9j_uTlOFD1-1iPZthJHdQLfSQuG-lXhDxgaQR_REf9tZ0feEJ0lhohQuM/exec';
+      if ($('sheetsWebhookUrl')) $('sheetsWebhookUrl').value = defaultWebhookUrl;
+
       initHelpDb();
 
-      $('btnPreCam')?.addEventListener('click', togglePreCam);
-      $('btnQuickAddStaging')?.addEventListener('click', () => {
-        const staging = $('preStaging').value.trim();
-        if (staging) renderPreAlert();
-      });
-
-      $('btnClearPre')?.addEventListener('click', () => {
-        if (confirm('Apakah Anda yakin ingin menghapus seluruh data Pre-Alert tanggal ini?')) {
-          delete preAlertData[currentDateKey];
-          localStorage.setItem('prealert_data_v2', JSON.stringify(preAlertData));
-          renderPreAlert();
-          toast('Data Pre-Alert dibersihkan.');
-        }
-      });
-
       $('btnScanBagshieldCam')?.addEventListener('click', () => toggleHelpCam('bagshield'));
-      $('btnCloseHelpCam')?.addEventListener('click', stopAllCameras);
+      $('btnCloseHelpCam')?.addEventListener('click', () => stopAllCameras());
+      $('btnHelpCam')?.addEventListener('click', () => toggleHelpCam('awb'));
 
       $('btnLoadSavedBagshield')?.addEventListener('click', () => {
-        const selectedId = $('savedBagshieldSelect').value;
-        if (!selectedId) {
-          toast('Pilih Bagshield yang ingin dibuka!');
-          return;
+        const selectedId = parseInt($('savedBagshieldSelect').value);
+        if (selectedId) {
+          editSavedReport(selectedId);
+        } else {
+          toast('⚠️ Pilih Bagshield dari daftar terlebih dahulu!');
         }
-        editSavedReport(parseInt(selectedId));
       });
 
       $('btnNextToAwb')?.addEventListener('click', () => {
-        const bagshield = $('helpBagshield').value.trim();
+        const bagshieldVal = $('helpBagshield').value.trim();
         const shipDate = $('helpShipDate').value;
         const staff = $('helpStaff').value.trim();
         const hub = $('helpHub').value.trim();
 
-        if (!shipDate || !staff || !hub || !bagshield) {
-          toast('❌ Lengkapi Tanggal, Petugas, HUB, dan No Bagshield!');
+        if (!shipDate || !staff || !hub || !bagshieldVal) {
+          toast('❌ Silakan lengkapi Tanggal, Nama Petugas, HUB, dan No Bagshield!');
           return;
         }
 
-        activeBagshieldNo = bagshield;
-        $('displayActiveBagshield').textContent = bagshield;
+        activeBagshieldNo = bagshieldVal;
+        $('displayActiveBagshield').textContent = activeBagshieldNo;
+
+        // If not editing existing record, start fresh list
+        if (!editingReportId) {
+          currentBagshieldAwbs = [];
+          renderHelpAwbList();
+        }
+
         stopAllCameras();
-        $('helpStep1').style.display = 'none';
-        $('helpStep2').style.display = 'block';
-        renderHelpAwbList();
+        $('helpStep2').classList.add('active');
+        toast('🔓 Ruang Scan AWB dibuka untuk Bagshield: ' + activeBagshieldNo);
       });
 
       $('btnBackToStep1')?.addEventListener('click', () => {
-        $('helpStep2').style.display = 'none';
-        $('helpStep1').style.display = 'block';
         stopAllCameras();
+        $('helpStep2').classList.remove('active');
       });
-
-      $('btnHelpCam')?.addEventListener('click', () => toggleHelpCam('awb'));
 
       $('btnAddManualAwb')?.addEventListener('click', () => {
-        const code = prompt('Masukkan Nomor Barcode AWB:');
-        if (code) addAwbToList(code.trim());
+        const manualCode = prompt('Masukkan Nomor AWB Manual:');
+        if (manualCode && manualCode.trim()) {
+          addAwbToList(manualCode.trim());
+        }
       });
 
-      $('helpSave')?.addEventListener('click', saveHelpdeskReport);
+      $('helpSave')?.addEventListener('click', () => saveHelpdeskReport());
 
-      const exportPreExcel = () => {
-        const list = preAlertData[currentDateKey] || [];
-        if (!list.length) {
-          toast('Tidak ada data Pre-Alert untuk diunduh!');
-          return;
-        }
-
-        const date = $('preDate').value;
-        const batch = $('preBatch').value.trim();
-        const pic = $('prePic').value.trim();
-        const vendor = $('preVendor').value.trim();
-
-        const dataRows = list.map(item => ({
-          'TANGGAL': date,
-          'BATCH': batch,
-          'PIC PENGIRIM': pic,
-          'VENDOR': vendor,
-          'TARGET HUB': item.staging,
-          'NO BAGSEAL': item.bagseal,
-          'BERAT (KG)': item.weight || 0,
-          'QTY PARCEL': item.total || 1,
-          'KATEGORI': item.category || 'Reg',
-          'CATATAN': item.notes || '-',
-          'PENERIMA': item.receiver || '-'
-        }));
-
-        const ws = XLSX.utils.json_to_sheet(dataRows);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Pre-Alert");
-        XLSX.writeFile(wb, `PreAlert_${date}_${batch.replace(/\s+/g, '_')}.xlsx`);
-        toast('📥 File Excel Pre-Alert Terunduh!');
-      };
-
-      $('btnExportPreTop')?.addEventListener('click', exportPreExcel);
-      $('btnExportPre')?.addEventListener('click', exportPreExcel);
-
+      // Download Excel Event Trigger
       $('btnExportHelp')?.addEventListener('click', () => {
         if (!helpReports.length) {
-          toast('Belum ada laporan untuk diunduh!');
+          toast('⚠️ Belum ada data laporan untuk diunduh.');
           return;
         }
         $('confirmDownloadModal').classList.add('show');
@@ -1584,71 +990,74 @@
 
       $('btnConfirmDownloadHelp')?.addEventListener('click', async () => {
         $('confirmDownloadModal').classList.remove('show');
-        toast('⏳ Menyiapkan Excel & foto bukti...');
+        toast('⏳ Menyiapkan File Excel...');
 
-        const wb = new ExcelJS.Workbook();
-        const ws = wb.addWorksheet('Laporan Kendala');
+        try {
+          const wb = new ExcelJS.Workbook();
+          const ws = wb.addWorksheet('Laporan Kendala');
 
-        ws.columns = [
-          { header: 'Tgl Pengiriman', key: 'shipDate', width: 16 },
-          { header: 'Petugas', key: 'staff', width: 18 },
-          { header: 'HUB / Staging', key: 'hub', width: 18 },
-          { header: 'No Bagshield', key: 'bagshield', width: 22 },
-          { header: 'No AWB', key: 'awb', width: 22 },
-          { header: 'Jenis Masalah', key: 'problemType', width: 20 },
-          { header: 'Keterangan', key: 'notes', width: 30 },
-          { header: 'Foto Bukti', key: 'photoStatus', width: 24 }
-        ];
+          ws.columns = [
+            { header: 'No', key: 'no', width: 6 },
+            { header: 'Tanggal Pengiriman', key: 'shipDate', width: 18 },
+            { header: 'Nama Petugas', key: 'staff', width: 18 },
+            { header: 'Lokasi HUB / Staging', key: 'hub', width: 20 },
+            { header: 'No Bagshield', key: 'bagshield', width: 22 },
+            { header: 'No AWB', key: 'awb', width: 22 },
+            { header: 'Jenis Masalah', key: 'problemType', width: 18 },
+            { header: 'Keterangan Detail', key: 'notes', width: 25 },
+            { header: 'Waktu Input', key: 'createdAt', width: 20 },
+            { header: 'Foto Bukti', key: 'photo', width: 20 }
+          ];
 
-        let rowIndex = 2;
+          let rowCounter = 1;
+          for (const rep of helpReports) {
+            if (rep.awbList && rep.awbList.length > 0) {
+              for (const awbItem of rep.awbList) {
+                const row = ws.addRow({
+                  no: rowCounter++,
+                  shipDate: rep.shipDate || '-',
+                  staff: rep.staff || '-',
+                  hub: rep.hub || '-',
+                  bagshield: rep.bagshield || '-',
+                  awb: awbItem.awb || '-',
+                  problemType: awbItem.problemType || '-',
+                  notes: awbItem.notes || '-',
+                  createdAt: rep.createdAt || '-'
+                });
 
-        for (const r of helpReports) {
-          if (r.awbList && r.awbList.length > 0) {
-            for (const a of r.awbList) {
-              const row = ws.addRow({
-                shipDate: r.shipDate,
-                staff: r.staff,
-                hub: r.hub,
-                bagshield: r.bagshield,
-                awb: a.awb,
-                problemType: a.problemType,
-                notes: a.notes || '-',
-                photoStatus: a.photo ? '' : 'Tanpa Foto'
-              });
-
-              if (a.photo) {
-                try {
-                  row.height = 70;
+                if (awbItem.photo && awbItem.photo.startsWith('data:image')) {
+                  row.height = 80;
                   const imageId = wb.addImage({
-                    base64: a.photo,
-                    extension: 'jpeg',
+                    base64: awbItem.photo,
+                    extension: 'jpeg'
                   });
 
                   ws.addImage(imageId, {
-                    tl: { col: 7, row: rowIndex - 1 },
-                    ext: { width: 85, height: 85 },
-                    editAs: 'oneCell'
+                    tl: { col: 9, row: row.number - 1 },
+                    ext: { width: 100, height: 75 }
                   });
-                } catch (imgErr) {
-                  console.error('Gagal menyematkan foto ke Excel:', imgErr);
                 }
               }
-
-              rowIndex++;
             }
           }
+
+          const buffer = await wb.xlsx.writeBuffer();
+          const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `Laporan_Kendala_Helpdesk_${new Date().toISOString().slice(0,10)}.xlsx`;
+          a.click();
+          URL.revokeObjectURL(url);
+
+          toast('✅ File Excel berhasil dibuat!');
+          setTimeout(() => {
+            $('confirmResetModal').classList.add('show');
+          }, 800);
+        } catch (err) {
+          console.error('Export error:', err);
+          toast('❌ Gagal membuat file Excel.');
         }
-
-        const buf = await wb.xlsx.writeBuffer();
-        const blob = new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `Laporan_Kendala_Helpdesk_${new Date().toISOString().slice(0,10)}.xlsx`;
-        a.click();
-
-        toast('📥 Excel + Foto Bukti Terunduh!');
-        $('confirmResetModal').classList.add('show');
       });
 
       $('btnKeepHelpHistory')?.addEventListener('click', () => {
@@ -1663,7 +1072,7 @@
         store.clear();
         tx.oncomplete = () => {
           loadHelpReports();
-          toast('🗑 Riwayat Helpdesk berhasil dikosongkan!');
+          toast('🗑️ Riwayat laporan berhasil direset!');
         };
       });
     });
