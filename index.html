@@ -1764,70 +1764,87 @@
       });
 
       const handlePreExport = () => {
-        const list = preAlertData[currentDateKey] || [];
-        if (!list.length) {
-          toast('Tidak ada data untuk diunduh pada tanggal ini!');
-          return;
+        try {
+          const list = preAlertData[currentDateKey] || [];
+          if (!list.length) {
+            toast('Tidak ada data untuk diunduh pada tanggal ini!');
+            return;
+          }
+
+          if (typeof XLSX === 'undefined') {
+            toast('Library Excel sedang dimuat, coba sebentar lagi...');
+            return;
+          }
+
+          const dateVal = $('preDate')?.value || currentDateKey;
+          let formattedDate = dateVal;
+          try {
+            formattedDate = new Date(dateVal).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }).toUpperCase();
+          } catch(e) {}
+          
+          const batchVal = ($('preBatch')?.value || 'BATCH 1').toUpperCase();
+          const picVal = ($('prePic')?.value || '-').toUpperCase();
+          const vendorVal = ($('preVendor')?.value || '-').toUpperCase();
+          const receiverVal = ($('preReceiver')?.value || '-').toUpperCase();
+
+          // Format Excel khusus Pre-Alert CSC HLM
+          const exportData = [];
+          
+          // Header Banner & Info Meta
+          exportData.push(['PRE-ALERT CSC HLM ' + formattedDate + '_' + picVal + ' ' + batchVal]);
+          exportData.push(['TANGGAL:', formattedDate]);
+          exportData.push(['BATCH:', batchVal]);
+          exportData.push(['PIC PENGIRIM (PEMBUAT):', picVal]);
+          exportData.push(['VENDOR:', vendorVal]);
+          exportData.push(['PENERIMA:', receiverVal]);
+          exportData.push([]); // Row kosong
+
+          // Column Headers
+          exportData.push(['NO', 'STAGING / HUB TUJUAN', 'NO BAGSEAL', 'QTY (PCS)', 'BERAT (KG)', 'KATEGORI', 'CATATAN']);
+
+          // Data Rows
+          list.forEach((item, idx) => {
+            exportData.push([
+              idx + 1,
+              item.staging || '-',
+              item.bagseal || '-',
+              Number(item.total) || 0,
+              Number(item.weight) || 0,
+              item.category || 'Reg',
+              item.notes || '-'
+            ]);
+          });
+
+          const ws = XLSX.utils.aoa_to_sheet(exportData);
+
+          // Styling Lebar Kolom
+          ws['!cols'] = [
+            { wch: 6 },
+            { wch: 25 },
+            { wch: 22 },
+            { wch: 12 },
+            { wch: 14 },
+            { wch: 20 },
+            { wch: 25 }
+          ];
+
+          const wb = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(wb, ws, 'Pre-Alert');
+          
+          const filename = `Pre-Alert CSC HLM ${formattedDate}_${picVal} ${batchVal}.xlsx`;
+          XLSX.writeFile(wb, filename);
+          toast('✅ Data Pre-Alert CSC HLM berhasil diunduh!');
+        } catch (err) {
+          console.error(err);
+          toast('❌ Gagal mengunduh Excel: ' + (err.message || 'Error tidak diketahui'));
         }
-
-        const dateVal = $('preDate').value || currentDateKey;
-        const formattedDate = new Date(dateVal).toLocaleDateString('id-ID', { day: '2-digit', month: 'LONG', year: 'NUMERIC' }).toUpperCase();
-        const batchVal = ($('preBatch').value || 'BATCH 1').toUpperCase();
-        const picVal = ($('prePic').value || '-').toUpperCase();
-        const vendorVal = ($('preVendor').value || '-').toUpperCase();
-        const receiverVal = ($('preReceiver').value || '-').toUpperCase();
-
-        // Format Excel khusus Pre-Alert CSC HLM
-        const exportData = [];
-        
-        // Header Banner & Info Meta
-        exportData.push(['PRE-ALERT CSC HLM ' + formattedDate + '_' + picVal + ' ' + batchVal]);
-        exportData.push(['TANGGAL:', formattedDate]);
-        exportData.push(['BATCH:', batchVal]);
-        exportData.push(['PIC PENGIRIM (PEMBUAT):', picVal]);
-        exportData.push(['VENDOR:', vendorVal]);
-        exportData.push(['PENERIMA:', receiverVal]);
-        exportData.push([]); // Empty row space
-
-        // Column Headers
-        exportData.push(['NO', 'STAGING / HUB TUJUAN', 'NO BAGSEAL', 'QTY (PCS)', 'BERAT (KG)', 'KATEGORI', 'CATATAN']);
-
-        // Data Rows
-        list.forEach((item, idx) => {
-          exportData.push([
-            idx + 1,
-            item.staging || '-',
-            item.bagseal || '-',
-            item.total || 0,
-            item.weight || 0,
-            item.category || 'Reg',
-            item.notes || '-'
-          ]);
-        });
-
-        const ws = XLSX.utils.aoa_to_sheet(exportData);
-
-        // Styling Lebar Kolom
-        ws['!cols'] = [
-          { wch: 6 },
-          { wch: 25 },
-          { wch: 22 },
-          { wch: 12 },
-          { wch: 14 },
-          { wch: 20 },
-          { wch: 25 }
-        ];
-
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, 'Pre-Alert');
-        
-        const filename = `Pre-Alert CSC HLM ${formattedDate}_${picVal} ${batchVal}.xlsx`;
-        XLSX.writeFile(wb, filename);
-        toast('✅ Data Pre-Alert CSC HLM berhasil diunduh!');
       };
 
-      $('btnExportPre')?.addEventListener('click', handlePreExport);
-      $('btnExportPreTop')?.addEventListener('click', handlePreExport);
+      const btnExportPre = $('btnExportPre');
+      const btnExportPreTop = $('btnExportPreTop');
+
+      if (btnExportPre) btnExportPre.onclick = handlePreExport;
+      if (btnExportPreTop) btnExportPreTop.onclick = handlePreExport;
 
       // Helpdesk handlers
       $('btnHelpCam')?.addEventListener('click', toggleHelpCam);
