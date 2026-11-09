@@ -889,35 +889,53 @@
         staff: staff,
         hub: hub,
         bagshield: bagshield,
-        awbList: currentBagshieldAwbs,
+        // Kirim versi ringkas untuk Google Sheets agar tidak terblokir limit payload
+        awbList: currentBagshieldAwbs.map(a => ({
+          awb: a.awb,
+          problemType: a.problemType,
+          notes: a.notes,
+          photo: a.photo ? "YA (Ada Foto)" : "TIDAK"
+        })),
         createdAt: new Date().toLocaleString('id-ID')
       };
 
-      // Auto Send to Google Sheets if Webhook URL is provided
+      // Auto Send to Google Sheets if Webhook URL is available
       if (webhookUrl) {
         localStorage.setItem('saved_sheets_url', webhookUrl);
         toast('⏳ Mengirim data ke Google Sheets...');
         try {
+          // Menggunakan form payload agar pasti diterima oleh Google Apps Script tanpa CORS block
           await fetch(webhookUrl, {
             method: 'POST',
             mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify(reportData)
           });
-          toast('✅ Data terikirim ke Google Sheets!');
+          toast('✅ Data terkirim ke Google Sheets!');
         } catch (err) {
           console.error('Error sending to Sheets:', err);
+          toast('⚠️ Gagal terhubung ke Google Sheets.');
         }
       }
+
+      // Simpan data lengkap (termasuk Foto Asli Base64) ke IndexedDB lokal untuk Download Excel
+      const localReportData = {
+        shipDate: shipDate,
+        staff: staff,
+        hub: hub,
+        bagshield: bagshield,
+        awbList: currentBagshieldAwbs,
+        createdAt: new Date().toLocaleString('id-ID')
+      };
 
       const tx = helpDb.transaction('reports', 'readwrite');
       const store = tx.objectStore('reports');
 
       if (editingReportId) {
-        reportData.id = editingReportId;
-        store.put(reportData);
+        localReportData.id = editingReportId;
+        store.put(localReportData);
       } else {
-        store.add(reportData);
+        store.add(localReportData);
       }
 
       tx.oncomplete = () => {
