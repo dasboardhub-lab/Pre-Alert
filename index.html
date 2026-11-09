@@ -1048,49 +1048,51 @@
                   createdAt: rep.createdAt || '-'
                 });
 
-      async function saveHelpdeskReport() {
-        const shipDate = $('helpShipDate').value;
-        const staff = $('helpStaff').value.trim();
-        const hub = $('helpHub').value.trim();
-        const bagshield = activeBagshieldNo || $('helpBagshield').value.trim();
-        const webhookUrl = $('sheetsWebhookUrl')?.value.trim();
-
-        if (!shipDate || !staff || !hub || !bagshield) {
-          toast('❌ Lengkapi Tanggal, Nama Petugas, HUB, dan Bagshield!');
-          return;
-        }
-
-        if (currentBagshieldAwbs.length === 0) {
-          toast('❌ Minimal tambahkan 1 AWB ke dalam list Bagshield!');
-          return;
-        }
-
-        const reportData = {
-          shipDate: shipDate,
-          staff: staff,
-          hub: hub,
-          bagshield: bagshield,
-          awbList: currentBagshieldAwbs,
-          createdAt: new Date().toLocaleString('id-ID')
-        };
-
-        // Auto Send to Google Sheets if Webhook URL is provided
-        if (webhookUrl) {
-          localStorage.setItem('saved_sheets_url', webhookUrl);
-          toast('⏳ Mengirim data ke Google Sheets...');
-          try {
-            await fetch(webhookUrl, {
-              method: 'POST',
-              mode: 'no-cors',
-              headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-              body: JSON.stringify(reportData)
-            });
-            toast('✅ Data terkirim ke Google Sheets!');
-          } catch (err) {
-            console.error('Error sending to Sheets:', err);
+                if (awbItem.photo) {
+                  try {
+                    const imgId = wb.addImage({
+                      base64: awbItem.photo,
+                      extension: 'jpeg'
+                    });
+                    ws.addImage(imgId, {
+                      tl: { col: 9, row: row.number - 1 },
+                      ext: { width: 100, height: 75 }
+                    });
+                    row.height = 60;
+                  } catch (e) {
+                    console.error('Image add error:', e);
+                  }
+                }
+              }
+            }
           }
-        }
 
+          const buffer = await wb.xlsx.writeBuffer();
+          const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `Laporan_Kendala_Helpdesk_${new Date().toISOString().slice(0,10)}.xlsx`;
+          a.click();
+          window.URL.revokeObjectURL(url);
+
+          toast('✅ File Excel Berhasil Diunduh!');
+          setTimeout(() => {
+            $('confirmResetModal').classList.add('show');
+          }, 600);
+        } catch (err) {
+          console.error(err);
+          toast('❌ Gagal mengunduh Excel');
+        }
+      });
+
+      $('btnKeepHelpHistory')?.addEventListener('click', () => {
+        $('confirmResetModal').classList.remove('show');
+      });
+
+      $('btnResetHelpHistory')?.addEventListener('click', () => {
+        $('confirmResetModal').classList.remove('show');
+        if (!helpDb) return;
         const tx = helpDb.transaction('reports', 'readwrite');
         const store = tx.objectStore('reports');
         store.clear();
