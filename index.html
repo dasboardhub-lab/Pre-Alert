@@ -1499,4 +1499,322 @@
     async function saveHelp() {
       const staff = $('helpStaff').value.trim();
       const hub = $('helpHub').value.trim();
-<!-- ... existing code -->
+      const awb = $('helpAwb').value.trim();
+      const type = $('helpType').value;
+      const detail = $('helpDetail').value.trim();
+
+      if (!staff) {
+        toast('Nama petugas wajib diisi!');
+        $('helpStaff').focus();
+        return;
+      }
+
+      const report = {
+        id: 'HELP-' + Date.now(),
+        staff: staff,
+        hub: hub,
+        awb: awb,
+        type: type,
+        detail: detail,
+        photos: [...helpPhotos],
+        createdAt: new Date().toISOString()
+      };
+
+      try {
+        if (!helpDb) await openHelpDb();
+        const tx = helpDb.transaction('reports', 'readwrite');
+        const store = tx.objectStore('reports');
+        await new Promise((res, rej) => {
+          const req = store.put(report);
+          req.onsuccess = res;
+          req.onerror = rej;
+        });
+
+        helpReports.unshift(report);
+        renderHelp();
+
+        // Reset form input
+        $('helpAwb').value = '';
+        $('helpDetail').value = '';
+        helpPhotos = [];
+        renderHelpPhotos();
+
+        toast('✅ Laporan Helpdesk berhasil disimpan!');
+      } catch (e) {
+        toast('Gagal menyimpan laporan: ' + e.message);
+      }
+    }
+
+    async function captureHelpPhoto() {
+      if (!streamHelp) {
+        toast('Buka kamera Helpdesk terlebih dahulu!');
+        return;
+      }
+
+      if (helpPhotos.length >= 4) {
+        toast('Maksimal 4 foto per laporan!');
+        return;
+      }
+
+      const video = $('helpWebcam');
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth || 640;
+      canvas.height = video.videoHeight || 480;
+
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+
+      helpPhotos.push({ id: Date.now(), data: dataUrl });
+      renderHelpPhotos();
+      playBeep();
+      toast('📸 Foto berhasil diambil!');
+    }
+
+    async function toggleHelpCam() {
+      if (streamHelp) {
+        stopAllCameras();
+        return;
+      }
+
+      if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+        toast('❌ Akses kamera diblokir browser: Web harus dijalankan via HTTPS!');
+        return;
+      }
+
+      try {
+        try {
+          streamHelp = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: "environment" } } });
+        } catch (errBack) {
+          streamHelp = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+        }
+
+        const video = $('helpWebcam');
+        video.srcObject = streamHelp;
+        $('helpScanFrame').classList.add('active');
+        $('btnHelpCam').textContent = '⏹ Hentikan Kamera';
+        $('helpCamStatus').textContent = 'Kamera Helpdesk Aktif';
+
+        if ('BarcodeDetector' in window) {
+          const detector = new BarcodeDetector({ formats: ['code_128', 'qr_code', 'ean_13', 'code_39'] });
+          const helpScanInterval = setInterval(async () => {
+            if (!streamHelp) { clearInterval(helpScanInterval); return; }
+            try {
+              const barcodes = await detector.detect(video);
+              if (barcodes.length > 0) {
+                $('helpAwb').value = barcodes[0].rawValue;
+                playBeep();
+                toast('AWB Terdeteksi: ' + barcodes[0].rawValue);
+              }
+            } catch (e) {}
+          }, 500);
+        }
+      } catch (e) {
+        toast('❌ Gagal membuka kamera: ' + e.message);
+      }
+    }
+
+    // Modal Konfirmasi Download & Reset Handlers
+    function showDownloadConfirm() {
+      if (!helpReports.length) {
+        toast('Tidak ada laporan Helpdesk untuk diunduh!');
+        return;
+      }
+      $('confirmDownloadModal').classList.add('show');
+    }
+
+    function hideDownloadConfirm() {
+      $('confirmDownloadModal').classList.remove('show');
+    }
+
+    function showResetConfirm() {
+      $('confirmResetModal').classList.add('show');
+    }
+
+    function hideResetConfirm() {
+      $('confirmResetModal').classList.remove('show');
+    }
+
+    async function processExportHelpdesk() {
+      hideDownloadConfirm();
+      toast('Memproses pembuatan Excel...');
+
+      try {
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Helpdesk Laporan');
+
+        worksheet.columns = [
+          { header: 'ID LAPORAN', key: 'id', width: 18 },
+          { header: 'TANGGAL & WAKTU', key: 'createdAt', width: 22 },
+          { header: 'NAMA PETUGAS', key: 'staff', width: 20 },
+          { header: 'LOKASI HUB', key: 'hub', width: 18 },
+          { header: 'NOMOR AWB', key: 'awb', width: 22 },
+          { header: 'JENIS MASALAH', key: 'type', width: 20 },
+          { header: 'KETERANGAN', key: 'detail', width: 35 },
+          { header: 'FOTO BUKTI', key: 'photos', width: 30 }
+        ];
+
+        worksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFF' } };
+        worksheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '16B887' } };
+
+        for (let i = 0; i < helpReports.length; i++) {
+          const r = helpReports[i];
+          const rowIndex = i + 2;
+
+          const row = worksheet.addRow({
+            id: r.id,
+            createdAt: new Date(r.createdAt).toLocaleString('id-ID'),
+            staff: r.staff || '-',
+            hub: r.hub || '-',
+            awb: r.awb || '-',
+            type: r.type || '-',
+            detail: r.detail || '-'
+          });
+          row.height = 70;
+
+          if (r.photos && r.photos.length > 0) {
+            for (let pIdx = 0; pIdx < r.photos.length; pIdx++) {
+              try {
+                const imgId = workbook.addImage({
+                  base64: r.photos[pIdx].data,
+                  extension: 'jpeg'
+                });
+                worksheet.addImage(imgId, {
+                  tl: { col: 7 + (pIdx * 0.4), row: rowIndex - 1 },
+                  ext: { width: 65, height: 65 }
+                });
+              } catch (err) {}
+            }
+          }
+        }
+
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Helpdesk_Laporan_${new Date().toISOString().slice(0, 10)}.xlsx`;
+        a.click();
+        URL.revokeObjectURL(url);
+
+        toast('✅ Excel berhasil diunduh!');
+        setTimeout(showResetConfirm, 500);
+      } catch (e) {
+        toast('Gagal mengekspor Excel: ' + e.message);
+      }
+    }
+
+    async function clearHelpdeskData() {
+      hideResetConfirm();
+      try {
+        if (!helpDb) await openHelpDb();
+        const tx = helpDb.transaction('reports', 'readwrite');
+        const store = tx.objectStore('reports');
+        await new Promise((res, rej) => {
+          const req = store.clear();
+          req.onsuccess = res;
+          req.onerror = rej;
+        });
+
+        helpReports = [];
+        renderHelp();
+        toast('🗑 Riwayat laporan berhasil direset!');
+      } catch (e) {
+        toast('Gagal menghapus riwayat: ' + e.message);
+      }
+    }
+
+    // Event Listener Binding
+    window.addEventListener('DOMContentLoaded', () => {
+      loadHelpReports();
+      renderPreAlert();
+
+      // Pre-alert trip tab switching
+      document.querySelectorAll('.trip-tab').forEach(tab => {
+        tab.addEventListener('click', (e) => {
+          document.querySelectorAll('.trip-tab').forEach(t => t.classList.remove('active'));
+          e.target.classList.add('active');
+          currentTrip = e.target.dataset.trip;
+          renderPreAlert();
+        });
+      });
+
+      // Staging / Pre-Alert handlers
+      $('btnQuickAddStaging')?.addEventListener('click', () => {
+        const val = $('preStaging').value.trim();
+        if (val) {
+          renderPreAlert();
+          toast('Target HUB diatur ke: ' + val);
+        } else {
+          toast('Ketikkan nama HUB terlebih dahulu');
+        }
+      });
+
+      $('btnPreCam')?.addEventListener('click', togglePreCam);
+
+      $('btnClearPre')?.addEventListener('click', () => {
+        if (confirm(`Apakah Anda yakin ingin menghapus seluruh data Bagseal di ${currentTrip}?`)) {
+          preAlertData[currentTrip] = [];
+          localStorage.setItem('prealert_data', JSON.stringify(preAlertData));
+          renderPreAlert();
+          toast(`Data ${currentTrip} telah dihapus.`);
+        }
+      });
+
+      $('btnExportPre')?.addEventListener('click', () => {
+        const list = preAlertData[currentTrip] || [];
+        if (!list.length) {
+          toast('Tidak ada data untuk diunduh pada trip ini!');
+          return;
+        }
+
+        const exportData = list.map(item => ({
+          'Trip': currentTrip,
+          'Tujuan / Staging HUB': item.staging,
+          'No. Bagseal': item.bagseal,
+          'QTY (Pcs)': item.total,
+          'Berat (Kg)': item.weight || 0,
+          'Kategori': item.category,
+          'Catatan': item.notes || '-'
+        }));
+
+        const ws = XLSX.utils.json_to_sheet(exportData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, currentTrip);
+        XLSX.getFileUrl ? XLSX.writeFile(wb, `PreAlert_${currentTrip.replace(' ', '_')}_${new Date().toISOString().slice(0,10)}.xlsx`) : XLSX.writeFile(wb, `PreAlert_${currentTrip.replace(' ', '_')}.xlsx`);
+        toast('✅ Data Staging berhasil diunduh!');
+      });
+
+      // Helpdesk handlers
+      $('btnHelpCam')?.addEventListener('click', toggleHelpCam);
+      $('btnHelpSnap')?.addEventListener('click', captureHelpPhoto);
+      $('helpSave')?.addEventListener('click', saveHelp);
+      $('btnExportHelp')?.addEventListener('click', showDownloadConfirm);
+
+      // Confirm dialog handlers
+      $('btnCancelDownloadHelp')?.addEventListener('click', hideDownloadConfirm);
+      $('btnConfirmDownloadHelp')?.addEventListener('click', processExportHelpdesk);
+      $('btnKeepHelpHistory')?.addEventListener('click', hideResetConfirm);
+      $('btnResetHelpHistory')?.addEventListener('click', clearHelpdeskData);
+    });
+
+    // Inline row editing helper functions
+    window.updatePreItem = function(index, field, value) {
+      if (preAlertData[currentTrip] && preAlertData[currentTrip][index]) {
+        preAlertData[currentTrip][index][field] = field === 'total' || field === 'weight' ? Number(value) : value;
+        localStorage.setItem('prealert_data', JSON.stringify(preAlertData));
+        renderPreAlert();
+      }
+    };
+
+    window.deletePreItem = function(index) {
+      if (preAlertData[currentTrip] && preAlertData[currentTrip][index]) {
+        preAlertData[currentTrip].splice(index, 1);
+        localStorage.setItem('prealert_data', JSON.stringify(preAlertData));
+        renderPreAlert();
+        toast('Bagseal dihapus.');
+      }
+    };
+  </script>
+</body>
+</html>
