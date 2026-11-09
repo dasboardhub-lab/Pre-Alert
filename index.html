@@ -1890,7 +1890,8 @@
 
       $('btnConfirmDownloadHelp')?.addEventListener('click', async () => {
         $('confirmDownloadModal').classList.remove('show');
-        
+        toast('⏳ Menyiapkan Excel & foto bukti...');
+
         const wb = new ExcelJS.Workbook();
         const ws = wb.addWorksheet('Laporan Kendala');
 
@@ -1902,13 +1903,15 @@
           { header: 'No AWB', key: 'awb', width: 22 },
           { header: 'Jenis Masalah', key: 'problemType', width: 20 },
           { header: 'Keterangan', key: 'notes', width: 30 },
-          { header: 'Status Foto', key: 'photoStatus', width: 18 }
+          { header: 'Foto Bukti', key: 'photoStatus', width: 24 }
         ];
 
-        helpReports.forEach(r => {
+        let rowIndex = 2; // Baris 1 adalah header
+
+        for (const r of helpReports) {
           if (r.awbList && r.awbList.length > 0) {
-            r.awbList.forEach(a => {
-              ws.addRow({
+            for (const a of r.awbList) {
+              const row = ws.addRow({
                 shipDate: r.shipDate,
                 staff: r.staff,
                 hub: r.hub,
@@ -1916,11 +1919,33 @@
                 awb: a.awb,
                 problemType: a.problemType,
                 notes: a.notes || '-',
-                photoStatus: a.photo ? 'Ada Foto' : 'Tanpa Foto'
+                photoStatus: a.photo ? '' : 'Tanpa Foto'
               });
-            });
+
+              // Jika ada foto pada AWB ini, embed langsung gambarnya ke sel Excel
+              if (a.photo) {
+                try {
+                  row.height = 70; // Atur tinggi baris agar foto muat
+                  const imageId = wb.addImage({
+                    base64: a.photo,
+                    extension: 'jpeg',
+                  });
+
+                  // Sematkan foto ke kolom H (kolom ke-8) di baris aktif
+                  ws.addImage(imageId, {
+                    tl: { col: 7, row: rowIndex - 1 },
+                    ext: { width: 85, height: 85 },
+                    editAs: 'oneCell'
+                  });
+                } catch (imgErr) {
+                  console.error('Gagal menyematkan foto ke Excel:', imgErr);
+                }
+              }
+
+              rowIndex++;
+            }
           }
-        });
+        }
 
         const buf = await wb.xlsx.writeBuffer();
         const blob = new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
@@ -1930,7 +1955,7 @@
         a.download = `Laporan_Kendala_Helpdesk_${new Date().toISOString().slice(0,10)}.xlsx`;
         a.click();
 
-        toast('📥 Excel Helpdesk Terunduh!');
+        toast('📥 Excel + Foto Bukti Terunduh!');
         $('confirmResetModal').classList.add('show');
       });
 
@@ -1940,14 +1965,14 @@
 
       $('btnResetHelpHistory')?.addEventListener('click', () => {
         $('confirmResetModal').classList.remove('show');
-        if (helpDb) {
-          const tx = helpDb.transaction('reports', 'readwrite');
-          tx.objectStore('reports').clear();
-          tx.oncomplete = () => {
-            loadHelpReports();
-            toast('Riwayat Helpdesk Di-reset.');
-          };
-        }
+        if (!helpDb) return;
+        const tx = helpDb.transaction('reports', 'readwrite');
+        const store = tx.objectStore('reports');
+        store.clear();
+        tx.oncomplete = () => {
+          loadHelpReports();
+          toast('🗑 Riwayat Helpdesk berhasil dikosongkan!');
+        };
       });
     });
   </script>
