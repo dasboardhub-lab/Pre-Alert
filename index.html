@@ -1094,12 +1094,12 @@
 
         <!-- Pilihan Bagshield Yang Sudah Pernah Diproses -->
         <div style="background:#12171b; border:1px solid #332713; border-radius:12px; padding:10px; margin-bottom:14px;">
-          <label style="color:var(--amber); font-size:11px; font-weight:900; margin:0 0 4px; display:block;">📂 REVISI / TAMBAH AWBS DARI BAGSHIELD SEBELUMNYA</label>
+          <label style="color:var(--amber); font-size:11px; font-weight:900; margin:0 0 4px; display:block;">📂 REVISI / TAMBAH AWB DARI LIST BAGSHIELD SEBELUMNYA</label>
           <div style="display:flex; gap:8px;">
             <select id="savedBagshieldSelect" class="help-select" style="padding:8px; font-size:12px; flex:1;">
-              <option value="">-- Pilih Bagshield Yang Sudah Ada --</option>
+              <option value="">-- Pilih Dari List Bagshield --</option>
             </select>
-            <button type="button" class="btn primary" id="btnLoadSavedBagshield" style="min-height:auto; padding:0 12px; font-size:12px; font-weight:800;">📂 Buka & Edit</button>
+            <button type="button" class="btn primary" id="btnLoadSavedBagshield" style="min-height:auto; padding:0 12px; font-size:12px; font-weight:800;">📂 Edit Bagshield Ini</button>
           </div>
         </div>
         
@@ -1735,7 +1735,7 @@
             <div class="help-report-title">🛡️ Bagshield: ${safe(r.bagshield || 'N/A')}</div>
             <div style="display:flex; gap:6px; align-items:center;">
               <span class="help-badge hub-badge">${safe(r.hub || 'HUB N/A')}</span>
-              <button onclick="editSavedReport(${r.id})" style="background:#252c34; border:1px solid var(--amber); color:#ffd05b; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:800; cursor:pointer;">✏️ Edit</button>
+              <button onclick="editSavedReport(${r.id})" style="background:#332713; border:1px solid var(--amber); color:#ffd05b; padding:6px 12px; border-radius:8px; font-size:12px; font-weight:900; cursor:pointer; display:inline-flex; align-items:center; gap:4px;">✏️ Revisi Bagshield Ini</button>
             </div>
           </div>
 
