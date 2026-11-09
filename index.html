@@ -778,32 +778,32 @@
       margin: 12px 0 5px;
     }
 
-    .problem-buttons {
+    .problem-buttons-sm {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 6px;
+      gap: 4px;
+      margin-top: 4px;
     }
 
-    .problem-btn {
+    .problem-btn-sm {
       background: #12171b;
       border: 1px solid var(--line);
       color: var(--text);
-      padding: 10px 14px;
-      border-radius: 12px;
-      font-size: 13px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 11px;
       font-weight: 700;
       cursor: pointer;
       transition: all 0.2s ease;
-      flex: 1 1 calc(50% - 8px);
+      flex: 1 1 calc(50% - 4px);
       text-align: center;
     }
 
-    .problem-btn:hover {
+    .problem-btn-sm:hover {
       background: var(--panel2);
     }
 
-    .problem-btn.active {
+    .problem-btn-sm.active {
       background: #332713;
       border-color: var(--amber);
       color: #ffd05b;
@@ -825,6 +825,14 @@
     .help-textarea {
       min-height: 78px;
       resize: vertical;
+    }
+
+    .awb-item-card {
+      background: #12171b;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      margin-top: 10px;
     }
 
     .help-camera .scan-frame {
@@ -1062,27 +1070,10 @@
         </div>
       </div>
 
-      <div class="help-card help-camera">
-        <div class="status">
-          <span class="dot"></span>
-          <span id="helpCamStatus">Pemindai Barcode / Kamera Rekam Off</span>
-        </div>
-        <div class="scan-frame" id="helpScanFrame">
-          <div class="camera-placeholder">
-            <div class="cam-icon" style="font-size:36px;">📸</div>
-            <p style="margin:4px 0 0;font-size:13px;">Ambil Foto Bukti atau Scan Barcode Paket</p>
-          </div>
-          <video id="helpWebcam" playsinline autoplay muted></video>
-        </div>
-        <div class="help-actions">
-          <button class="btn primary" id="btnHelpCam">▶ Kamera Helpdesk</button>
-          <button class="btn" id="btnHelpSnap">📷 Ambil Foto Bukti</button>
-        </div>
-        <div class="photo-strip" id="helpPhotoStrip"></div>
-      </div>
-
-      <section class="help-card">
-        <div style="font-weight:900">Detail Laporan</div>
+      <!-- Step 1: Data Utama & Scan Bagshield -->
+      <section class="help-card" id="helpStep1">
+        <div style="font-weight:900; color:var(--amber); font-size:16px; margin-bottom:12px;">STEP 1: Scan / Input Nomor Bagshield</div>
+        
         <label for="helpShipDate">Tanggal Pengiriman</label>
         <input class="help-input" type="date" id="helpShipDate">
 
@@ -1093,25 +1084,56 @@
         <input class="help-input" id="helpHub" placeholder="Contoh: HUB JKT-WEST / HUB MLG">
 
         <label for="helpBagshield">No Bagshield (Pengikat Karung)</label>
-        <input class="help-input" id="helpBagshield" placeholder="Nomor bagshield pengikat karung">
-
-        <label for="helpAwb">Nomor AWB (opsional)</label>
-        <input class="help-input" id="helpAwb" placeholder="Otomatis dari barcode atau ketik manual">
-
-        <label>Jenis Masalah</label>
-        <div class="problem-buttons" id="problemBtnGroup">
-          <button type="button" class="problem-btn active" data-value="AWB / label hilang">AWB / label hilang</button>
-          <button type="button" class="problem-btn" data-value="Barang bocor">Barang bocor</button>
-          <button type="button" class="problem-btn" data-value="Kemasan rusak">Kemasan rusak</button>
-          <button type="button" class="problem-btn" data-value="Lainnya">Lainnya</button>
+        <div style="display:flex; gap:8px;">
+          <input class="help-input" id="helpBagshield" placeholder="Scan barcode Bagshield atau ketik manual">
+          <button class="btn primary" id="btnScanBagshieldCam" style="min-height:auto; padding:0 14px; font-size:13px; white-space:nowrap;">📷 Scan Bagshield</button>
         </div>
-        <input type="hidden" id="helpType" value="AWB / label hilang">
 
-        <label for="helpDetail">Keterangan</label>
-        <textarea class="help-textarea" id="helpDetail" placeholder="Jelaskan kondisi paket atau kendala serah terima..."></textarea>
-
-        <button class="btn primary pre-save" id="helpSave">＋ Simpan Laporan</button>
+        <button class="btn primary pre-save" id="btnNextToAwb" style="margin-top:16px; font-weight:900; font-size:15px;">➡️ Lanjutkan ke Scan AWB</button>
       </section>
+
+      <!-- Step 2: Scan Barcode AWB & Detail List (Muncul setelah klik Lanjutkan) -->
+      <div id="helpStep2" style="display:none;">
+        <div class="help-card" style="border: 2px solid var(--amber);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <div style="font-weight:900; color:var(--amber); font-size:15px;">🔒 BAGSHIELD: <span id="displayActiveBagshield" style="color:#fff;">-</span></div>
+            <button class="btn" id="btnBackToStep1" style="min-height:auto; padding:5px 10px; font-size:11px; background:#252c34;">⚙ Ubah Bagshield</button>
+          </div>
+          <div style="font-size:12px; color:var(--muted);">Silakan scan barcode AWB di dalam Bagshield ini. Hasil scan akan langsung masuk ke daftar di bawah.</div>
+        </div>
+
+        <div class="help-card help-camera">
+          <div class="status">
+            <span class="dot"></span>
+            <span id="helpCamStatus">Kamera Pemindai AWB Off</span>
+          </div>
+          <div class="scan-frame" id="helpScanFrame">
+            <div class="camera-placeholder">
+              <div class="cam-icon" style="font-size:36px;">📸</div>
+              <p style="margin:4px 0 0;font-size:13px;">Arahkan Kamera ke Barcode AWB Paket</p>
+            </div>
+            <video id="helpWebcam" playsinline autoplay muted></video>
+          </div>
+          <div class="help-actions">
+            <button class="btn primary" id="btnHelpCam">▶ Kamera Scan AWB</button>
+            <button class="btn" id="btnHelpSnap">📷 Ambil Foto Bukti</button>
+          </div>
+          <div class="photo-strip" id="helpPhotoStrip"></div>
+        </div>
+
+        <div class="help-card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <div style="font-weight:900;">Daftar AWB dalam Bagshield (<span id="awbListCount">0</span>)</div>
+            <button class="btn primary" id="btnAddManualAwb" style="min-height:auto; padding:6px 12px; font-size:12px;">＋ Tambah Manual</button>
+          </div>
+
+          <div id="helpAwbListContainer">
+            <div class="last-box" style="padding:16px;">Belum ada AWB di-scan. Nyalakan kamera atau tambah manual.</div>
+          </div>
+
+          <button class="btn primary pre-save" id="helpSave" style="margin-top:16px; font-size:15px; font-weight:900;">＋ Simpan Seluruh Laporan Bagshield</button>
+        </div>
+      </div>
 
       <div class="pre-summary">
         <span>RIWAYAT LAPORAN: <strong id="helpCount" style="color:var(--text)">0</strong></span>
@@ -1181,11 +1203,16 @@
     let helpDb = null;
     let helpReports = [];
     let helpPhotos = [];
+    let currentBagshieldAwbs = [];
+    let helpCamMode = 'bagshield'; // 'bagshield' atau 'awb'
+    let activeBagshieldNo = '';
 
     // Camera Handles
     let streamPre = null;
     let streamHelp = null;
     let preScanInterval = null;
+    let lastScannedAwb = '';
+    let helpAwbThrottle = null;
 
     // Beep Audio Effect
     function playBeep() {
@@ -1444,96 +1471,24 @@
           });
 
           preScanInterval = setInterval(async () => {
+            if (!streamPre) { clearInterval(preScanInterval); return; }
             try {
               const barcodes = await barcodeDetector.detect(video);
-              if (barcodes.length > 0) {
-                const code = barcodes[0].rawValue;
-                if (code) {
-                  addScannedBagseal(code.trim());
-                }
+              if (barcodes.length > 0 && barcodes[0].rawValue) {
+                addScannedBagseal(barcodes[0].rawValue.trim());
               }
-            } catch (err) {}
-          }, 350);
-        } else {
-          toast('BarcodeDetector API tidak didukung pada browser ini.');
+            } catch (e) {}
+          }, 400);
         }
       } catch (err) {
-        toast('Gagal membuka kamera: ' + (err.message || 'Izin ditolak atau butuh HTTPS'));
+        toast('Gagal membuka kamera Pre-Alert.');
         stopAllCameras();
       }
     }
 
-    // --- MODUL 2: HELPDESK ---
-    function openHelpDb() {
-      return new Promise((resolve, reject) => {
-        const req = indexedDB.open('HelpdeskDB', 1);
-        req.onupgradeneeded = e => {
-          const db = e.target.result;
-          if (!db.objectStoreNames.contains('reports')) {
-            db.createObjectStore('reports', { keyPath: 'id', autoIncrement: true });
-          }
-        };
-        req.onsuccess = e => {
-          helpDb = e.target.result;
-          resolve(helpDb);
-        };
-        req.onerror = e => reject(e);
-      });
-    }
-
-    async function loadHelpReports() {
-      try {
-        await openHelpDb();
-        const tx = helpDb.transaction('reports', 'readonly');
-        const store = tx.objectStore('reports');
-        const req = store.getAll();
-        req.onsuccess = () => {
-          helpReports = req.result || [];
-          renderHelpReports();
-        };
-      } catch (e) {
-        console.error('Error load help reports:', e);
-      }
-    }
-
-    function renderHelpReports() {
-      const container = $('helpReports');
-      $('helpCount').textContent = helpReports.length;
-
-      if (!helpReports.length) {
-        container.innerHTML = '<div class="last-box">Belum ada laporan Helpdesk.</div>';
-        return;
-      }
-
-      container.innerHTML = helpReports.map(rep => `
-        <div class="help-report">
-          <div class="help-report-header">
-            <div>
-              <div class="help-report-title">${safe(rep.awb || 'AWB TIDAK TERCATAT')}</div>
-              <div style="display:flex; gap:6px; margin-top:4px;">
-                <span class="help-badge">${safe(rep.type)}</span>
-                ${rep.hub ? `<span class="help-badge hub-badge">${safe(rep.hub)}</span>` : ''}
-              </div>
-            </div>
-            <span style="font-size:11px; color:var(--muted); font-weight:700;">${new Date(rep.timestamp).toLocaleString('id-ID')}</span>
-          </div>
-          <div class="help-meta">
-            <span>📅 Tgl Kirim: <strong>${safe(rep.shipDate || '-')}</strong></span>
-            <span>👤 Petugas: <strong>${safe(rep.staff || '-')}</strong></span>
-            ${rep.hub ? `<span>🏢 HUB: <strong>${safe(rep.hub)}</strong></span>` : ''}
-            ${rep.bagshield ? `<span>🔒 Bagshield: <strong>${safe(rep.bagshield)}</strong></span>` : ''}
-          </div>
-          <div class="help-report-detail">${safe(rep.detail || 'Tidak ada keterangan.')}</div>
-          ${rep.photos && rep.photos.length ? `
-            <div class="help-report-photos">
-              ${rep.photos.map(p => `<img src="${p}" alt="Foto Bukti">`).join('')}
-            </div>
-          ` : ''}
-        </div>
-      `).join('');
-    }
-
-    async function toggleHelpCam() {
+    // Camera Handlers for Helpdesk
+    async function toggleHelpCam(mode = 'awb') {
+      helpCamMode = mode;
       if (streamHelp) {
         stopAllCameras();
         return;
@@ -1555,8 +1510,8 @@
         video.srcObject = streamHelp;
         video.play();
         $('helpScanFrame').classList.add('active');
-        $('btnHelpCam').textContent = '⏹ Hentikan Kamera';
-        $('helpCamStatus').textContent = 'Kamera Helpdesk Aktif';
+        if ($('btnHelpCam')) $('btnHelpCam').textContent = '⏹ Hentikan Kamera';
+        $('helpCamStatus').textContent = mode === 'bagshield' ? 'Scan Barcode Bagseal Aktif' : 'Scan Barcode AWB Aktif';
 
         if ('BarcodeDetector' in window) {
           const barcodeDetector = new BarcodeDetector({
@@ -1568,9 +1523,17 @@
             try {
               const barcodes = await barcodeDetector.detect(video);
               if (barcodes.length > 0 && barcodes[0].rawValue) {
-                $('helpAwb').value = barcodes[0].rawValue.trim();
-                playBeep();
-                toast('AWB Terdeteksi: ' + barcodes[0].rawValue);
+                const code = barcodes[0].rawValue.trim();
+                
+                if (helpCamMode === 'bagshield') {
+                  $('helpBagshield').value = code;
+                  playBeep();
+                  toast('No Bagshield Scanned: ' + code);
+                  stopAllCameras();
+                } else {
+                  // Mode Scan AWB langsung ke List
+                  addAwbToList(code);
+                }
               }
             } catch (e) {}
           }, 400);
@@ -1581,418 +1544,402 @@
       }
     }
 
-    function captureHelpPhoto() {
-      if (!streamHelp) {
-        toast('Aktifkan kamera terlebih dahulu!');
+    function addAwbToList(awbCode) {
+      if (!awbCode) return;
+      if (lastScannedAwb === awbCode) return;
+      
+      const existing = currentBagshieldAwbs.find(x => x.awb === awbCode);
+      if (existing) {
+        toast('⚠️ AWB ' + awbCode + ' sudah ada di daftar!');
         return;
       }
-      if (helpPhotos.length >= 4) {
-        toast('Maksimal 4 foto per laporan.');
-        return;
-      }
 
-      const video = $('helpWebcam');
-      const canvas = document.createElement('canvas');
-      canvas.width = video.videoWidth || 640;
-      canvas.height = video.videoHeight || 480;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      lastScannedAwb = awbCode;
+      clearTimeout(helpAwbThrottle);
+      helpAwbThrottle = setTimeout(() => { lastScannedAwb = ''; }, 2500);
 
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-      helpPhotos.push(dataUrl);
-
-      renderHelpPhotoStrip();
       playBeep();
-      toast('📷 Foto berhasil diambil (' + helpPhotos.length + '/4)');
+      if (navigator.vibrate) navigator.vibrate(100);
+
+      currentBagshieldAwbs.unshift({
+        id: Date.now() + Math.random().toString(36).substr(2, 5),
+        awb: awbCode,
+        problemType: 'AWB Hilang',
+        notes: ''
+      });
+
+      renderHelpAwbList();
+      toast('✅ AWB ditambahkan: ' + awbCode);
     }
 
-    function renderHelpPhotoStrip() {
-      const strip = $('helpPhotoStrip');
-      strip.innerHTML = helpPhotos.map((p, i) => `
-        <div style="position:relative; display:inline-block;">
-          <img src="${p}" class="photo-thumb" alt="Bukti ${i+1}">
-          <button onclick="removeHelpPhoto(${i})" style="position:absolute; top:-4px; right:-4px; background:var(--red); color:white; border:none; border-radius:50%; width:20px; height:20px; cursor:pointer; font-size:10px; font-weight:bold;">✕</button>
+    function renderHelpAwbList() {
+      const container = $('helpAwbListContainer');
+      $('awbListCount').textContent = currentBagshieldAwbs.length;
+
+      if (currentBagshieldAwbs.length === 0) {
+        container.innerHTML = '<div class="last-box" style="padding:16px;">Belum ada AWB di-scan. Nyalakan kamera atau tambah manual.</div>';
+        return;
+      }
+
+      container.innerHTML = currentBagshieldAwbs.map((item, idx) => `
+        <div class="awb-item-card">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong style="color:var(--amber); font-size:15px;">#${currentBagshieldAwbs.length - idx}. ${safe(item.awb)}</strong>
+            <button onclick="removeAwbItem('${item.id}')" style="background:none; border:none; color:var(--red); cursor:pointer; font-weight:bold; font-size:16px;">✕ Hapus</button>
+          </div>
+          
+          <div style="margin-top:8px;">
+            <label style="color:var(--muted); font-size:10px; font-weight:900; display:block; margin-bottom:4px;">JENIS MASALAH</label>
+            <div class="problem-buttons-sm">
+              ${['AWB Hilang', 'Barang Bocor', 'Kemasan Rusak', 'Lainnya'].map(prob => `
+                <button type="button" class="problem-btn-sm ${item.problemType === prob ? 'active' : ''}" onclick="selectAwbProblem('${item.id}', '${prob}')">
+                  ${prob}
+                </button>
+              `).join('')}
+            </div>
+          </div>
+
+          <div style="margin-top:8px;">
+            <label style="color:var(--muted); font-size:10px; font-weight:900; display:block; margin-bottom:4px;">KETERANGAN (OPTIONAL)</label>
+            <input class="help-input" style="padding:7px 10px; font-size:12px;" value="${safe(item.notes)}" onchange="updateAwbNotes('${item.id}', this.value)" placeholder="Tambah keterangan detail...">
+          </div>
         </div>
       `).join('');
     }
 
-    window.removeHelpPhoto = function(idx) {
-      helpPhotos.splice(idx, 1);
-      renderHelpPhotoStrip();
+    window.selectAwbProblem = function(id, problem) {
+      const target = currentBagshieldAwbs.find(x => x.id === id);
+      if (target) {
+        target.problemType = problem;
+        renderHelpAwbList();
+      }
     };
 
-    async function saveHelp() {
-      const shipDate = $('helpShipDate').value || currentDateKey;
+    window.updateAwbNotes = function(id, val) {
+      const target = currentBagshieldAwbs.find(x => x.id === id);
+      if (target) {
+        target.notes = val;
+      }
+    };
+
+    window.removeAwbItem = function(id) {
+      currentBagshieldAwbs = currentBagshieldAwbs.filter(x => x.id !== id);
+      renderHelpAwbList();
+      toast('AWB dihapus dari list.');
+    };
+
+    // --- HELPDESK INDEXED DB MANAGEMENT ---
+    function initHelpDb() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open('HelpdeskScanDB', 1);
+        req.onupgradeneeded = e => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains('reports')) {
+            db.createObjectStore('reports', { keyPath: 'id', autoIncrement: true });
+          }
+        };
+        req.onsuccess = e => {
+          helpDb = e.target.result;
+          loadHelpReports();
+          resolve(helpDb);
+        };
+        req.onerror = e => reject(e);
+      });
+    }
+
+    function loadHelpReports() {
+      if (!helpDb) return;
+      const tx = helpDb.transaction('reports', 'readonly');
+      const store = tx.objectStore('reports');
+      const req = store.getAll();
+      req.onsuccess = () => {
+        helpReports = req.result || [];
+        renderHelpReports();
+      };
+    }
+
+    function renderHelpReports() {
+      const container = $('helpReports');
+      $('helpCount').textContent = helpReports.length;
+
+      if (!helpReports.length) {
+        container.innerHTML = '<div class="last-box">Belum ada laporan Helpdesk.</div>';
+        return;
+      }
+
+      container.innerHTML = helpReports.slice().reverse().map(r => `
+        <div class="help-report">
+          <div class="help-report-header">
+            <div class="help-report-title">🛡️ Bagshield: ${safe(r.bagshield || 'N/A')}</div>
+            <span class="help-badge hub-badge">${safe(r.hub || 'HUB N/A')}</span>
+          </div>
+
+          <div class="help-meta">
+            <span>📅 ${safe(r.shipDate || '-')}</span>
+            <span>👤 ${safe(r.staff || '-')}</span>
+            <span>📦 ${r.awbList ? r.awbList.length : 0} AWB Kendala</span>
+          </div>
+
+          ${r.awbList && r.awbList.length > 0 ? `
+            <div style="margin-top:6px;">
+              ${r.awbList.map(a => `
+                <div class="help-report-detail" style="margin-bottom:6px;">
+                  <strong style="color:var(--amber);">AWB: ${safe(a.awb)}</strong> | <span class="help-badge">${safe(a.problemType)}</span>
+                  ${a.notes ? `<div style="font-size:11px; margin-top:3px; color:var(--muted);">${safe(a.notes)}</div>` : ''}
+                </div>
+              `).join('')}
+            </div>
+          ` : ''}
+
+          ${r.photos && r.photos.length > 0 ? `
+            <div class="help-report-photos">
+              ${r.photos.map(p => `<img src="${p}">`).join('')}
+            </div>
+          ` : ''}
+        </div>
+      `).join('');
+    }
+
+    function saveHelpdeskReport() {
+      const shipDate = $('helpShipDate').value;
       const staff = $('helpStaff').value.trim();
       const hub = $('helpHub').value.trim();
-      const bagshield = $('helpBagshield').value.trim();
-      const awb = $('helpAwb').value.trim();
-      const type = $('helpType').value;
-      const detail = $('helpDetail').value.trim();
+      const bagshield = activeBagshieldNo || $('helpBagshield').value.trim();
 
-      if (!staff) {
-        toast('Nama Petugas wajib diisi!');
+      if (!shipDate || !staff || !hub || !bagshield) {
+        toast('❌ Lengkapi Tanggal, Nama Petugas, HUB, dan Bagshield!');
         return;
       }
 
-      const report = {
-        shipDate,
-        staff,
-        hub,
-        bagshield,
-        awb,
-        type,
-        detail,
-        photos: [...helpPhotos],
-        timestamp: new Date().toISOString()
+      if (currentBagshieldAwbs.length === 0) {
+        toast('❌ Minimal tambahkan 1 AWB ke dalam list Bagshield!');
+        return;
+      }
+
+      const reportData = {
+        shipDate: shipDate,
+        staff: staff,
+        hub: hub,
+        bagshield: bagshield,
+        awbList: currentBagshieldAwbs,
+        photos: helpPhotos,
+        createdAt: new Date().toLocaleString('id-ID')
       };
 
-      try {
-        await openHelpDb();
-        const tx = helpDb.transaction('reports', 'readwrite');
-        const store = tx.objectStore('reports');
-        store.add(report);
+      const tx = helpDb.transaction('reports', 'readwrite');
+      const store = tx.objectStore('reports');
+      store.add(reportData);
 
-        tx.oncomplete = () => {
-          toast('✅ Laporan berhasil disimpan!');
-          $('helpBagshield').value = '';
-          $('helpAwb').value = '';
-          $('helpDetail').value = '';
-          helpPhotos = [];
-          renderHelpPhotoStrip();
-          loadHelpReports();
-        };
-      } catch (e) {
-        toast('Gagal menyimpan laporan.');
-      }
+      tx.oncomplete = () => {
+        toast('✅ Laporan Bagshield Berhasil Disimpan!');
+        helpPhotos = [];
+        currentBagshieldAwbs = [];
+        $('helpPhotoStrip').innerHTML = '';
+        renderHelpAwbList();
+        loadHelpReports();
+
+        // Kembali ke step 1
+        $('helpStep2').style.display = 'none';
+        $('helpStep1').style.display = 'block';
+        $('helpBagshield').value = '';
+        stopAllCameras();
+      };
     }
 
-    function showDownloadConfirm() {
-      if (!helpReports.length) {
-        toast('Tidak ada laporan untuk diunduh.');
-        return;
-      }
-      $('confirmDownloadModal').classList.add('show');
-    }
-
-    function hideDownloadConfirm() {
-      $('confirmDownloadModal').classList.remove('show');
-    }
-
-    function showResetConfirm() {
-      $('confirmResetModal').classList.add('show');
-    }
-
-    function hideResetConfirm() {
-      $('confirmResetModal').classList.remove('show');
-    }
-
-    async function processExportHelpdesk() {
-      hideDownloadConfirm();
-      toast('⏳ Memproses file Excel & foto...');
-
-      try {
-        const workbook = new ExcelJS.Workbook();
-        const worksheet = workbook.addWorksheet('Helpdesk Laporan');
-
-        worksheet.columns = [
-          { header: 'No', key: 'no', width: 6 },
-          { header: 'Tgl Pengiriman', key: 'shipDate', width: 16 },
-          { header: 'Waktu Input', key: 'time', width: 20 },
-          { header: 'Nama Petugas', key: 'staff', width: 18 },
-          { header: 'Lokasi HUB', key: 'hub', width: 18 },
-          { header: 'No Bagshield', key: 'bagshield', width: 20 },
-          { header: 'Nomor AWB', key: 'awb', width: 22 },
-          { header: 'Jenis Masalah', key: 'type', width: 20 },
-          { header: 'Keterangan', key: 'detail', width: 30 },
-          { header: 'Foto Bukti', key: 'photos', width: 35 }
-        ];
-
-        for (let i = 0; i < helpReports.length; i++) {
-          const rep = helpReports[i];
-          const rowNum = i + 2;
-
-          const row = worksheet.addRow({
-            no: i + 1,
-            shipDate: rep.shipDate || '-',
-            time: new Date(rep.timestamp).toLocaleString('id-ID'),
-            staff: rep.staff || '-',
-            hub: rep.hub || '-',
-            bagshield: rep.bagshield || '-',
-            awb: rep.awb || '-',
-            type: rep.type || '-',
-            detail: rep.detail || '-',
-            photos: ''
-          });
-
-          row.height = rep.photos && rep.photos.length ? 90 : 30;
-
-          if (rep.photos && rep.photos.length) {
-            for (let pIdx = 0; pIdx < rep.photos.length; pIdx++) {
-              try {
-                const imageId = workbook.addImage({
-                  base64: rep.photos[pIdx],
-                  extension: 'jpeg'
-                });
-
-                worksheet.addImage(imageId, {
-                  tl: { col: 9 + (pIdx * 0.4), row: rowNum - 1 + 0.1 },
-                  ext: { width: 75, height: 75 }
-                });
-              } catch (e) {}
-            }
-          }
-        }
-
-        const buffer = await workbook.xlsx.writeBuffer();
-        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `Laporan_Helpdesk_${new Date().toISOString().slice(0,10)}.xlsx`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-
-        toast('✅ Unduhan Excel Selesai!');
-        setTimeout(showResetConfirm, 500);
-      } catch (err) {
-        console.error(err);
-        toast('Gagal membuat file Excel.');
-      }
-    }
-
-    async function clearHelpdeskData() {
-      hideResetConfirm();
-      try {
-        await openHelpDb();
-        const tx = helpDb.transaction('reports', 'readwrite');
-        const store = tx.objectStore('reports');
-        store.clear();
-        tx.oncomplete = () => {
-          toast('🗑 Riwayat Helpdesk berhasil dibersihkan.');
-          loadHelpReports();
-        };
-      } catch (e) {
-        toast('Gagal membersihkan riwayat.');
-      }
-    }
-
-    // Event Listener Binding
-    window.addEventListener('DOMContentLoaded', () => {
-      loadHelpReports();
-
-      // Inisialisasi Tanggal
-      if ($('preDate')) {
-        $('preDate').value = currentDateKey;
-        $('preDate').addEventListener('change', (e) => {
-          currentDateKey = e.target.value;
-          renderPreAlert();
-        });
-      }
-
-      if ($('helpShipDate')) {
-        $('helpShipDate').value = currentDateKey;
-      }
-
-      // Handler Tombol Jenis Masalah
-      const problemBtns = document.querySelectorAll('#problemBtnGroup .problem-btn');
-      problemBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-          problemBtns.forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          $('helpType').value = btn.getAttribute('data-value');
-        });
-      });
+    // --- INITIALIZATION & EVENT LISTENERS ---
+    window.addEventListener('load', () => {
+      // Set Default Date
+      const today = new Date().toISOString().slice(0, 10);
+      if ($('preDate')) $('preDate').value = today;
+      if ($('helpShipDate')) $('helpShipDate').value = today;
 
       renderPreAlert();
+      initHelpDb();
 
-      // Staging / Pre-Alert handlers
-      $('btnQuickAddStaging')?.addEventListener('click', () => {
-        const val = $('preStaging').value.trim();
-        if (val) {
-          renderPreAlert();
-          toast('Target HUB diatur ke: ' + val);
-        } else {
-          toast('Ketikkan nama HUB terlebih dahulu');
-        }
-      });
-
+      // Pre-Alert Event Bindings
       $('btnPreCam')?.addEventListener('click', togglePreCam);
+      $('btnQuickAddStaging')?.addEventListener('click', () => {
+        const staging = $('preStaging').value.trim();
+        if (staging) renderPreAlert();
+      });
 
       $('btnClearPre')?.addEventListener('click', () => {
-        if (confirm(`Apakah Anda yakin ingin menghapus seluruh data Bagseal untuk tanggal ${currentDateKey}?`)) {
-          preAlertData[currentDateKey] = [];
+        if (confirm('Apakah Anda yakin ingin menghapus seluruh data Pre-Alert tanggal ini?')) {
+          delete preAlertData[currentDateKey];
           localStorage.setItem('prealert_data_v2', JSON.stringify(preAlertData));
           renderPreAlert();
-          toast(`Data tanggal ${currentDateKey} telah dihapus.`);
+          toast('Data Pre-Alert dibersihkan.');
         }
       });
 
-      const handlePreExport = () => {
-        try {
-          const list = preAlertData[currentDateKey] || [];
-          if (!list.length) {
-            toast('Tidak ada data untuk diunduh pada tanggal ini!');
-            return;
-          }
+      // Helpdesk Event Bindings
+      $('btnScanBagshieldCam')?.addEventListener('click', () => toggleHelpCam('bagshield'));
 
-          if (typeof XLSX === 'undefined') {
-            toast('Library Excel sedang dimuat, coba sebentar lagi...');
-            return;
-          }
+      $('btnNextToAwb')?.addEventListener('click', () => {
+        const bagshield = $('helpBagshield').value.trim();
+        const shipDate = $('helpShipDate').value;
+        const staff = $('helpStaff').value.trim();
+        const hub = $('helpHub').value.trim();
 
-          const dateVal = $('preDate')?.value || currentDateKey;
-          let formattedDate = dateVal;
-          try {
-            formattedDate = new Date(dateVal).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }).toUpperCase();
-          } catch(e) {}
-          
-          const batchVal = ($('preBatch')?.value || 'BATCH 1').toUpperCase();
-          const picVal = ($('prePic')?.value || '-').toUpperCase();
-          const vendorVal = ($('preVendor')?.value || '-').toUpperCase();
-
-          // Membangun array data sesuai format Pre-Alert CSC HLM
-          const exportData = [];
-          
-          // Header Metadata Dokumen
-          exportData.push(['PRE-ALERT CSC HLM']);
-          exportData.push(['TANGGAL', ':', formattedDate]);
-          exportData.push(['BATCH', ':', batchVal]);
-          exportData.push(['PIC PENGIRIM', ':', picVal]);
-          exportData.push(['VENDOR', ':', vendorVal]);
-          exportData.push([]); // Baris kosong pemisah
-
-          // Header Kolom Tabel Utama (Berat sebelum QTY, Penerima di bagian belakang)
-          exportData.push(['NO', 'STAGING / HUB TUJUAN', 'NO BAGSEAL', 'BERAT (KG)', 'QTY (PCS)', 'KATEGORI', 'CATATAN', 'PENERIMA']);
-
-          // Pengelompokan Data per Destinasi / HUB Tujuan untuk Sub Total
-          const groupedData = {};
-          list.forEach(item => {
-            const hub = (item.staging || 'TIDAK ADA TUJUAN HUB').toUpperCase();
-            if (!groupedData[hub]) groupedData[hub] = [];
-            groupedData[hub].push(item);
-          });
-
-          let globalNo = 1;
-          let grandTotalQty = 0;
-          let grandTotalWeight = 0;
-
-          // Iterasi Per Destinasi dengan Sub Total & Penerima
-          Object.keys(groupedData).forEach(hubName => {
-            const items = groupedData[hubName];
-            let subQty = 0;
-            let subWeight = 0;
-
-            // Mengambil penerima destinasi dari item pertama yang ada
-            const hubReceiver = items.find(x => x.receiver && x.receiver !== '-')?.receiver || items[0]?.receiver || '-';
-
-            items.forEach(item => {
-              const qty = Number(item.total) || 0;
-              const weight = Number(item.weight) || 0;
-              subQty += qty;
-              subWeight += weight;
-
-              exportData.push([
-                globalNo++,
-                hubName,
-                item.bagseal || '-',
-                weight,
-                qty,
-                item.category || 'Reg',
-                item.notes || '-',
-                (item.receiver || hubReceiver).toUpperCase()
-              ]);
-            });
-
-            grandTotalQty += subQty;
-            grandTotalWeight += subWeight;
-
-            // Baris Sub Total per Destinasi / HUB (Penerima di paling kanan)
-            exportData.push([
-              `SUBTOTAL (${hubName})`,
-              '',
-              `${items.length} BAGSEAL`,
-              Number(subWeight.toFixed(2)),
-              subQty,
-              '',
-              '',
-              hubReceiver.toUpperCase()
-            ]);
-
-            // Baris kosong pemisah antar destinasi
-            exportData.push([]);
-          });
-
-          // Baris Ringkasan Grand Total Utama
-          exportData.push([
-            'GRAND TOTAL',
-            '',
-            `${list.length} BAGSEAL`,
-            Number(grandTotalWeight.toFixed(2)),
-            grandTotalQty,
-            '',
-            '',
-            ''
-          ]);
-
-          const ws = XLSX.utils.aoa_to_sheet(exportData);
-
-          // Pengaturan Lebar Kolom Presisi
-          ws['!cols'] = [
-            { wch: 22 },  // NO / SUBTOTAL / GRAND TOTAL
-            { wch: 24 },  // HUB TUJUAN
-            { wch: 24 },  // NO BAGSEAL
-            { wch: 12 },  // BERAT (KG)
-            { wch: 12 },  // QTY (PCS)
-            { wch: 18 },  // KATEGORI
-            { wch: 26 },  // CATATAN
-            { wch: 22 }   // PENERIMA (BELAKANG)
-          ];
-
-          // Penggabungan Cell (Merge) untuk Header Banner & Text Total
-          ws['!merges'] = [
-            { s: { r: 0, c: 0 }, e: { r: 0, c: 7 } } // Merge Judul Utama
-          ];
-
-          // Menambahkan merge cell untuk setiap baris Sub Total & Grand Total
-          exportData.forEach((row, idx) => {
-            if (row[0] && (String(row[0]).startsWith('SUBTOTAL') || String(row[0]) === 'GRAND TOTAL')) {
-              if (!ws['!merges']) ws['!merges'] = [];
-              ws['!merges'].push({ s: { r: idx, c: 0 }, e: { r: idx, c: 1 } });
-            }
-          });
-
-          const wb = XLSX.utils.book_new();
-          XLSX.utils.book_append_sheet(wb, ws, 'Pre-Alert CSC HLM');
-          
-          const filename = `Pre-Alert CSC HLM ${formattedDate}_${picVal} ${batchVal}.xlsx`;
-          XLSX.writeFile(wb, filename);
-          toast('✅ Data Pre-Alert CSC HLM berhasil diunduh!');
-        } catch (err) {
-          console.error(err);
-          toast('❌ Gagal mengunduh Excel: ' + (err.message || 'Error tidak diketahui'));
+        if (!shipDate || !staff || !hub || !bagshield) {
+          toast('❌ Lengkapi Tanggal, Petugas, HUB, dan No Bagshield!');
+          return;
         }
+
+        activeBagshieldNo = bagshield;
+        $('displayActiveBagshield').textContent = bagshield;
+        $('helpStep1').style.display = 'none';
+        $('helpStep2').style.display = 'block';
+        renderHelpAwbList();
+      });
+
+      $('btnBackToStep1')?.addEventListener('click', () => {
+        $('helpStep2').style.display = 'none';
+        $('helpStep1').style.display = 'block';
+        stopAllCameras();
+      });
+
+      $('btnHelpCam')?.addEventListener('click', () => toggleHelpCam('awb'));
+
+      $('btnAddManualAwb')?.addEventListener('click', () => {
+        const code = prompt('Masukkan Nomor Barcode AWB:');
+        if (code) addAwbToList(code.trim());
+      });
+
+      $('btnHelpSnap')?.addEventListener('click', () => {
+        const video = $('helpWebcam');
+        if (!streamHelp || video.paused) {
+          toast('Buka kamera terlebih dahulu untuk ambil foto!');
+          return;
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth || 640;
+        canvas.height = video.videoHeight || 480;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        const photoData = canvas.toDataURL('image/jpeg', 0.7);
+        helpPhotos.push(photoData);
+
+        const img = document.createElement('img');
+        img.src = photoData;
+        img.className = 'photo-thumb';
+        $('helpPhotoStrip').appendChild(img);
+        toast('📷 Foto Bukti Diambil');
+      });
+
+      $('helpSave')?.addEventListener('click', saveHelpdeskReport);
+
+      // Export Pre-Alert Excel
+      const exportPreExcel = () => {
+        const list = preAlertData[currentDateKey] || [];
+        if (!list.length) {
+          toast('Tidak ada data Pre-Alert untuk diunduh!');
+          return;
+        }
+
+        const date = $('preDate').value;
+        const batch = $('preBatch').value.trim();
+        const pic = $('prePic').value.trim();
+        const vendor = $('preVendor').value.trim();
+
+        const dataRows = list.map(item => ({
+          'TANGGAL': date,
+          'BATCH': batch,
+          'PIC PENGIRIM': pic,
+          'VENDOR': vendor,
+          'TARGET HUB': item.staging,
+          'NO BAGSEAL': item.bagseal,
+          'BERAT (KG)': item.weight || 0,
+          'QTY PARCEL': item.total || 1,
+          'KATEGORI': item.category || 'Reg',
+          'CATATAN': item.notes || '-',
+          'PENERIMA': item.receiver || '-'
+        }));
+
+        const ws = XLSX.utils.json_to_sheet(dataRows);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Pre-Alert");
+        XLSX.writeFile(wb, `PreAlert_${date}_${batch.replace(/\s+/g, '_')}.xlsx`);
+        toast('📥 File Excel Pre-Alert Terunduh!');
       };
 
-      const btnExportPre = $('btnExportPre');
-      if (btnExportPre) btnExportPre.onclick = handlePreExport;
+      $('btnExportPreTop')?.addEventListener('click', exportPreExcel);
+      $('btnExportPre')?.addEventListener('click', exportPreExcel);
 
-      const btnExportPreTop = $('btnExportPreTop');
-      if (btnExportPreTop) btnExportPreTop.onclick = handlePreExport;
+      // Export Helpdesk Excel
+      $('btnExportHelp')?.addEventListener('click', () => {
+        if (!helpReports.length) {
+          toast('Belum ada laporan untuk diunduh!');
+          return;
+        }
+        $('confirmDownloadModal').classList.add('show');
+      });
 
-      // Helpdesk Event Listeners
-      $('btnHelpCam')?.addEventListener('click', toggleHelpCam);
-      $('btnHelpSnap')?.addEventListener('click', captureHelpPhoto);
-      $('helpSave')?.addEventListener('click', saveHelp);
-      $('btnExportHelp')?.addEventListener('click', showDownloadConfirm);
+      $('btnCancelDownloadHelp')?.addEventListener('click', () => {
+        $('confirmDownloadModal').classList.remove('show');
+      });
 
-      // Modal Dialog Action Listeners
-      $('btnCancelDownloadHelp')?.addEventListener('click', hideDownloadConfirm);
-      $('btnConfirmDownloadHelp')?.addEventListener('click', processExportHelpdesk);
-      $('btnKeepHelpHistory')?.addEventListener('click', hideResetConfirm);
-      $('btnResetHelpHistory')?.addEventListener('click', clearHelpdeskData);
+      $('btnConfirmDownloadHelp')?.addEventListener('click', async () => {
+        $('confirmDownloadModal').classList.remove('show');
+        
+        const wb = new ExcelJS.Workbook();
+        const ws = wb.addWorksheet('Laporan Kendala');
+
+        ws.columns = [
+          { header: 'Tgl Pengiriman', key: 'shipDate', width: 16 },
+          { header: 'Petugas', key: 'staff', width: 18 },
+          { header: 'HUB / Staging', key: 'hub', width: 18 },
+          { header: 'No Bagshield', key: 'bagshield', width: 22 },
+          { header: 'No AWB', key: 'awb', width: 22 },
+          { header: 'Jenis Masalah', key: 'problemType', width: 20 },
+          { header: 'Keterangan', key: 'notes', width: 30 }
+        ];
+
+        helpReports.forEach(r => {
+          if (r.awbList && r.awbList.length > 0) {
+            r.awbList.forEach(a => {
+              ws.addRow({
+                shipDate: r.shipDate,
+                staff: r.staff,
+                hub: r.hub,
+                bagshield: r.bagshield,
+                awb: a.awb,
+                problemType: a.problemType,
+                notes: a.notes || '-'
+              });
+            });
+          }
+        });
+
+        const buf = await wb.xlsx.writeBuffer();
+        const blob = new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Laporan_Kendala_Helpdesk_${new Date().toISOString().slice(0,10)}.xlsx`;
+        a.click();
+
+        toast('📥 Excel Helpdesk Terunduh!');
+        $('confirmResetModal').classList.add('show');
+      });
+
+      $('btnKeepHelpHistory')?.addEventListener('click', () => {
+        $('confirmResetModal').classList.remove('show');
+      });
+
+      $('btnResetHelpHistory')?.addEventListener('click', () => {
+        $('confirmResetModal').classList.remove('show');
+        if (helpDb) {
+          const tx = helpDb.transaction('reports', 'readwrite');
+          tx.objectStore('reports').clear();
+          tx.oncomplete = () => {
+            loadHelpReports();
+            toast('Riwayat Helpdesk Di-reset.');
+          };
+        }
+      });
     });
   </script>
 </body>
