@@ -944,10 +944,26 @@
         </div>
       </div>
 
-      <div class="trip-tabs">
-        <button class="trip-tab active" data-trip="Trip 1">Trip 1</button>
-        <button class="trip-tab" data-trip="Trip 2">Trip 2</button>
-        <button class="trip-tab" data-trip="Pending">Pending</button>
+      <!-- Informasi Tanggal, Batch & PIC Pengirim -->
+      <div class="pre-form" style="margin-bottom: 12px; background: var(--panel); padding: 14px; border-radius: 16px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px;">
+          <div>
+            <label style="color:var(--muted); font-size:11px; font-weight:900; display:block; margin-bottom:4px;">TANGGAL</label>
+            <input type="date" id="preDate" style="width:100%; background:#12171b; border:1px solid var(--line); border-radius:10px; color:white; padding:9px 10px; font-weight:700;">
+          </div>
+          <div>
+            <label style="color:var(--muted); font-size:11px; font-weight:900; display:block; margin-bottom:4px;">BATCH</label>
+            <input id="preBatch" placeholder="Contoh: BATCH 1" value="BATCH 1" style="width:100%; background:#12171b; border:1px solid var(--line); border-radius:10px; color:white; padding:9px 10px; font-weight:700;">
+          </div>
+          <div>
+            <label style="color:var(--muted); font-size:11px; font-weight:900; display:block; margin-bottom:4px;">PIC PENGIRIM (PEMBUAT)</label>
+            <input id="prePic" placeholder="Nama PIC Pembuat" value="LIONEL" style="width:100%; background:#12171b; border:1px solid var(--line); border-radius:10px; color:white; padding:9px 10px; font-weight:700;">
+          </div>
+          <div>
+            <label style="color:var(--muted); font-size:11px; font-weight:900; display:block; margin-bottom:4px;">VENDOR (OPTIONAL)</label>
+            <input id="preVendor" placeholder="Nama Vendor (cth: LIONEL)" style="width:100%; background:#12171b; border:1px solid var(--line); border-radius:10px; color:white; padding:9px 10px; font-weight:700;">
+          </div>
+        </div>
       </div>
 
       <!-- Selector Tujuan Active / HUB Utama -->
@@ -956,9 +972,13 @@
           <label style="color:var(--amber); font-weight:900; font-size:12px; display:block; margin-bottom:6px;">
             🎯 TARGET TUJUAN / HUB SAAT INI (HASIL SCAN KAMERA AKAN MASUK KE SINI)
           </label>
-          <div style="display:flex; gap:8px;">
+          <div style="display:flex; gap:8px; margin-bottom:8px;">
             <input id="preStaging" placeholder="Ketik atau pilih HUB (cth: HUB JKT-WEST)" style="flex:1; font-weight:800; font-size:15px; color:#ffd05b; background:#1b2026; border:1px solid var(--amber); border-radius:10px; padding:12px 10px;">
             <button class="btn primary" id="btnQuickAddStaging" style="min-height: auto; padding: 0 16px; font-size: 13px; font-weight:800;">＋ Target HUB Baru</button>
+          </div>
+          <div>
+            <label style="color:var(--muted); font-size:11px; font-weight:900; display:block; margin-bottom:4px;">PENERIMA (OPTIONAL)</label>
+            <input id="preReceiver" placeholder="Nama / Kontak Penerima di Tujuan" style="width:100%; background:#1b2026; border:1px solid var(--line); border-radius:10px; color:white; padding:9px 10px; font-size:13px; font-weight:600;">
           </div>
         </div>
       </div>
@@ -980,10 +1000,13 @@
         </div>
       </div>
 
-      <div class="pre-summary">
-        <span>TERCATAT: <strong id="preBagCount" style="color:var(--text)">0 Bagseal</strong></span>
-        <span>TOTAL PARCEL: <strong id="preParcelSum" style="color:var(--amber)">0 Parcel</strong></span>
-        <span>TOTAL BERAT: <strong id="preWeightSum" style="color:var(--green)">0 Kg</strong></span>
+      <div class="pre-summary" style="align-items:center;">
+        <div>
+          <span>TERCATAT: <strong id="preBagCount" style="color:var(--text)">0 Bagseal</strong></span> |
+          <span>TOTAL PARCEL: <strong id="preParcelSum" style="color:var(--amber)">0 Parcel</strong></span> |
+          <span>BERAT: <strong id="preWeightSum" style="color:var(--green)">0 Kg</strong></span>
+        </div>
+        <button class="btn primary" id="btnExportPreTop" style="min-height:40px; padding:6px 14px; font-size:13px; font-weight:800;">📥 Unduh Excel Pra-Alert</button>
       </div>
 
       <div id="preGroupedRows">
@@ -993,8 +1016,8 @@
       </div>
 
       <div class="pre-actions" style="margin-top:18px;">
-        <button class="btn danger" id="btnClearPre">🗑 Hapus Trip</button>
-        <button class="btn primary" id="btnExportPre">📥 Unduh Staging (.xlsx)</button>
+        <button class="btn danger" id="btnClearPre">🗑 Hapus Trip Tanggal Ini</button>
+        <button class="btn primary" id="btnExportPre" style="font-size:15px; font-weight:900;">📥 Unduh Excel Pra-Alert (CSC HLM)</button>
       </div>
     </section>
 
@@ -1110,8 +1133,8 @@
 
     // Global App State
     let activePage = 'prealert';
-    let currentTrip = 'Trip 1';
-    let preAlertData = JSON.parse(localStorage.getItem('prealert_data') || '{"Trip 1":[],"Trip 2":[],"Pending":[]}');
+    let currentDateKey = new Date().toISOString().slice(0, 10);
+    let preAlertData = JSON.parse(localStorage.getItem('prealert_data_v2') || '{}');
     let lastScannedBagseal = '';
     let scanThrottleTimeout = null;
     
@@ -1165,7 +1188,6 @@
         document.querySelectorAll('.desktop-link')[1]?.classList.add('active');
       }
 
-      // Close camera if page changes
       stopAllCameras();
     };
 
@@ -1183,7 +1205,7 @@
 
     // --- MODUL 1: PRE-ALERT ---
     function renderPreAlert() {
-      const list = preAlertData[currentTrip] || [];
+      const list = preAlertData[currentDateKey] || [];
       const container = $('preGroupedRows');
       
       let totalBagseal = list.length;
@@ -1200,7 +1222,7 @@
       if ($('preWeightSum')) $('preWeightSum').textContent = totalWeightSum.toFixed(1) + ' Kg';
 
       if (!list.length) {
-        container.innerHTML = '<div class="pre-list"><div class="pre-empty">Belum ada bagseal untuk trip ini. Aktifkan kamera lalu scan barcode.</div></div>';
+        container.innerHTML = '<div class="pre-list"><div class="pre-empty">Belum ada bagseal untuk tanggal ini. Aktifkan kamera lalu scan barcode.</div></div>';
         return;
       }
 
@@ -1244,7 +1266,7 @@
               </div>
             </div>
 
-            <div class="pre-colhead" style="grid-template-columns: 1.2fr .6fr .6fr .8fr 1fr 40px;">
+            <div class="pre-colhead" style="grid-template-columns: 1.2fr .6fr .6fr 1fr 1fr 40px;">
               <span>NO BAGSEAL</span>
               <span>QTY</span>
               <span>BERAT (KG)</span>
@@ -1254,11 +1276,16 @@
             </div>
 
             ${items.map(item => `
-              <div class="pre-row" style="grid-template-columns: 1.2fr .6fr .6fr .8fr 1fr 40px;">
+              <div class="pre-row" style="grid-template-columns: 1.2fr .6fr .6fr 1fr 1fr 40px;">
                 <input value="${safe(item.bagseal)}" onchange="updatePreItem(${item.originalIndex}, 'bagseal', this.value)" placeholder="No. Bagseal">
                 <input type="number" value="${item.total}" onchange="updatePreItem(${item.originalIndex}, 'total', this.value)" placeholder="0">
                 <input type="number" step="0.1" value="${item.weight || ''}" onchange="updatePreItem(${item.originalIndex}, 'weight', this.value)" placeholder="0.0">
-                <input value="${safe(item.category)}" onchange="updatePreItem(${item.originalIndex}, 'category', this.value)" placeholder="Kategori">
+                <select onchange="updatePreItem(${item.originalIndex}, 'category', this.value)" style="min-width:0; width:100%; background:#12171b; border:1px solid #343e49; border-radius:8px; color:white; padding:9px 5px; font:600 11px system-ui, sans-serif;">
+                  <option value="Reg" ${item.category === 'Reg' ? 'selected' : ''}>Reg</option>
+                  <option value="HV/Dok/Al-Qur'an" ${item.category === "HV/Dok/Al-Qur'an" ? 'selected' : ''}>HV/Dok/Al-Qur'an</option>
+                  <option value="Cairan" ${item.category === 'Cairan' ? 'selected' : ''}>Cairan</option>
+                  <option value="BP" ${item.category === 'BP' ? 'selected' : ''}>BP</option>
+                </select>
                 <input value="${safe(item.notes)}" onchange="updatePreItem(${item.originalIndex}, 'notes', this.value)" placeholder="Catatan">
                 <button onclick="deletePreItem(${item.originalIndex})" style="background:none; border:none; color:var(--red); cursor:pointer; font-weight:bold; font-size:16px;">✕</button>
               </div>
@@ -1284,6 +1311,16 @@
         return;
       }
 
+      if (!preAlertData[currentDateKey]) preAlertData[currentDateKey] = [];
+
+      // Cek apakah bagseal sudah ada di list tanggal ini
+      const existing = preAlertData[currentDateKey].find(x => x.bagseal === bagsealCode);
+      if (existing) {
+        if (navigator.vibrate) navigator.vibrate([150, 80, 150]);
+        toast('❌ Bagseal ' + bagsealCode + ' SUDAH ADA di HUB: ' + existing.staging);
+        return;
+      }
+
       if (lastScannedBagseal === bagsealCode) return;
       lastScannedBagseal = bagsealCode;
 
@@ -1293,16 +1330,7 @@
       playBeep();
       if (navigator.vibrate) navigator.vibrate(100);
 
-      if (!preAlertData[currentTrip]) preAlertData[currentTrip] = [];
-
-      // Cek apakah bagseal sudah ada di list trip ini
-      const existing = preAlertData[currentTrip].find(x => x.bagseal === bagsealCode);
-      if (existing) {
-        toast('⚠️ Bagseal ' + bagsealCode + ' sudah pernah discan!');
-        return;
-      }
-
-      preAlertData[currentTrip].unshift({
+      preAlertData[currentDateKey].unshift({
         staging: staging,
         bagseal: bagsealCode,
         total: 1,
@@ -1311,190 +1339,243 @@
         notes: '-'
       });
 
-      localStorage.setItem('prealert_data', JSON.stringify(preAlertData));
+      localStorage.setItem('prealert_data_v2', JSON.stringify(preAlertData));
       renderPreAlert();
       toast('✅ Added: ' + bagsealCode + ' ➔ ' + staging);
     }
 
+    // Inline row editing helper functions
+    window.updatePreItem = function(index, field, value) {
+      if (preAlertData[currentDateKey] && preAlertData[currentDateKey][index]) {
+        if (field === 'bagseal') {
+          const duplicate = preAlertData[currentDateKey].find((x, i) => i !== index && x.bagseal === value.trim());
+          if (duplicate) {
+            toast('❌ Nomor Bagseal ' + value + ' sudah dipakai!');
+            renderPreAlert();
+            return;
+          }
+        }
+        preAlertData[currentDateKey][index][field] = field === 'total' || field === 'weight' ? Number(value) : value;
+        localStorage.setItem('prealert_data_v2', JSON.stringify(preAlertData));
+        renderPreAlert();
+      }
+    };
+
+    window.deletePreItem = function(index) {
+      if (preAlertData[currentDateKey] && preAlertData[currentDateKey][index]) {
+        preAlertData[currentDateKey].splice(index, 1);
+        localStorage.setItem('prealert_data_v2', JSON.stringify(preAlertData));
+        renderPreAlert();
+        toast('Bagseal dihapus.');
+      }
+    };
+
+    // Camera Handlers for Pre-Alert
     async function togglePreCam() {
       if (streamPre) {
         stopAllCameras();
         return;
       }
 
-      const staging = $('preStaging').value.trim();
-      if (!staging) {
-        toast('PILIH / INPUT TUJUAN (HUB) TERLEBIH DAHULU!');
-        $('preStaging').focus();
-        return;
-      }
+      stopAllCameras();
 
       try {
-        streamPre = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-        const video = $('preWebcam');
-        video.srcObject = streamPre;
-        $('preScanFrame').classList.add('active');
-        $('btnPreCam').textContent = '⏹ Hentikan Kamera';
-
-        if ('BarcodeDetector' in window) {
-          const detector = new BarcodeDetector({ formats: ['code_128', 'qr_code', 'ean_13', 'code_39'] });
-          preScanInterval = setInterval(async () => {
-            try {
-              const barcodes = await detector.detect(video);
-              if (barcodes.length > 0) {
-                addScannedBagseal(barcodes[0].rawValue);
-              }
-            } catch (e) {}
-          }, 400);
-        } else {
-          toast('BarcodeDetector tidak didukung penuh di browser ini. Anda dapat memasukkan/edit manual.');
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          toast('Kamera tidak didukung di browser ini / perlukan koneksi HTTPS');
+          return;
         }
-      } catch (e) {
-        toast('Gagal membuka kamera: ' + e.message);
-      }
-    }
-    async function togglePreCam() {
-      if (streamPre) {
-        stopAllCameras();
-        return;
-      }
 
-      const staging = $('preStaging').value.trim();
-      if (!staging) {
-        toast('PILIH / INPUT TUJUAN (HUB) TERLEBIH DAHULU!');
-        $('preStaging').focus();
-        return;
-      }
-
-      // Cek apakah koneksi menggunakan HTTPS atau localhost (Persyaratan wajib akses kamera web)
-      if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
-        toast('❌ Akses kamera diblokir browser: Web harus dijalankan via HTTPS!');
-        return;
-      }
-
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        toast('❌ Browser ini tidak mendukung akses kamera!');
-        return;
-      }
-
-      try {
-        // Coba minta akses kamera belakang terlebih dahulu, jika gagal coba kamera umum
-        try {
-          streamPre = await navigator.mediaDevices.getUserMedia({ 
-            video: { facingMode: { exact: "environment" } } 
-          });
-        } catch (errBack) {
-          streamPre = await navigator.mediaDevices.getUserMedia({ 
-            video: { facingMode: "environment" } 
-          });
-        }
+        streamPre = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+        });
 
         const video = $('preWebcam');
         video.srcObject = streamPre;
+        video.play();
         $('preScanFrame').classList.add('active');
         $('btnPreCam').textContent = '⏹ Hentikan Kamera';
         $('preCamStatus').textContent = 'Kamera Pemindai Aktif';
 
         if ('BarcodeDetector' in window) {
-          const detector = new BarcodeDetector({ formats: ['code_128', 'qr_code', 'ean_13', 'code_39'] });
+          const barcodeDetector = new BarcodeDetector({
+            formats: ['code_128', 'code_39', 'code_93', 'ean_13', 'qr_code', 'data_matrix']
+          });
+
           preScanInterval = setInterval(async () => {
             try {
-              const barcodes = await detector.detect(video);
+              const barcodes = await barcodeDetector.detect(video);
               if (barcodes.length > 0) {
-                addScannedBagseal(barcodes[0].rawValue);
+                const code = barcodes[0].rawValue;
+                if (code) {
+                  addScannedBagseal(code.trim());
+                }
               }
-            } catch (e) {}
-          }, 400);
+            } catch (err) {}
+          }, 350);
         } else {
-          toast('BarcodeDetector tidak didukung browser ini. Anda dapat ketik manual.');
+          toast('BarcodeDetector API tidak didukung pada browser ini.');
         }
-      } catch (e) {
-        let errMsg = e.message;
-        if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
-          errMsg = 'Izin kamera ditolak. Silakan izinkan akses kamera di ikon gembok/pengaturan browser Anda.';
-        } else if (e.name === 'NotFoundError' || e.name === 'DevicesNotFoundError') {
-          errMsg = 'Kamera tidak ditemukan pada perangkat ini.';
-        } else if (e.name === 'NotReadableError' || e.name === 'TrackStartError') {
-          errMsg = 'Kamera sedang digunakan oleh aplikasi lain.';
-        }
-        toast('❌ ' + errMsg);
+      } catch (err) {
+        toast('Gagal membuka kamera: ' + (err.message || 'Izin ditolak atau butuh HTTPS'));
+        stopAllCameras();
       }
     }
 
-    function renderHelp() {
-      if (!$('helpReports')) return;
-      $('helpCount').textContent = helpReports.length;
-
-      $('helpReports').innerHTML = helpReports.length
-        ? helpReports.map(r => 
-            '<article class="help-report">' +
-              '<div class="help-report-header">' +
-                '<div>' +
-                  '<div class="help-report-title">' + safe(r.awb || 'AWB Tidak Tersedia') + '</div>' +
-                '</div>' +
-                '<div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">' +
-                  (r.hub ? '<span class="help-badge hub-badge">HUB: ' + safe(r.hub) + '</span>' : '') +
-                  '<span class="help-badge">' + safe(r.type) + '</span>' +
-                '</div>' +
-              '</div>' +
-              '<div class="help-meta">' +
-                '<span>👤 ' + safe(r.staff || 'Petugas belum diisi') + '</span>' +
-                '<span>🕒 ' + safe(new Date(r.createdAt).toLocaleString('id-ID')) + '</span>' +
-              '</div>' +
-              (r.detail ? '<div class="help-report-detail">' + safe(r.detail) + '</div>' : '') +
-              (r.photos && r.photos.length ? 
-                '<div class="help-report-photos">' + 
-                  r.photos.map(p => '<img src="' + p.data + '" alt="Foto bukti">').join('') + 
-                '</div>' : ''
-              ) +
-            '</article>'
-          ).join('')
-        : '<div class="last-box">Belum ada laporan Helpdesk.</div>';
-    }
-
-    function renderHelpPhotos() {
-      const container = $('helpPhotoStrip');
-      container.innerHTML = helpPhotos.map((p, idx) => `
-        <img class="photo-thumb" src="${p.data}" title="Hapus Foto" onclick="removePhoto(${idx})">
-      `).join('');
-    }
-
-    window.removePhoto = function(idx) {
-      helpPhotos.splice(idx, 1);
-      renderHelpPhotos();
-    };
-
+    // --- MODUL 2: HELPDESK ---
     function openHelpDb() {
       return new Promise((resolve, reject) => {
         const req = indexedDB.open('HelpdeskDB', 1);
         req.onupgradeneeded = e => {
           const db = e.target.result;
           if (!db.objectStoreNames.contains('reports')) {
-            db.createObjectStore('reports', { keyPath: 'id' });
+            db.createObjectStore('reports', { keyPath: 'id', autoIncrement: true });
           }
         };
         req.onsuccess = e => {
           helpDb = e.target.result;
           resolve(helpDb);
         };
-        req.onerror = () => reject(req.error);
+        req.onerror = e => reject(e);
       });
     }
 
     async function loadHelpReports() {
       try {
-        if (!helpDb) await openHelpDb();
+        await openHelpDb();
         const tx = helpDb.transaction('reports', 'readonly');
         const store = tx.objectStore('reports');
         const req = store.getAll();
         req.onsuccess = () => {
-          helpReports = (req.result || []).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-          renderHelp();
+          helpReports = req.result || [];
+          renderHelpReports();
         };
       } catch (e) {
-        console.error('Gagal memuat laporan Helpdesk:', e);
+        console.error('Error load help reports:', e);
       }
     }
+
+    function renderHelpReports() {
+      const container = $('helpReports');
+      $('helpCount').textContent = helpReports.length;
+
+      if (!helpReports.length) {
+        container.innerHTML = '<div class="last-box">Belum ada laporan Helpdesk.</div>';
+        return;
+      }
+
+      container.innerHTML = helpReports.map(rep => `
+        <div class="help-report">
+          <div class="help-report-header">
+            <div>
+              <div class="help-report-title">${safe(rep.awb || 'AWB TIDAK TERCATAT')}</div>
+              <div style="display:flex; gap:6px; margin-top:4px;">
+                <span class="help-badge">${safe(rep.type)}</span>
+                ${rep.hub ? `<span class="help-badge hub-badge">${safe(rep.hub)}</span>` : ''}
+              </div>
+            </div>
+            <span style="font-size:11px; color:var(--muted); font-weight:700;">${new Date(rep.timestamp).toLocaleString('id-ID')}</span>
+          </div>
+          <div class="help-meta">
+            <span>👤 Petugas: <strong>${safe(rep.staff || '-')}</strong></span>
+            ${rep.hub ? `<span>🏢 HUB: <strong>${safe(rep.hub)}</strong></span>` : ''}
+          </div>
+          <div class="help-report-detail">${safe(rep.detail || 'Tidak ada keterangan.')}</div>
+          ${rep.photos && rep.photos.length ? `
+            <div class="help-report-photos">
+              ${rep.photos.map(p => `<img src="${p}" alt="Foto Bukti">`).join('')}
+            </div>
+          ` : ''}
+        </div>
+      `).join('');
+    }
+
+    async function toggleHelpCam() {
+      if (streamHelp) {
+        stopAllCameras();
+        return;
+      }
+
+      stopAllCameras();
+
+      try {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          toast('Kamera tidak didukung / perlukan HTTPS');
+          return;
+        }
+
+        streamHelp = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+        });
+
+        const video = $('helpWebcam');
+        video.srcObject = streamHelp;
+        video.play();
+        $('helpScanFrame').classList.add('active');
+        $('btnHelpCam').textContent = '⏹ Hentikan Kamera';
+        $('helpCamStatus').textContent = 'Kamera Helpdesk Aktif';
+
+        if ('BarcodeDetector' in window) {
+          const barcodeDetector = new BarcodeDetector({
+            formats: ['code_128', 'code_39', 'code_93', 'ean_13', 'qr_code', 'data_matrix']
+          });
+
+          const helpScanInterval = setInterval(async () => {
+            if (!streamHelp) { clearInterval(helpScanInterval); return; }
+            try {
+              const barcodes = await barcodeDetector.detect(video);
+              if (barcodes.length > 0 && barcodes[0].rawValue) {
+                $('helpAwb').value = barcodes[0].rawValue.trim();
+                playBeep();
+                toast('AWB Terdeteksi: ' + barcodes[0].rawValue);
+              }
+            } catch (e) {}
+          }, 400);
+        }
+      } catch (err) {
+        toast('Gagal membuka kamera Helpdesk.');
+        stopAllCameras();
+      }
+    }
+
+    function captureHelpPhoto() {
+      if (!streamHelp) {
+        toast('Aktifkan kamera terlebih dahulu!');
+        return;
+      }
+      if (helpPhotos.length >= 4) {
+        toast('Maksimal 4 foto per laporan.');
+        return;
+      }
+
+      const video = $('helpWebcam');
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth || 640;
+      canvas.height = video.videoHeight || 480;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+      helpPhotos.push(dataUrl);
+
+      renderHelpPhotoStrip();
+      playBeep();
+      toast('📷 Foto berhasil diambil (' + helpPhotos.length + '/4)');
+    }
+
+    function renderHelpPhotoStrip() {
+      const strip = $('helpPhotoStrip');
+      strip.innerHTML = helpPhotos.map((p, i) => `
+        <div style="position:relative; display:inline-block;">
+          <img src="${p}" class="photo-thumb" alt="Bukti ${i+1}">
+          <button onclick="removeHelpPhoto(${i})" style="position:absolute; top:-4px; right:-4px; background:var(--red); color:white; border:none; border-radius:50%; width:20px; height:20px; cursor:pointer; font-size:10px; font-weight:bold;">✕</button>
+        </div>
+      `).join('');
+    }
+
+    window.removeHelpPhoto = function(idx) {
+      helpPhotos.splice(idx, 1);
+      renderHelpPhotoStrip();
+    };
 
     async function saveHelp() {
       const staff = $('helpStaff').value.trim();
@@ -1504,120 +1585,42 @@
       const detail = $('helpDetail').value.trim();
 
       if (!staff) {
-        toast('Nama petugas wajib diisi!');
-        $('helpStaff').focus();
+        toast('Nama Petugas wajib diisi!');
         return;
       }
 
       const report = {
-        id: 'HELP-' + Date.now(),
-        staff: staff,
-        hub: hub,
-        awb: awb,
-        type: type,
-        detail: detail,
+        staff,
+        hub,
+        awb,
+        type,
+        detail,
         photos: [...helpPhotos],
-        createdAt: new Date().toISOString()
+        timestamp: new Date().toISOString()
       };
 
       try {
-        if (!helpDb) await openHelpDb();
+        await openHelpDb();
         const tx = helpDb.transaction('reports', 'readwrite');
         const store = tx.objectStore('reports');
-        await new Promise((res, rej) => {
-          const req = store.put(report);
-          req.onsuccess = res;
-          req.onerror = rej;
-        });
+        store.add(report);
 
-        helpReports.unshift(report);
-        renderHelp();
-
-        // Reset form input
-        $('helpAwb').value = '';
-        $('helpDetail').value = '';
-        helpPhotos = [];
-        renderHelpPhotos();
-
-        toast('✅ Laporan Helpdesk berhasil disimpan!');
+        tx.oncomplete = () => {
+          toast('✅ Laporan berhasil disimpan!');
+          $('helpAwb').value = '';
+          $('helpDetail').value = '';
+          helpPhotos = [];
+          renderHelpPhotoStrip();
+          loadHelpReports();
+        };
       } catch (e) {
-        toast('Gagal menyimpan laporan: ' + e.message);
+        toast('Gagal menyimpan laporan.');
       }
     }
 
-    async function captureHelpPhoto() {
-      if (!streamHelp) {
-        toast('Buka kamera Helpdesk terlebih dahulu!');
-        return;
-      }
-
-      if (helpPhotos.length >= 4) {
-        toast('Maksimal 4 foto per laporan!');
-        return;
-      }
-
-      const video = $('helpWebcam');
-      const canvas = document.createElement('canvas');
-      canvas.width = video.videoWidth || 640;
-      canvas.height = video.videoHeight || 480;
-
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-
-      helpPhotos.push({ id: Date.now(), data: dataUrl });
-      renderHelpPhotos();
-      playBeep();
-      toast('📸 Foto berhasil diambil!');
-    }
-
-    async function toggleHelpCam() {
-      if (streamHelp) {
-        stopAllCameras();
-        return;
-      }
-
-      if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
-        toast('❌ Akses kamera diblokir browser: Web harus dijalankan via HTTPS!');
-        return;
-      }
-
-      try {
-        try {
-          streamHelp = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: "environment" } } });
-        } catch (errBack) {
-          streamHelp = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-        }
-
-        const video = $('helpWebcam');
-        video.srcObject = streamHelp;
-        $('helpScanFrame').classList.add('active');
-        $('btnHelpCam').textContent = '⏹ Hentikan Kamera';
-        $('helpCamStatus').textContent = 'Kamera Helpdesk Aktif';
-
-        if ('BarcodeDetector' in window) {
-          const detector = new BarcodeDetector({ formats: ['code_128', 'qr_code', 'ean_13', 'code_39'] });
-          const helpScanInterval = setInterval(async () => {
-            if (!streamHelp) { clearInterval(helpScanInterval); return; }
-            try {
-              const barcodes = await detector.detect(video);
-              if (barcodes.length > 0) {
-                $('helpAwb').value = barcodes[0].rawValue;
-                playBeep();
-                toast('AWB Terdeteksi: ' + barcodes[0].rawValue);
-              }
-            } catch (e) {}
-          }, 500);
-        }
-      } catch (e) {
-        toast('❌ Gagal membuka kamera: ' + e.message);
-      }
-    }
-
-    // Modal Konfirmasi Download & Reset Handlers
     function showDownloadConfirm() {
       if (!helpReports.length) {
-        toast('Tidak ada laporan Helpdesk untuk diunduh!');
+        toast('Tidak ada laporan untuk diunduh.');
         return;
       }
       $('confirmDownloadModal').classList.add('show');
@@ -1637,53 +1640,53 @@
 
     async function processExportHelpdesk() {
       hideDownloadConfirm();
-      toast('Memproses pembuatan Excel...');
+      toast('⏳ Memproses file Excel & foto...');
 
       try {
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet('Helpdesk Laporan');
 
         worksheet.columns = [
-          { header: 'ID LAPORAN', key: 'id', width: 18 },
-          { header: 'TANGGAL & WAKTU', key: 'createdAt', width: 22 },
-          { header: 'NAMA PETUGAS', key: 'staff', width: 20 },
-          { header: 'LOKASI HUB', key: 'hub', width: 18 },
-          { header: 'NOMOR AWB', key: 'awb', width: 22 },
-          { header: 'JENIS MASALAH', key: 'type', width: 20 },
-          { header: 'KETERANGAN', key: 'detail', width: 35 },
-          { header: 'FOTO BUKTI', key: 'photos', width: 30 }
+          { header: 'No', key: 'no', width: 6 },
+          { header: 'Waktu', key: 'time', width: 20 },
+          { header: 'Nama Petugas', key: 'staff', width: 18 },
+          { header: 'Lokasi HUB', key: 'hub', width: 18 },
+          { header: 'Nomor AWB', key: 'awb', width: 22 },
+          { header: 'Jenis Masalah', key: 'type', width: 20 },
+          { header: 'Keterangan', key: 'detail', width: 30 },
+          { header: 'Foto Bukti', key: 'photos', width: 35 }
         ];
 
-        worksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFF' } };
-        worksheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '16B887' } };
-
         for (let i = 0; i < helpReports.length; i++) {
-          const r = helpReports[i];
-          const rowIndex = i + 2;
+          const rep = helpReports[i];
+          const rowNum = i + 2;
 
           const row = worksheet.addRow({
-            id: r.id,
-            createdAt: new Date(r.createdAt).toLocaleString('id-ID'),
-            staff: r.staff || '-',
-            hub: r.hub || '-',
-            awb: r.awb || '-',
-            type: r.type || '-',
-            detail: r.detail || '-'
+            no: i + 1,
+            time: new Date(rep.timestamp).toLocaleString('id-ID'),
+            staff: rep.staff || '-',
+            hub: rep.hub || '-',
+            awb: rep.awb || '-',
+            type: rep.type || '-',
+            detail: rep.detail || '-',
+            photos: ''
           });
-          row.height = 70;
 
-          if (r.photos && r.photos.length > 0) {
-            for (let pIdx = 0; pIdx < r.photos.length; pIdx++) {
+          row.height = rep.photos && rep.photos.length ? 90 : 30;
+
+          if (rep.photos && rep.photos.length) {
+            for (let pIdx = 0; pIdx < rep.photos.length; pIdx++) {
               try {
-                const imgId = workbook.addImage({
-                  base64: r.photos[pIdx].data,
+                const imageId = workbook.addImage({
+                  base64: rep.photos[pIdx],
                   extension: 'jpeg'
                 });
-                worksheet.addImage(imgId, {
-                  tl: { col: 7 + (pIdx * 0.4), row: rowIndex - 1 },
-                  ext: { width: 65, height: 65 }
+
+                worksheet.addImage(imageId, {
+                  tl: { col: 7 + (pIdx * 0.4), row: rowNum - 1 + 0.1 },
+                  ext: { width: 75, height: 75 }
                 });
-              } catch (err) {}
+              } catch (e) {}
             }
           }
         }
@@ -1693,51 +1696,50 @@
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `Helpdesk_Laporan_${new Date().toISOString().slice(0, 10)}.xlsx`;
+        a.download = `Laporan_Helpdesk_${new Date().toISOString().slice(0,10)}.xlsx`;
+        document.body.appendChild(a);
         a.click();
+        document.body.removeChild(a);
         URL.revokeObjectURL(url);
 
-        toast('✅ Excel berhasil diunduh!');
+        toast('✅ Unduhan Excel Selesai!');
         setTimeout(showResetConfirm, 500);
-      } catch (e) {
-        toast('Gagal mengekspor Excel: ' + e.message);
+      } catch (err) {
+        console.error(err);
+        toast('Gagal membuat file Excel.');
       }
     }
 
     async function clearHelpdeskData() {
       hideResetConfirm();
       try {
-        if (!helpDb) await openHelpDb();
+        await openHelpDb();
         const tx = helpDb.transaction('reports', 'readwrite');
         const store = tx.objectStore('reports');
-        await new Promise((res, rej) => {
-          const req = store.clear();
-          req.onsuccess = res;
-          req.onerror = rej;
-        });
-
-        helpReports = [];
-        renderHelp();
-        toast('🗑 Riwayat laporan berhasil direset!');
+        store.clear();
+        tx.oncomplete = () => {
+          toast('🗑 Riwayat Helpdesk berhasil dibersihkan.');
+          loadHelpReports();
+        };
       } catch (e) {
-        toast('Gagal menghapus riwayat: ' + e.message);
+        toast('Gagal membersihkan riwayat.');
       }
     }
 
     // Event Listener Binding
     window.addEventListener('DOMContentLoaded', () => {
       loadHelpReports();
-      renderPreAlert();
 
-      // Pre-alert trip tab switching
-      document.querySelectorAll('.trip-tab').forEach(tab => {
-        tab.addEventListener('click', (e) => {
-          document.querySelectorAll('.trip-tab').forEach(t => t.classList.remove('active'));
-          e.target.classList.add('active');
-          currentTrip = e.target.dataset.trip;
+      // Inisialisasi Tanggal
+      if ($('preDate')) {
+        $('preDate').value = currentDateKey;
+        $('preDate').addEventListener('change', (e) => {
+          currentDateKey = e.target.value;
           renderPreAlert();
         });
-      });
+      }
+
+      renderPreAlert();
 
       // Staging / Pre-Alert handlers
       $('btnQuickAddStaging')?.addEventListener('click', () => {
@@ -1753,37 +1755,79 @@
       $('btnPreCam')?.addEventListener('click', togglePreCam);
 
       $('btnClearPre')?.addEventListener('click', () => {
-        if (confirm(`Apakah Anda yakin ingin menghapus seluruh data Bagseal di ${currentTrip}?`)) {
-          preAlertData[currentTrip] = [];
-          localStorage.setItem('prealert_data', JSON.stringify(preAlertData));
+        if (confirm(`Apakah Anda yakin ingin menghapus seluruh data Bagseal untuk tanggal ${currentDateKey}?`)) {
+          preAlertData[currentDateKey] = [];
+          localStorage.setItem('prealert_data_v2', JSON.stringify(preAlertData));
           renderPreAlert();
-          toast(`Data ${currentTrip} telah dihapus.`);
+          toast(`Data tanggal ${currentDateKey} telah dihapus.`);
         }
       });
 
-      $('btnExportPre')?.addEventListener('click', () => {
-        const list = preAlertData[currentTrip] || [];
+      const handlePreExport = () => {
+        const list = preAlertData[currentDateKey] || [];
         if (!list.length) {
-          toast('Tidak ada data untuk diunduh pada trip ini!');
+          toast('Tidak ada data untuk diunduh pada tanggal ini!');
           return;
         }
 
-        const exportData = list.map(item => ({
-          'Trip': currentTrip,
-          'Tujuan / Staging HUB': item.staging,
-          'No. Bagseal': item.bagseal,
-          'QTY (Pcs)': item.total,
-          'Berat (Kg)': item.weight || 0,
-          'Kategori': item.category,
-          'Catatan': item.notes || '-'
-        }));
+        const dateVal = $('preDate').value || currentDateKey;
+        const formattedDate = new Date(dateVal).toLocaleDateString('id-ID', { day: '2-digit', month: 'LONG', year: 'NUMERIC' }).toUpperCase();
+        const batchVal = ($('preBatch').value || 'BATCH 1').toUpperCase();
+        const picVal = ($('prePic').value || '-').toUpperCase();
+        const vendorVal = ($('preVendor').value || '-').toUpperCase();
+        const receiverVal = ($('preReceiver').value || '-').toUpperCase();
 
-        const ws = XLSX.utils.json_to_sheet(exportData);
+        // Format Excel khusus Pre-Alert CSC HLM
+        const exportData = [];
+        
+        // Header Banner & Info Meta
+        exportData.push(['PRE-ALERT CSC HLM ' + formattedDate + '_' + picVal + ' ' + batchVal]);
+        exportData.push(['TANGGAL:', formattedDate]);
+        exportData.push(['BATCH:', batchVal]);
+        exportData.push(['PIC PENGIRIM (PEMBUAT):', picVal]);
+        exportData.push(['VENDOR:', vendorVal]);
+        exportData.push(['PENERIMA:', receiverVal]);
+        exportData.push([]); // Empty row space
+
+        // Column Headers
+        exportData.push(['NO', 'STAGING / HUB TUJUAN', 'NO BAGSEAL', 'QTY (PCS)', 'BERAT (KG)', 'KATEGORI', 'CATATAN']);
+
+        // Data Rows
+        list.forEach((item, idx) => {
+          exportData.push([
+            idx + 1,
+            item.staging || '-',
+            item.bagseal || '-',
+            item.total || 0,
+            item.weight || 0,
+            item.category || 'Reg',
+            item.notes || '-'
+          ]);
+        });
+
+        const ws = XLSX.utils.aoa_to_sheet(exportData);
+
+        // Styling Lebar Kolom
+        ws['!cols'] = [
+          { wch: 6 },
+          { wch: 25 },
+          { wch: 22 },
+          { wch: 12 },
+          { wch: 14 },
+          { wch: 20 },
+          { wch: 25 }
+        ];
+
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, currentTrip);
-        XLSX.getFileUrl ? XLSX.writeFile(wb, `PreAlert_${currentTrip.replace(' ', '_')}_${new Date().toISOString().slice(0,10)}.xlsx`) : XLSX.writeFile(wb, `PreAlert_${currentTrip.replace(' ', '_')}.xlsx`);
-        toast('✅ Data Staging berhasil diunduh!');
-      });
+        XLSX.utils.book_append_sheet(wb, ws, 'Pre-Alert');
+        
+        const filename = `Pre-Alert CSC HLM ${formattedDate}_${picVal} ${batchVal}.xlsx`;
+        XLSX.writeFile(wb, filename);
+        toast('✅ Data Pre-Alert CSC HLM berhasil diunduh!');
+      };
+
+      $('btnExportPre')?.addEventListener('click', handlePreExport);
+      $('btnExportPreTop')?.addEventListener('click', handlePreExport);
 
       // Helpdesk handlers
       $('btnHelpCam')?.addEventListener('click', toggleHelpCam);
@@ -1797,24 +1841,6 @@
       $('btnKeepHelpHistory')?.addEventListener('click', hideResetConfirm);
       $('btnResetHelpHistory')?.addEventListener('click', clearHelpdeskData);
     });
-
-    // Inline row editing helper functions
-    window.updatePreItem = function(index, field, value) {
-      if (preAlertData[currentTrip] && preAlertData[currentTrip][index]) {
-        preAlertData[currentTrip][index][field] = field === 'total' || field === 'weight' ? Number(value) : value;
-        localStorage.setItem('prealert_data', JSON.stringify(preAlertData));
-        renderPreAlert();
-      }
-    };
-
-    window.deletePreItem = function(index) {
-      if (preAlertData[currentTrip] && preAlertData[currentTrip][index]) {
-        preAlertData[currentTrip].splice(index, 1);
-        localStorage.setItem('prealert_data', JSON.stringify(preAlertData));
-        renderPreAlert();
-        toast('Bagseal dihapus.');
-      }
-    };
   </script>
 </body>
 </html>
