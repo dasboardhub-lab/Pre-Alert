@@ -1787,49 +1787,114 @@
           const vendorVal = ($('preVendor')?.value || '-').toUpperCase();
           const receiverVal = ($('preReceiver')?.value || '-').toUpperCase();
 
-          // Format Excel khusus Pre-Alert CSC HLM
+          // Membangun array data sesuai format Pre-Alert CSC HLM
           const exportData = [];
           
-          // Header Banner & Info Meta
-          exportData.push(['PRE-ALERT CSC HLM ' + formattedDate + '_' + picVal + ' ' + batchVal]);
-          exportData.push(['TANGGAL:', formattedDate]);
-          exportData.push(['BATCH:', batchVal]);
-          exportData.push(['PIC PENGIRIM (PEMBUAT):', picVal]);
-          exportData.push(['VENDOR:', vendorVal]);
-          exportData.push(['PENERIMA:', receiverVal]);
-          exportData.push([]); // Row kosong
+          // Header Metadata Dokumen
+          exportData.push(['PRE-ALERT CSC HLM']);
+          exportData.push(['TANGGAL', ':', formattedDate]);
+          exportData.push(['BATCH', ':', batchVal]);
+          exportData.push(['PIC PENGIRIM', ':', picVal]);
+          exportData.push(['VENDOR', ':', vendorVal]);
+          exportData.push(['PENERIMA', ':', receiverVal]);
+          exportData.push([]); // Baris kosong pemisah
 
-          // Column Headers
+          // Header Kolom Tabel Utama
+          const tableHeaderRowIndex = exportData.length;
           exportData.push(['NO', 'STAGING / HUB TUJUAN', 'NO BAGSEAL', 'QTY (PCS)', 'BERAT (KG)', 'KATEGORI', 'CATATAN']);
 
-          // Data Rows
-          list.forEach((item, idx) => {
-            exportData.push([
-              idx + 1,
-              item.staging || '-',
-              item.bagseal || '-',
-              Number(item.total) || 0,
-              Number(item.weight) || 0,
-              item.category || 'Reg',
-              item.notes || '-'
-            ]);
+          // Pengelompokan Data per Destinasi / HUB Tujuan untuk Sub Total
+          const groupedData = {};
+          list.forEach(item => {
+            const hub = (item.staging || 'TIDAK ADA TUJUAN HUB').toUpperCase();
+            if (!groupedData[hub]) groupedData[hub] = [];
+            groupedData[hub].push(item);
           });
+
+          let globalNo = 1;
+          let grandTotalQty = 0;
+          let grandTotalWeight = 0;
+
+          // Iterasi Per Destinasi dengan Sub Total
+          Object.keys(groupedData).forEach(hubName => {
+            const items = groupedData[hubName];
+            let subQty = 0;
+            let subWeight = 0;
+
+            items.forEach(item => {
+              const qty = Number(item.total) || 0;
+              const weight = Number(item.weight) || 0;
+              subQty += qty;
+              subWeight += weight;
+
+              exportData.push([
+                globalNo++,
+                hubName,
+                item.bagseal || '-',
+                qty,
+                weight,
+                item.category || 'Reg',
+                item.notes || '-'
+              ]);
+            });
+
+            grandTotalQty += subQty;
+            grandTotalWeight += subWeight;
+
+            // Baris Sub Total per Destinasi / HUB
+            exportData.push([
+              `SUBTOTAL (${hubName})`,
+              '',
+              `${items.length} BAGSEAL`,
+              subQty,
+              Number(subWeight.toFixed(2)),
+              '',
+              ''
+            ]);
+
+            // Baris kosong pemisah antar destinasi
+            exportData.push([]);
+          });
+
+          // Baris Ringkasan Grand Total Utama
+          exportData.push([
+            'GRAND TOTAL',
+            '',
+            `${list.length} BAGSEAL`,
+            grandTotalQty,
+            Number(grandTotalWeight.toFixed(2)),
+            '',
+            ''
+          ]);
 
           const ws = XLSX.utils.aoa_to_sheet(exportData);
 
-          // Styling Lebar Kolom
+          // Pengaturan Lebar Kolom Presisi
           ws['!cols'] = [
-            { wch: 6 },
-            { wch: 25 },
-            { wch: 22 },
-            { wch: 12 },
-            { wch: 14 },
-            { wch: 20 },
-            { wch: 25 }
+            { wch: 22 },  // NO / SUBTOTAL / GRAND TOTAL
+            { wch: 26 },  // HUB TUJUAN
+            { wch: 24 },  // NO BAGSEAL
+            { wch: 14 },  // QTY (PCS)
+            { wch: 14 },  // BERAT (KG)
+            { wch: 20 },  // KATEGORI
+            { wch: 30 }   // CATATAN
           ];
 
+          // Penggabungan Cell (Merge) untuk Header Banner & Text Total
+          ws['!merges'] = [
+            { s: { r: 0, c: 0 }, e: { r: 0, c: 6 } } // Merge Judul Utama
+          ];
+
+          // Menambahkan merge cell untuk setiap baris Sub Total & Grand Total
+          exportData.forEach((row, idx) => {
+            if (row[0] && (String(row[0]).startsWith('SUBTOTAL') || String(row[0]) === 'GRAND TOTAL')) {
+              if (!ws['!merges']) ws['!merges'] = [];
+              ws['!merges'].push({ s: { r: idx, c: 0 }, e: { r: idx, c: 1 } });
+            }
+          });
+
           const wb = XLSX.utils.book_new();
-          XLSX.utils.book_append_sheet(wb, ws, 'Pre-Alert');
+          XLSX.utils.book_append_sheet(wb, ws, 'Pre-Alert CSC HLM');
           
           const filename = `Pre-Alert CSC HLM ${formattedDate}_${picVal} ${batchVal}.xlsx`;
           XLSX.writeFile(wb, filename);
@@ -1841,18 +1906,18 @@
       };
 
       const btnExportPre = $('btnExportPre');
-      const btnExportPreTop = $('btnExportPreTop');
-
       if (btnExportPre) btnExportPre.onclick = handlePreExport;
+
+      const btnExportPreTop = $('btnExportPreTop');
       if (btnExportPreTop) btnExportPreTop.onclick = handlePreExport;
 
-      // Helpdesk handlers
+      // Helpdesk Event Listeners
       $('btnHelpCam')?.addEventListener('click', toggleHelpCam);
       $('btnHelpSnap')?.addEventListener('click', captureHelpPhoto);
       $('helpSave')?.addEventListener('click', saveHelp);
       $('btnExportHelp')?.addEventListener('click', showDownloadConfirm);
 
-      // Confirm dialog handlers
+      // Modal Dialog Action Listeners
       $('btnCancelDownloadHelp')?.addEventListener('click', hideDownloadConfirm);
       $('btnConfirmDownloadHelp')?.addEventListener('click', processExportHelpdesk);
       $('btnKeepHelpHistory')?.addEventListener('click', hideResetConfirm);
