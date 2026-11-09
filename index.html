@@ -1116,9 +1116,7 @@
           </div>
           <div class="help-actions">
             <button class="btn primary" id="btnHelpCam">▶ Kamera Scan AWB</button>
-            <button class="btn" id="btnHelpSnap">📷 Ambil Foto Bukti</button>
           </div>
-          <div class="photo-strip" id="helpPhotoStrip"></div>
         </div>
 
         <div class="help-card">
@@ -1565,7 +1563,8 @@
         id: Date.now() + Math.random().toString(36).substr(2, 5),
         awb: awbCode,
         problemType: 'AWB Hilang',
-        notes: ''
+        notes: '',
+        photo: null // 1 Foto per Resi/AWB
       });
 
       renderHelpAwbList();
@@ -1603,9 +1602,46 @@
             <label style="color:var(--muted); font-size:10px; font-weight:900; display:block; margin-bottom:4px;">KETERANGAN (OPTIONAL)</label>
             <input class="help-input" style="padding:7px 10px; font-size:12px;" value="${safe(item.notes)}" onchange="updateAwbNotes('${item.id}', this.value)" placeholder="Tambah keterangan detail...">
           </div>
+
+          <!-- Foto Khusus Untuk 1 Resi ini -->
+          <div style="margin-top:10px; padding-top:8px; border-top:1px dashed var(--line); display:flex; align-items:center; gap:10px;">
+            ${item.photo ? `
+              <img src="${item.photo}" style="width:64px; height:64px; object-fit:cover; border-radius:8px; border:1px solid var(--amber);">
+              <div style="flex:1;">
+                <span style="color:var(--green); font-size:11px; font-weight:800; display:block;">✓ Foto Resi Tersedia</span>
+                <button onclick="takePhotoForAwb('${item.id}')" style="background:#252c34; border:none; color:white; padding:4px 8px; border-radius:6px; font-size:10px; margin-top:4px; cursor:pointer;">📷 Foto Ulang</button>
+              </div>
+            ` : `
+              <button class="btn primary" onclick="takePhotoForAwb('${item.id}')" style="min-height:36px; padding:6px 12px; font-size:11px; font-weight:800;">📷 Ambil Foto Resi Ini</button>
+              <span style="color:var(--muted); font-size:11px;">Belum ada foto</span>
+            `}
+          </div>
         </div>
       `).join('');
     }
+
+    window.takePhotoForAwb = function(id) {
+      const video = $('helpWebcam');
+      if (!streamHelp || video.paused) {
+        toast('Nyalakan Kamera AWB terlebih dahulu!');
+        return;
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth || 640;
+      canvas.height = video.videoHeight || 480;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      const photoData = canvas.toDataURL('image/jpeg', 0.7);
+      
+      const target = currentBagshieldAwbs.find(x => x.id === id);
+      if (target) {
+        target.photo = photoData;
+        renderHelpAwbList();
+        toast('📷 Foto berhasil dihubungkan ke AWB!');
+      }
+    };
 
     window.selectAwbProblem = function(id, problem) {
       const target = currentBagshieldAwbs.find(x => x.id === id);
@@ -1683,17 +1719,14 @@
           ${r.awbList && r.awbList.length > 0 ? `
             <div style="margin-top:6px;">
               ${r.awbList.map(a => `
-                <div class="help-report-detail" style="margin-bottom:6px;">
-                  <strong style="color:var(--amber);">AWB: ${safe(a.awb)}</strong> | <span class="help-badge">${safe(a.problemType)}</span>
-                  ${a.notes ? `<div style="font-size:11px; margin-top:3px; color:var(--muted);">${safe(a.notes)}</div>` : ''}
+                <div class="help-report-detail" style="margin-bottom:6px; display:flex; justify-content:space-between; align-items:center;">
+                  <div>
+                    <strong style="color:var(--amber);">AWB: ${safe(a.awb)}</strong> | <span class="help-badge">${safe(a.problemType)}</span>
+                    ${a.notes ? `<div style="font-size:11px; margin-top:3px; color:var(--muted);">${safe(a.notes)}</div>` : ''}
+                  </div>
+                  ${a.photo ? `<img src="${a.photo}" style="width:48px; height:48px; object-fit:cover; border-radius:6px; border:1px solid var(--amber);">` : ''}
                 </div>
               `).join('')}
-            </div>
-          ` : ''}
-
-          ${r.photos && r.photos.length > 0 ? `
-            <div class="help-report-photos">
-              ${r.photos.map(p => `<img src="${p}">`).join('')}
             </div>
           ` : ''}
         </div>
@@ -1722,7 +1755,6 @@
         hub: hub,
         bagshield: bagshield,
         awbList: currentBagshieldAwbs,
-        photos: helpPhotos,
         createdAt: new Date().toLocaleString('id-ID')
       };
 
@@ -1732,9 +1764,7 @@
 
       tx.oncomplete = () => {
         toast('✅ Laporan Bagshield Berhasil Disimpan!');
-        helpPhotos = [];
         currentBagshieldAwbs = [];
-        $('helpPhotoStrip').innerHTML = '';
         renderHelpAwbList();
         loadHelpReports();
 
@@ -1806,29 +1836,6 @@
         if (code) addAwbToList(code.trim());
       });
 
-      $('btnHelpSnap')?.addEventListener('click', () => {
-        const video = $('helpWebcam');
-        if (!streamHelp || video.paused) {
-          toast('Buka kamera terlebih dahulu untuk ambil foto!');
-          return;
-        }
-
-        const canvas = document.createElement('canvas');
-        canvas.width = video.videoWidth || 640;
-        canvas.height = video.videoHeight || 480;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-        const photoData = canvas.toDataURL('image/jpeg', 0.7);
-        helpPhotos.push(photoData);
-
-        const img = document.createElement('img');
-        img.src = photoData;
-        img.className = 'photo-thumb';
-        $('helpPhotoStrip').appendChild(img);
-        toast('📷 Foto Bukti Diambil');
-      });
-
       $('helpSave')?.addEventListener('click', saveHelpdeskReport);
 
       // Export Pre-Alert Excel
@@ -1894,7 +1901,8 @@
           { header: 'No Bagshield', key: 'bagshield', width: 22 },
           { header: 'No AWB', key: 'awb', width: 22 },
           { header: 'Jenis Masalah', key: 'problemType', width: 20 },
-          { header: 'Keterangan', key: 'notes', width: 30 }
+          { header: 'Keterangan', key: 'notes', width: 30 },
+          { header: 'Status Foto', key: 'photoStatus', width: 18 }
         ];
 
         helpReports.forEach(r => {
@@ -1907,7 +1915,8 @@
                 bagshield: r.bagshield,
                 awb: a.awb,
                 problemType: a.problemType,
-                notes: a.notes || '-'
+                notes: a.notes || '-',
+                photoStatus: a.photo ? 'Ada Foto' : 'Tanpa Foto'
               });
             });
           }
