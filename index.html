@@ -1261,13 +1261,14 @@
               </div>
               <div style="font-size:12px; color:var(--muted); font-weight:800;">
                 <span style="color:var(--text); margin-right:8px;">${items.length} Bagseal</span>
-                <span style="color:var(--amber); margin-right:8px;">${grpParcels} Pcs</span>
-                <span style="color:var(--green);">${grpWeight.toFixed(1)} Kg</span>
+                <span style="color:var(--green); margin-right:8px;">${grpWeight.toFixed(1)} Kg</span>
+                <span style="color:var(--amber);">${grpParcels} Pcs</span>
               </div>
+            </div>
             <div class="pre-colhead" style="grid-template-columns: 1.1fr .5fr .5fr .9fr .9fr .9fr 35px;">
               <span>NO BAGSEAL</span>
-              <span>QTY</span>
               <span>BERAT (KG)</span>
+              <span>QTY (PCS)</span>
               <span>KATEGORI</span>
               <span>CATATAN</span>
               <span>PENERIMA</span>
@@ -1277,8 +1278,8 @@
             ${items.map(item => `
               <div class="pre-row" style="grid-template-columns: 1.1fr .5fr .5fr .9fr .9fr .9fr 35px;">
                 <input value="${safe(item.bagseal)}" onchange="updatePreItem(${item.originalIndex}, 'bagseal', this.value)" placeholder="No. Bagseal">
+                <input type="number" step="0.1" value="${item.weight !== undefined && item.weight !== null ? item.weight : ''}" onchange="updatePreItem(${item.originalIndex}, 'weight', this.value)" placeholder="0.0">
                 <input type="number" value="${item.total}" onchange="updatePreItem(${item.originalIndex}, 'total', this.value)" placeholder="0">
-                <input type="number" step="0.1" value="${item.weight || ''}" onchange="updatePreItem(${item.originalIndex}, 'weight', this.value)" placeholder="0.0">
                 <select onchange="updatePreItem(${item.originalIndex}, 'category', this.value)" style="min-width:0; width:100%; background:#12171b; border:1px solid #343e49; border-radius:8px; color:white; padding:9px 5px; font:600 11px system-ui, sans-serif;">
                   <option value="Reg" ${item.category === 'Reg' ? 'selected' : ''}>Reg</option>
                   <option value="HV/Dok/Al-Qur'an" ${item.category === "HV/Dok/Al-Qur'an" ? 'selected' : ''}>HV/Dok/Al-Qur'an</option>
@@ -1799,8 +1800,8 @@
           exportData.push(['VENDOR', ':', vendorVal]);
           exportData.push([]); // Baris kosong pemisah
 
-          // Header Kolom Tabel Utama (Penerima di bagian belakang)
-          exportData.push(['NO', 'STAGING / HUB TUJUAN', 'NO BAGSEAL', 'QTY (PCS)', 'BERAT (KG)', 'KATEGORI', 'CATATAN', 'PENERIMA']);
+          // Header Kolom Tabel Utama (Berat sebelum QTY, Penerima di bagian belakang)
+          exportData.push(['NO', 'STAGING / HUB TUJUAN', 'NO BAGSEAL', 'BERAT (KG)', 'QTY (PCS)', 'KATEGORI', 'CATATAN', 'PENERIMA']);
 
           // Pengelompokan Data per Destinasi / HUB Tujuan untuk Sub Total
           const groupedData = {};
@@ -1833,8 +1834,8 @@
                 globalNo++,
                 hubName,
                 item.bagseal || '-',
-                qty,
                 weight,
+                qty,
                 item.category || 'Reg',
                 item.notes || '-',
                 (item.receiver || hubReceiver).toUpperCase()
@@ -1849,8 +1850,8 @@
               `SUBTOTAL (${hubName})`,
               '',
               `${items.length} BAGSEAL`,
-              subQty,
               Number(subWeight.toFixed(2)),
+              subQty,
               '',
               '',
               hubReceiver.toUpperCase()
@@ -1865,8 +1866,8 @@
             'GRAND TOTAL',
             '',
             `${list.length} BAGSEAL`,
-            grandTotalQty,
             Number(grandTotalWeight.toFixed(2)),
+            grandTotalQty,
             '',
             '',
             ''
@@ -1879,8 +1880,8 @@
             { wch: 22 },  // NO / SUBTOTAL / GRAND TOTAL
             { wch: 24 },  // HUB TUJUAN
             { wch: 24 },  // NO BAGSEAL
-            { wch: 12 },  // QTY (PCS)
             { wch: 12 },  // BERAT (KG)
+            { wch: 12 },  // QTY (PCS)
             { wch: 18 },  // KATEGORI
             { wch: 26 },  // CATATAN
             { wch: 22 }   // PENERIMA (BELAKANG)
