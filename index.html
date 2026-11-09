@@ -1070,6 +1070,24 @@
         </div>
       </div>
 
+      <!-- Kamera Scanner Shared untuk Helpdesk (Bagshield & AWB) -->
+      <div class="help-card help-camera" id="helpCameraCard" style="display:none; border:2px solid var(--amber);">
+        <div class="status">
+          <span class="dot"></span>
+          <span id="helpCamStatus">Kamera Pemindai Off</span>
+        </div>
+        <div class="scan-frame active" id="helpScanFrame">
+          <div class="camera-placeholder">
+            <div class="cam-icon" style="font-size:36px;">📸</div>
+            <p style="margin:4px 0 0;font-size:13px;">Arahkan Kamera ke Barcode</p>
+          </div>
+          <video id="helpWebcam" playsinline autoplay muted></video>
+        </div>
+        <div style="text-align:center; margin-top:10px;">
+          <button class="btn danger" id="btnCloseHelpCam" style="min-height:40px; padding:6px 16px; font-size:12px;">⏹ Tutup Kamera</button>
+        </div>
+      </div>
+
       <!-- Step 1: Data Utama & Scan Bagshield -->
       <section class="help-card" id="helpStep1">
         <div style="font-weight:900; color:var(--amber); font-size:16px; margin-bottom:12px;">STEP 1: Scan / Input Nomor Bagshield</div>
@@ -1086,7 +1104,7 @@
         <label for="helpBagshield">No Bagshield (Pengikat Karung)</label>
         <div style="display:flex; gap:8px;">
           <input class="help-input" id="helpBagshield" placeholder="Scan barcode Bagshield atau ketik manual">
-          <button class="btn primary" id="btnScanBagshieldCam" style="min-height:auto; padding:0 14px; font-size:13px; white-space:nowrap;">📷 Scan Bagshield</button>
+          <button class="btn primary" id="btnScanBagshieldCam" type="button" style="min-height:auto; padding:0 14px; font-size:13px; white-space:nowrap;">📷 Scan Bagshield</button>
         </div>
 
         <button class="btn primary pre-save" id="btnNextToAwb" style="margin-top:16px; font-weight:900; font-size:15px;">➡️ Lanjutkan ke Scan AWB</button>
@@ -1100,22 +1118,8 @@
             <button class="btn" id="btnBackToStep1" style="min-height:auto; padding:5px 10px; font-size:11px; background:#252c34;">⚙ Ubah Bagshield</button>
           </div>
           <div style="font-size:12px; color:var(--muted);">Silakan scan barcode AWB di dalam Bagshield ini. Hasil scan akan langsung masuk ke daftar di bawah.</div>
-        </div>
-
-        <div class="help-card help-camera">
-          <div class="status">
-            <span class="dot"></span>
-            <span id="helpCamStatus">Kamera Pemindai AWB Off</span>
-          </div>
-          <div class="scan-frame" id="helpScanFrame">
-            <div class="camera-placeholder">
-              <div class="cam-icon" style="font-size:36px;">📸</div>
-              <p style="margin:4px 0 0;font-size:13px;">Arahkan Kamera ke Barcode AWB Paket</p>
-            </div>
-            <video id="helpWebcam" playsinline autoplay muted></video>
-          </div>
-          <div class="help-actions">
-            <button class="btn primary" id="btnHelpCam">▶ Kamera Scan AWB</button>
+          <div style="margin-top:10px;">
+            <button class="btn primary" id="btnHelpCam" style="width:100%; min-height:46px; font-size:14px; font-weight:800;">▶ Bukalah Kamera Scan AWB</button>
           </div>
         </div>
 
@@ -1209,6 +1213,7 @@
     let streamPre = null;
     let streamHelp = null;
     let preScanInterval = null;
+    let helpScanInterval = null;
     let lastScannedAwb = '';
     let helpAwbThrottle = null;
 
@@ -1226,6 +1231,46 @@
         osc.start();
         osc.stop(ctx.currentTime + 0.12);
       } catch (e) {}
+    }
+
+    function toast(msg) {
+      const t = $('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2400);
+    }
+
+    // Navigation System
+    window.page = function(p) {
+      activePage = p;
+      document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.desktop-link').forEach(el => el.classList.remove('active'));
+
+      if (p === 'prealert') {
+        $('pagePreAlert').classList.add('active');
+        $('navPreAlert')?.classList.add('active');
+        document.querySelectorAll('.desktop-link')[0]?.classList.add('active');
+      } else if (p === 'helpdesk') {
+        $('pageHelpdesk').classList.add('active');
+        $('navHelpdesk')?.classList.add('active');
+        document.querySelectorAll('.desktop-link')[1]?.classList.add('active');
+      }
+
+      stopAllCameras();
+    };
+
+    function stopAllCameras() {
+      if (preScanInterval) { clearInterval(preScanInterval); preScanInterval = null; }
+      if (helpScanInterval) { clearInterval(helpScanInterval); helpScanInterval = null; }
+      if (streamPre) { streamPre.getTracks().forEach(t => t.stop()); streamPre = null; }
+      if (streamHelp) { streamHelp.getTracks().forEach(t => t.stop()); streamHelp = null; }
+
+      $('preScanFrame')?.classList.remove('active');
+      $('helpCameraCard').style.display = 'none';
+
+      if ($('btnPreCam')) $('btnPreCam').textContent = '▶ Kamera Pre-Alert Scan';
+      if ($('btnHelpCam')) $('btnHelpCam').textContent = '▶ Bukalah Kamera Scan AWB';
     }
 
     function toast(msg) {
@@ -1506,17 +1551,18 @@
 
         const video = $('helpWebcam');
         video.srcObject = streamHelp;
-        video.play();
-        $('helpScanFrame').classList.add('active');
-        if ($('btnHelpCam')) $('btnHelpCam').textContent = '⏹ Hentikan Kamera';
-        $('helpCamStatus').textContent = mode === 'bagshield' ? 'Scan Barcode Bagseal Aktif' : 'Scan Barcode AWB Aktif';
+        await video.play();
+
+        $('helpCameraCard').style.display = 'block';
+        if ($('btnHelpCam') && mode === 'awb') $('btnHelpCam').textContent = '⏹ Hentikan Kamera AWB';
+        $('helpCamStatus').textContent = mode === 'bagshield' ? 'Scan Barcode Bagshield Aktif' : 'Scan Barcode AWB Aktif';
 
         if ('BarcodeDetector' in window) {
           const barcodeDetector = new BarcodeDetector({
             formats: ['code_128', 'code_39', 'code_93', 'ean_13', 'qr_code', 'data_matrix']
           });
 
-          const helpScanInterval = setInterval(async () => {
+          helpScanInterval = setInterval(async () => {
             if (!streamHelp) { clearInterval(helpScanInterval); return; }
             try {
               const barcodes = await barcodeDetector.detect(video);
@@ -1526,7 +1572,7 @@
                 if (helpCamMode === 'bagshield') {
                   $('helpBagshield').value = code;
                   playBeep();
-                  toast('No Bagshield Scanned: ' + code);
+                  toast('✅ No Bagshield: ' + code);
                   stopAllCameras();
                 } else {
                   // Mode Scan AWB langsung ke List
@@ -1804,6 +1850,7 @@
 
       // Helpdesk Event Bindings
       $('btnScanBagshieldCam')?.addEventListener('click', () => toggleHelpCam('bagshield'));
+      $('btnCloseHelpCam')?.addEventListener('click', stopAllCameras);
 
       $('btnNextToAwb')?.addEventListener('click', () => {
         const bagshield = $('helpBagshield').value.trim();
@@ -1818,6 +1865,7 @@
 
         activeBagshieldNo = bagshield;
         $('displayActiveBagshield').textContent = bagshield;
+        stopAllCameras();
         $('helpStep1').style.display = 'none';
         $('helpStep2').style.display = 'block';
         renderHelpAwbList();
