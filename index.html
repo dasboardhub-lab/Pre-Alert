@@ -778,6 +778,38 @@
       margin: 12px 0 5px;
     }
 
+    .problem-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .problem-btn {
+      background: #12171b;
+      border: 1px solid var(--line);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      flex: 1 1 calc(50% - 8px);
+      text-align: center;
+    }
+
+    .problem-btn:hover {
+      background: var(--panel2);
+    }
+
+    .problem-btn.active {
+      background: #332713;
+      border-color: var(--amber);
+      color: #ffd05b;
+      font-weight: 900;
+    }
+
     .help-input,
     .help-select,
     .help-textarea {
@@ -1051,22 +1083,29 @@
 
       <section class="help-card">
         <div style="font-weight:900">Detail Laporan</div>
+        <label for="helpShipDate">Tanggal Pengiriman</label>
+        <input class="help-input" type="date" id="helpShipDate">
+
         <label for="helpStaff">Nama Petugas</label>
         <input class="help-input" id="helpStaff" placeholder="Nama petugas pelapor">
 
         <label for="helpHub">Lokasi HUB / Staging</label>
         <input class="help-input" id="helpHub" placeholder="Contoh: HUB JKT-WEST / HUB MLG">
 
+        <label for="helpBagshield">No Bagshield (Pengikat Karung)</label>
+        <input class="help-input" id="helpBagshield" placeholder="Nomor bagshield pengikat karung">
+
         <label for="helpAwb">Nomor AWB (opsional)</label>
         <input class="help-input" id="helpAwb" placeholder="Otomatis dari barcode atau ketik manual">
 
-        <label for="helpType">Jenis Masalah</label>
-        <select class="help-select" id="helpType">
-          <option>AWB / label hilang</option>
-          <option>Barang bocor</option>
-          <option>Kemasan rusak</option>
-          <option>Lainnya</option>
-        </select>
+        <label>Jenis Masalah</label>
+        <div class="problem-buttons" id="problemBtnGroup">
+          <button type="button" class="problem-btn active" data-value="AWB / label hilang">AWB / label hilang</button>
+          <button type="button" class="problem-btn" data-value="Barang bocor">Barang bocor</button>
+          <button type="button" class="problem-btn" data-value="Kemasan rusak">Kemasan rusak</button>
+          <button type="button" class="problem-btn" data-value="Lainnya">Lainnya</button>
+        </div>
+        <input type="hidden" id="helpType" value="AWB / label hilang">
 
         <label for="helpDetail">Keterangan</label>
         <textarea class="help-textarea" id="helpDetail" placeholder="Jelaskan kondisi paket atau kendala serah terima..."></textarea>
@@ -1479,8 +1518,10 @@
             <span style="font-size:11px; color:var(--muted); font-weight:700;">${new Date(rep.timestamp).toLocaleString('id-ID')}</span>
           </div>
           <div class="help-meta">
+            <span>📅 Tgl Kirim: <strong>${safe(rep.shipDate || '-')}</strong></span>
             <span>👤 Petugas: <strong>${safe(rep.staff || '-')}</strong></span>
             ${rep.hub ? `<span>🏢 HUB: <strong>${safe(rep.hub)}</strong></span>` : ''}
+            ${rep.bagshield ? `<span>🔒 Bagshield: <strong>${safe(rep.bagshield)}</strong></span>` : ''}
           </div>
           <div class="help-report-detail">${safe(rep.detail || 'Tidak ada keterangan.')}</div>
           ${rep.photos && rep.photos.length ? `
@@ -1581,8 +1622,10 @@
     };
 
     async function saveHelp() {
+      const shipDate = $('helpShipDate').value || currentDateKey;
       const staff = $('helpStaff').value.trim();
       const hub = $('helpHub').value.trim();
+      const bagshield = $('helpBagshield').value.trim();
       const awb = $('helpAwb').value.trim();
       const type = $('helpType').value;
       const detail = $('helpDetail').value.trim();
@@ -1593,8 +1636,10 @@
       }
 
       const report = {
+        shipDate,
         staff,
         hub,
+        bagshield,
         awb,
         type,
         detail,
@@ -1610,6 +1655,7 @@
 
         tx.oncomplete = () => {
           toast('✅ Laporan berhasil disimpan!');
+          $('helpBagshield').value = '';
           $('helpAwb').value = '';
           $('helpDetail').value = '';
           helpPhotos = [];
@@ -1651,9 +1697,11 @@
 
         worksheet.columns = [
           { header: 'No', key: 'no', width: 6 },
-          { header: 'Waktu', key: 'time', width: 20 },
+          { header: 'Tgl Pengiriman', key: 'shipDate', width: 16 },
+          { header: 'Waktu Input', key: 'time', width: 20 },
           { header: 'Nama Petugas', key: 'staff', width: 18 },
           { header: 'Lokasi HUB', key: 'hub', width: 18 },
+          { header: 'No Bagshield', key: 'bagshield', width: 20 },
           { header: 'Nomor AWB', key: 'awb', width: 22 },
           { header: 'Jenis Masalah', key: 'type', width: 20 },
           { header: 'Keterangan', key: 'detail', width: 30 },
@@ -1666,9 +1714,11 @@
 
           const row = worksheet.addRow({
             no: i + 1,
+            shipDate: rep.shipDate || '-',
             time: new Date(rep.timestamp).toLocaleString('id-ID'),
             staff: rep.staff || '-',
             hub: rep.hub || '-',
+            bagshield: rep.bagshield || '-',
             awb: rep.awb || '-',
             type: rep.type || '-',
             detail: rep.detail || '-',
@@ -1686,7 +1736,7 @@
                 });
 
                 worksheet.addImage(imageId, {
-                  tl: { col: 7 + (pIdx * 0.4), row: rowNum - 1 + 0.1 },
+                  tl: { col: 9 + (pIdx * 0.4), row: rowNum - 1 + 0.1 },
                   ext: { width: 75, height: 75 }
                 });
               } catch (e) {}
@@ -1741,6 +1791,20 @@
           renderPreAlert();
         });
       }
+
+      if ($('helpShipDate')) {
+        $('helpShipDate').value = currentDateKey;
+      }
+
+      // Handler Tombol Jenis Masalah
+      const problemBtns = document.querySelectorAll('#problemBtnGroup .problem-btn');
+      problemBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          problemBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          $('helpType').value = btn.getAttribute('data-value');
+        });
+      });
 
       renderPreAlert();
 
