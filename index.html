@@ -972,13 +972,13 @@
           <label style="color:var(--amber); font-weight:900; font-size:12px; display:block; margin-bottom:6px;">
             🎯 TARGET TUJUAN / HUB SAAT INI (HASIL SCAN KAMERA AKAN MASUK KE SINI)
           </label>
-          <div style="display:flex; gap:8px; margin-bottom:8px;">
+          <div style="display:flex; gap:8px; margin-bottom:4px;">
             <input id="preStaging" placeholder="Ketik atau pilih HUB (cth: HUB JKT-WEST)" style="flex:1; font-weight:800; font-size:15px; color:#ffd05b; background:#1b2026; border:1px solid var(--amber); border-radius:10px; padding:12px 10px;">
             <button class="btn primary" id="btnQuickAddStaging" style="min-height: auto; padding: 0 16px; font-size: 13px; font-weight:800;">＋ Target HUB Baru</button>
           </div>
-          <div>
-            <label style="color:var(--muted); font-size:11px; font-weight:900; display:block; margin-bottom:4px;">PENERIMA (OPTIONAL)</label>
-            <input id="preReceiver" placeholder="Nama / Kontak Penerima di Tujuan" style="width:100%; background:#1b2026; border:1px solid var(--line); border-radius:10px; color:white; padding:9px 10px; font-size:13px; font-weight:600;">
+          <div style="margin-top:6px;">
+            <label style="color:var(--muted); font-size:11px; font-weight:900; display:block; margin-bottom:4px;">PENERIMA UNTUK TARGET HUB INI (OPTIONAL)</label>
+            <input id="preReceiver" placeholder="Nama / Kontak Penerima di Tujuan HUB ini" style="width:100%; background:#1b2026; border:1px solid var(--line); border-radius:10px; color:white; padding:9px 10px; font-size:13px; font-weight:600;">
           </div>
         </div>
       </div>
@@ -1264,19 +1264,18 @@
                 <span style="color:var(--amber); margin-right:8px;">${grpParcels} Pcs</span>
                 <span style="color:var(--green);">${grpWeight.toFixed(1)} Kg</span>
               </div>
-            </div>
-
-            <div class="pre-colhead" style="grid-template-columns: 1.2fr .6fr .6fr 1fr 1fr 40px;">
+            <div class="pre-colhead" style="grid-template-columns: 1.1fr .5fr .5fr .9fr .9fr .9fr 35px;">
               <span>NO BAGSEAL</span>
               <span>QTY</span>
               <span>BERAT (KG)</span>
               <span>KATEGORI</span>
               <span>CATATAN</span>
+              <span>PENERIMA</span>
               <span></span>
             </div>
 
             ${items.map(item => `
-              <div class="pre-row" style="grid-template-columns: 1.2fr .6fr .6fr 1fr 1fr 40px;">
+              <div class="pre-row" style="grid-template-columns: 1.1fr .5fr .5fr .9fr .9fr .9fr 35px;">
                 <input value="${safe(item.bagseal)}" onchange="updatePreItem(${item.originalIndex}, 'bagseal', this.value)" placeholder="No. Bagseal">
                 <input type="number" value="${item.total}" onchange="updatePreItem(${item.originalIndex}, 'total', this.value)" placeholder="0">
                 <input type="number" step="0.1" value="${item.weight || ''}" onchange="updatePreItem(${item.originalIndex}, 'weight', this.value)" placeholder="0.0">
@@ -1287,6 +1286,7 @@
                   <option value="BP" ${item.category === 'BP' ? 'selected' : ''}>BP</option>
                 </select>
                 <input value="${safe(item.notes)}" onchange="updatePreItem(${item.originalIndex}, 'notes', this.value)" placeholder="Catatan">
+                <input value="${safe(item.receiver || '')}" onchange="updatePreItem(${item.originalIndex}, 'receiver', this.value)" placeholder="Penerima">
                 <button onclick="deletePreItem(${item.originalIndex})" style="background:none; border:none; color:var(--red); cursor:pointer; font-weight:bold; font-size:16px;">✕</button>
               </div>
             `).join('')}
@@ -1306,6 +1306,7 @@
     // Auto Insert Bagseal from Camera Scan
     function addScannedBagseal(bagsealCode) {
       const staging = $('preStaging').value.trim();
+      const receiver = $('preReceiver').value.trim();
       if (!staging) {
         toast('PILIH/INPUT TUJUAN HUB DAHULU SEBELUM SCAN!');
         return;
@@ -1336,7 +1337,8 @@
         total: 1,
         weight: 0,
         category: 'Reg',
-        notes: '-'
+        notes: '-',
+        receiver: receiver || '-'
       });
 
       localStorage.setItem('prealert_data_v2', JSON.stringify(preAlertData));
@@ -1785,7 +1787,6 @@
           const batchVal = ($('preBatch')?.value || 'BATCH 1').toUpperCase();
           const picVal = ($('prePic')?.value || '-').toUpperCase();
           const vendorVal = ($('preVendor')?.value || '-').toUpperCase();
-          const receiverVal = ($('preReceiver')?.value || '-').toUpperCase();
 
           // Membangun array data sesuai format Pre-Alert CSC HLM
           const exportData = [];
@@ -1796,12 +1797,10 @@
           exportData.push(['BATCH', ':', batchVal]);
           exportData.push(['PIC PENGIRIM', ':', picVal]);
           exportData.push(['VENDOR', ':', vendorVal]);
-          exportData.push(['PENERIMA', ':', receiverVal]);
           exportData.push([]); // Baris kosong pemisah
 
-          // Header Kolom Tabel Utama
-          const tableHeaderRowIndex = exportData.length;
-          exportData.push(['NO', 'STAGING / HUB TUJUAN', 'NO BAGSEAL', 'QTY (PCS)', 'BERAT (KG)', 'KATEGORI', 'CATATAN']);
+          // Header Kolom Tabel Utama (Penerima di bagian belakang)
+          exportData.push(['NO', 'STAGING / HUB TUJUAN', 'NO BAGSEAL', 'QTY (PCS)', 'BERAT (KG)', 'KATEGORI', 'CATATAN', 'PENERIMA']);
 
           // Pengelompokan Data per Destinasi / HUB Tujuan untuk Sub Total
           const groupedData = {};
@@ -1815,11 +1814,14 @@
           let grandTotalQty = 0;
           let grandTotalWeight = 0;
 
-          // Iterasi Per Destinasi dengan Sub Total
+          // Iterasi Per Destinasi dengan Sub Total & Penerima
           Object.keys(groupedData).forEach(hubName => {
             const items = groupedData[hubName];
             let subQty = 0;
             let subWeight = 0;
+
+            // Mengambil penerima destinasi dari item pertama yang ada
+            const hubReceiver = items.find(x => x.receiver && x.receiver !== '-')?.receiver || items[0]?.receiver || '-';
 
             items.forEach(item => {
               const qty = Number(item.total) || 0;
@@ -1834,14 +1836,15 @@
                 qty,
                 weight,
                 item.category || 'Reg',
-                item.notes || '-'
+                item.notes || '-',
+                (item.receiver || hubReceiver).toUpperCase()
               ]);
             });
 
             grandTotalQty += subQty;
             grandTotalWeight += subWeight;
 
-            // Baris Sub Total per Destinasi / HUB
+            // Baris Sub Total per Destinasi / HUB (Penerima di paling kanan)
             exportData.push([
               `SUBTOTAL (${hubName})`,
               '',
@@ -1849,7 +1852,8 @@
               subQty,
               Number(subWeight.toFixed(2)),
               '',
-              ''
+              '',
+              hubReceiver.toUpperCase()
             ]);
 
             // Baris kosong pemisah antar destinasi
@@ -1864,6 +1868,7 @@
             grandTotalQty,
             Number(grandTotalWeight.toFixed(2)),
             '',
+            '',
             ''
           ]);
 
@@ -1872,17 +1877,18 @@
           // Pengaturan Lebar Kolom Presisi
           ws['!cols'] = [
             { wch: 22 },  // NO / SUBTOTAL / GRAND TOTAL
-            { wch: 26 },  // HUB TUJUAN
+            { wch: 24 },  // HUB TUJUAN
             { wch: 24 },  // NO BAGSEAL
-            { wch: 14 },  // QTY (PCS)
-            { wch: 14 },  // BERAT (KG)
-            { wch: 20 },  // KATEGORI
-            { wch: 30 }   // CATATAN
+            { wch: 12 },  // QTY (PCS)
+            { wch: 12 },  // BERAT (KG)
+            { wch: 18 },  // KATEGORI
+            { wch: 26 },  // CATATAN
+            { wch: 22 }   // PENERIMA (BELAKANG)
           ];
 
           // Penggabungan Cell (Merge) untuk Header Banner & Text Total
           ws['!merges'] = [
-            { s: { r: 0, c: 0 }, e: { r: 0, c: 6 } } // Merge Judul Utama
+            { s: { r: 0, c: 0 }, e: { r: 0, c: 7 } } // Merge Judul Utama
           ];
 
           // Menambahkan merge cell untuk setiap baris Sub Total & Grand Total
