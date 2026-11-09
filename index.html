@@ -1,0 +1,1502 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#111518">
+  <meta name="description" content="Aplikasi pemindai dan pencatat AWB Anteraja.">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="ScanParcel Pro">
+  <title>ScanParcel Pro | Anteraja</title>
+  
+  <!-- External Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #111518;
+      --panel: #1b2026;
+      --panel2: #252c34;
+      --line: #303943;
+      --text: #f3f5f8;
+      --muted: #929eae;
+      --amber: #ffa500;
+      --green: #16b887;
+      --red: #f05b62;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 16px/1.45 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    .app {
+      max-width: 720px;
+      min-height: 100dvh;
+      margin: auto;
+      padding: 26px 18px 112px;
+    }
+
+    /* Desktop Navigation Styling */
+    .desktop-nav {
+      display: none;
+    }
+
+    @media(min-width: 650px) {
+      .desktop-nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #1b2026;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 12px 24px;
+        margin-bottom: 24px;
+      }
+
+      .desktop-brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 900;
+        font-size: 18px;
+        color: var(--amber);
+        letter-spacing: 1px;
+      }
+
+      .desktop-links {
+        display: flex;
+        gap: 8px;
+      }
+
+      .desktop-link {
+        background: transparent;
+        border: 1px solid transparent;
+        color: var(--muted);
+        padding: 8px 18px;
+        border-radius: 12px;
+        font-weight: 800;
+        font-size: 14px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+      }
+
+      .desktop-link:hover {
+        color: var(--text);
+        background: var(--panel2);
+      }
+
+      .desktop-link.active {
+        background: #332713;
+        border-color: var(--amber);
+        color: #ffd05b;
+      }
+
+      .app {
+        padding-top: 24px;
+        padding-bottom: 40px;
+      }
+      
+      .bottom-nav {
+        display: none !important;
+      }
+    }
+
+    .eyebrow {
+      color: var(--amber);
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 2px;
+    }
+
+    .hero {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      margin: 8px 0 34px;
+    }
+
+    .hero h1 {
+      font-size: clamp(29px, 7vw, 42px);
+      line-height: 1.1;
+      margin: 10px 0 18px;
+      letter-spacing: -1.5px;
+    }
+
+    .hero p {
+      color: #c0c8d2;
+      font-size: 17px;
+      margin: 0;
+    }
+
+    .count {
+      border: 1px solid #9b6413;
+      background: #282116;
+      border-radius: 22px;
+      min-width: 94px;
+      padding: 12px;
+      text-align: center;
+      color: #ffd05b;
+      height: max-content;
+    }
+
+    .count strong {
+      display: block;
+      font-size: 30px;
+    }
+
+    .count span {
+      font-size: 12px;
+      font-weight: 900;
+      color: var(--muted);
+    }
+
+    .camera-card {
+      background: var(--panel);
+      border: 1px solid #202831;
+      border-radius: 30px;
+      padding: 24px 22px;
+      min-height: 465px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      background: #12171b;
+      border-radius: 22px;
+      padding: 9px 16px;
+      font-size: 13px;
+      font-weight: 900;
+      width: max-content;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--green);
+    }
+
+    .scan-frame {
+      flex: 1;
+      min-height: 300px;
+      position: relative;
+      display: grid;
+      place-items: center;
+      margin: 20px 0 8px;
+      overflow: hidden;
+      background: #14191e;
+      border-radius: 16px;
+    }
+
+    .corners {
+      position: absolute;
+      inset: 14px 5px;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .corner {
+      position: absolute;
+      width: 74px;
+      height: 74px;
+      border-color: var(--amber);
+      border-style: solid;
+    }
+
+    .tl { top: 0; left: 0; border-width: 5px 0 0 5px; border-radius: 17px 0 0; }
+    .tr { top: 0; right: 0; border-width: 5px 5px 0 0; border-radius: 0 17px 0 0; }
+    .bl { bottom: 0; left: 0; border-width: 0 0 5px 5px; border-radius: 0 0 0 17px; }
+    .br { bottom: 0; right: 0; border-width: 0 5px 5px 0; border-radius: 0 0 17px 0; }
+
+    .camera-placeholder {
+      text-align: center;
+      color: var(--muted);
+      padding: 20px;
+    }
+
+    .cam-icon {
+      font-size: 66px;
+      color: var(--amber);
+    }
+
+    .camera-placeholder h2 {
+      font-size: 22px;
+      color: var(--text);
+      margin: 18px 0 8px;
+    }
+
+    .scan-frame video {
+      display: none;
+      width: 100%;
+      max-height: 390px;
+      object-fit: cover;
+      border-radius: 16px;
+    }
+
+    .scan-frame.active video {
+      display: block;
+    }
+
+    .scan-frame.active .camera-placeholder {
+      display: none;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 18px 0 42px;
+    }
+
+    .btn {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      min-height: 64px;
+      padding: 14px;
+      background: var(--panel2);
+      color: var(--text);
+      font: 800 16px system-ui, sans-serif;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-align: center;
+      transition: background 0.2s, opacity 0.2s;
+    }
+
+    .btn:active {
+      opacity: 0.8;
+    }
+
+    .btn.primary {
+      background: var(--amber);
+      border-color: var(--amber);
+      color: #17191b;
+    }
+
+    .btn.danger {
+      background: var(--red);
+      border-color: var(--red);
+      color: white;
+    }
+
+    .section-label {
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 1.6px;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    .last-box {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 26px 16px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #1b2026;
+      border-top: 1px solid #28303a;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      padding: 10px 18px calc(12px + env(safe-area-inset-bottom));
+      z-index: 5;
+    }
+
+    .nav {
+      border: 0;
+      background: none;
+      color: var(--muted);
+      font-weight: 850;
+      font-size: 12px;
+      padding: 7px;
+      cursor: pointer;
+    }
+
+    .nav span {
+      display: block;
+      font-size: 22px;
+      margin-bottom: 2px;
+    }
+
+    .nav.active {
+      color: var(--amber);
+    }
+
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    .list-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 5px 0 24px;
+    }
+
+    .list-head h1 {
+      font-size: 34px;
+      margin: 8px 0;
+    }
+
+    .clear {
+      width: 58px;
+      height: 58px;
+      border: 0;
+      border-radius: 50%;
+      background: var(--panel2);
+      color: var(--red);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+    }
+
+    .clear svg {
+      width: 25px;
+      height: 25px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+
+    .stat {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 22px;
+    }
+
+    .stat .ico {
+      font-size: 23px;
+      color: var(--amber);
+    }
+
+    .stat small {
+      display: block;
+      color: var(--muted);
+      font-weight: 900;
+      letter-spacing: 1px;
+      margin-top: 12px;
+    }
+
+    .stat strong {
+      font-size: 29px;
+    }
+
+    .search {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--panel2);
+      color: white;
+      padding: 19px;
+      font: 16px system-ui, sans-serif;
+      margin-bottom: 18px;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 80px 14px;
+      color: var(--muted);
+    }
+
+    .empty .empty-icon {
+      font-size: 56px;
+      color: var(--amber);
+    }
+
+    .empty h2 {
+      color: var(--text);
+      font-size: 22px;
+    }
+
+    .download-actions {
+      position: fixed;
+      bottom: calc(94px + env(safe-area-inset-bottom));
+      left: 18px;
+      right: 18px;
+      max-width: 684px;
+      margin: auto;
+      z-index: 4;
+      display: block;
+    }
+
+    .download-actions .btn {
+      width: 100%;
+      min-height: 60px;
+    }
+
+    .rows {
+      padding-bottom: 100px;
+    }
+
+    .item {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px;
+      margin: 9px 0;
+      display: block;
+    }
+
+    .item strong {
+      display: block;
+      overflow-wrap: anywhere;
+      font-size: 16px;
+      user-select: text;
+      -webkit-user-select: text;
+    }
+
+    /* Modal Styling */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 10, 18, 0.82);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 18px;
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .sheet {
+      width: 100%;
+      max-width: 520px;
+      background: #20262d;
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      padding: 24px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    }
+
+    .sheet p {
+      color: var(--muted);
+    }
+
+    .field {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #12171b;
+      color: white;
+      padding: 17px;
+      font: 17px system-ui, sans-serif;
+    }
+
+    .sheet-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .sheet-actions .btn {
+      min-height: 52px;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: calc(102px + env(safe-area-inset-bottom));
+      transform: translate(-50%, 14px);
+      opacity: 0;
+      pointer-events: none;
+      background: #29343c;
+      color: white;
+      padding: 13px 18px;
+      border-radius: 14px;
+      font-weight: 800;
+      z-index: 120;
+      transition: .18s;
+      white-space: nowrap;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    /* Custom Confirm Dialog */
+    .confirm-dialog {
+      text-align: center;
+    }
+
+    .confirm-dialog h3 {
+      font-size: 20px;
+      margin: 0 0 10px;
+      color: var(--text);
+    }
+
+    .confirm-dialog p {
+      font-size: 14px;
+      color: #c0c8d2;
+      margin: 0 0 20px;
+      line-height: 1.45;
+    }
+
+    .confirm-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .confirm-actions .btn {
+      min-height: 52px;
+      font-size: 14px;
+    }
+
+    /* Pre-Alert Section Styling */
+    .pre-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin: 4px 0 18px;
+    }
+
+    .pre-head h1 {
+      font-size: 30px;
+      margin: 6px 0;
+    }
+
+    .trip-tabs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 7px;
+      margin: 14px 0;
+    }
+
+    .trip-tab {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--muted);
+      border-radius: 13px;
+      padding: 12px 4px;
+      font-weight: 850;
+      font-size: 13px;
+      cursor: pointer;
+
+    }
+
+    .trip-tab.active {
+      background: #332713;
+      border-color: var(--amber);
+      color: #ffd05b;
+    }
+
+    .pre-camera {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+
+    .pre-camera .scan-frame {
+      min-height: 190px;
+      margin: 10px 0;
+    }
+
+    .pre-camera .scan-frame video {
+      max-height: 230px;
+    }
+
+    .pre-form {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 14px;
+      margin: 12px 0;
+    }
+
+    .pre-form label {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .5px;
+      margin: 0 0 5px;
+    }
+
+    .pre-fields {
+      display: grid;
+      grid-template-columns: 1.45fr .8fr .8fr .62fr;
+      gap: 7px;
+    }
+
+    .pre-fields input {
+      min-width: 0;
+      width: 100%;
+      background: #12171b;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      color: white;
+      padding: 12px 7px;
+      font: 600 13px system-ui, sans-serif;
+    }
+
+    .pre-save {
+      width: 100%;
+      min-height: 52px;
+      margin-top: 12px;
+    }
+
+    .pre-summary {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      margin: 14px 2px;
+    }
+
+    .pre-list {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 10px;
+    }
+
+    .pre-row {
+      display: grid;
+      grid-template-columns: 1.45fr .8fr .8fr .62fr;
+      gap: 7px;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .pre-row:last-child {
+      border-bottom: 0;
+    }
+
+    .pre-row input {
+      min-width: 0;
+      width: 100%;
+      background: #12171b;
+      border: 1px solid #343e49;
+      border-radius: 8px;
+      color: white;
+      padding: 9px 5px;
+      font: 600 11px system-ui, sans-serif;
+    }
+
+    .pre-colhead {
+      display: grid;
+      grid-template-columns: 1.45fr .8fr .8fr .62fr;
+      gap: 7px;
+      padding: 5px 0 9px;
+      color: var(--muted);
+      font-size: 9px;
+      font-weight: 900;
+    }
+
+    .pre-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .pre-actions .btn {
+      min-height: 48px;
+      flex: 1;
+      font-size: 13px;
+    }
+
+    /* Helpdesk Section Styling */
+    .help-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin: 4px 0 18px;
+    }
+
+    .help-head h1 {
+      font-size: 30px;
+      margin: 6px 0;
+    }
+
+    .help-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 16px;
+      margin: 12px 0;
+    }
+
+    .help-card label {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 900;
+      margin: 12px 0 5px;
+    }
+
+    .help-input,
+    .help-select,
+    .help-textarea {
+      width: 100%;
+      background: #12171b;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      color: white;
+      padding: 13px;
+      font: 14px system-ui, sans-serif;
+    }
+
+    .help-textarea {
+      min-height: 78px;
+      resize: vertical;
+    }
+
+    .help-camera .scan-frame {
+      min-height: 190px;
+      margin: 10px 0;
+    }
+
+    .help-camera .scan-frame video {
+      max-height: 260px;
+    }
+
+    .help-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .help-actions .btn {
+      min-height: 52px;
+      font-size: 13px;
+    }
+
+    .photo-strip {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      margin-top: 10px;
+    }
+
+    .photo-thumb {
+      width: 82px;
+      height: 82px;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      flex: 0 0 auto;
+    }
+
+    .help-report {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px;
+      margin: 12px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .help-report-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .help-report-title {
+      font-weight: 800;
+      font-size: 16px;
+      color: #ffffff;
+      word-break: break-word;
+    }
+
+    .help-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 800;
+      background: #252c34;
+      color: var(--amber);
+      border: 1px solid #3d3422;
+      white-space: nowrap;
+    }
+
+    .help-badge.hub-badge {
+      background: #182824;
+      color: var(--green);
+      border-color: #174236;
+    }
+
+    .help-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 14px;
+      font-size: 12px;
+      color: var(--muted);
+      padding-bottom: 4px;
+      border-bottom: 1px dashed #26303a;
+    }
+
+    .help-meta span {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .help-report-detail {
+      font-size: 13px;
+      color: #c0c8d2;
+      line-height: 1.45;
+      background: #12171b;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #202831;
+    }
+
+    .help-report-photos {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-top: 4px;
+    }
+
+    .help-report-photos img {
+      width: 72px;
+      height: 72px;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      flex: 0 0 auto;
+    }
+
+    .help-footer {
+      padding-bottom: 95px;
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app">
+    <!-- Header Nav Bar (Tampilan Desktop) -->
+    <header class="desktop-nav">
+      <div class="desktop-brand">
+        <span>📦</span> ScanParcel Pro
+      </div>
+      <nav class="desktop-links">
+        <button class="desktop-link active" onclick="page('prealert')">📦 Pre-Alert Bagseal</button>
+        <button class="desktop-link" onclick="page('helpdesk')">🚨 Helpdesk Kendala</button>
+      </nav>
+    </header>
+
+    <!-- Halaman 1: Pre-Alert Bagseal -->
+    <section id="pagePreAlert" class="page active">
+      <div class="pre-head">
+        <div>
+          <div class="eyebrow">STAGING & BAGSEAL LOGISTICS</div>
+          <h1>Pre-Alert Staging</h1>
+        </div>
+      </div>
+
+      <div class="trip-tabs">
+        <button class="trip-tab active" data-trip="Trip 1">Trip 1</button>
+        <button class="trip-tab" data-trip="Trip 2">Trip 2</button>
+        <button class="trip-tab" data-trip="Pending">Pending</button>
+      </div>
+
+      <!-- Selector Tujuan Active / HUB Utama -->
+      <div class="pre-form" style="margin-bottom: 14px;">
+        <div style="padding: 12px; background: #12171b; border: 1px dashed var(--amber); border-radius: 14px;">
+          <label style="color:var(--amber); font-weight:900; font-size:12px; display:block; margin-bottom:6px;">
+            🎯 TARGET TUJUAN / HUB SAAT INI (HASIL SCAN KAMERA AKAN MASUK KE SINI)
+          </label>
+          <div style="display:flex; gap:8px;">
+            <input id="preStaging" placeholder="Ketik atau pilih HUB (cth: HUB JKT-WEST)" style="flex:1; font-weight:800; font-size:15px; color:#ffd05b; background:#1b2026; border:1px solid var(--amber); border-radius:10px; padding:12px 10px;">
+            <button class="btn primary" id="btnQuickAddStaging" style="min-height: auto; padding: 0 16px; font-size: 13px; font-weight:800;">＋ Target HUB Baru</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="pre-camera">
+        <div class="status">
+          <span class="dot"></span>
+          <span id="preCamStatus">Kamera Pemindai Off</span>
+        </div>
+        <div class="scan-frame" id="preScanFrame">
+          <div class="camera-placeholder">
+            <div class="cam-icon" style="font-size:36px;">🔍</div>
+            <p style="margin:4px 0 0;font-size:13px;">Arahkan Kamera ke Barcode Bagseal</p>
+          </div>
+          <video id="preWebcam" playsinline autoplay muted></video>
+        </div>
+        <div class="help-actions">
+          <button class="btn primary" id="btnPreCam">▶ Kamera Pre-Alert Scan</button>
+        </div>
+      </div>
+
+      <div class="pre-summary">
+        <span>TERCATAT: <strong id="preBagCount" style="color:var(--text)">0 Bagseal</strong></span>
+        <span>TOTAL PARCEL: <strong id="preParcelSum" style="color:var(--amber)">0 Parcel</strong></span>
+        <span>TOTAL BERAT: <strong id="preWeightSum" style="color:var(--green)">0 Kg</strong></span>
+      </div>
+
+      <div id="preGroupedRows">
+        <div class="pre-list">
+          <div class="pre-empty">Belum ada bagseal untuk trip ini.</div>
+        </div>
+      </div>
+
+      <div class="pre-actions" style="margin-top:18px;">
+        <button class="btn danger" id="btnClearPre">🗑 Hapus Trip</button>
+        <button class="btn primary" id="btnExportPre">📥 Unduh Staging (.xlsx)</button>
+      </div>
+    </section>
+
+    <!-- Halaman 2: Helpdesk Kendala Paket -->
+    <section id="pageHelpdesk" class="page">
+      <div class="help-head">
+        <div>
+          <div class="eyebrow">HELPDESK & KENDALA SERAH TERIMA</div>
+          <h1>Laporan Kendala</h1>
+        </div>
+      </div>
+
+      <div class="help-card help-camera">
+        <div class="status">
+          <span class="dot"></span>
+          <span id="helpCamStatus">Pemindai Barcode / Kamera Rekam Off</span>
+        </div>
+        <div class="scan-frame" id="helpScanFrame">
+          <div class="camera-placeholder">
+            <div class="cam-icon" style="font-size:36px;">📸</div>
+            <p style="margin:4px 0 0;font-size:13px;">Ambil Foto Bukti atau Scan Barcode Paket</p>
+          </div>
+          <video id="helpWebcam" playsinline autoplay muted></video>
+        </div>
+        <div class="help-actions">
+          <button class="btn primary" id="btnHelpCam">▶ Kamera Helpdesk</button>
+          <button class="btn" id="btnHelpSnap">📷 Ambil Foto Bukti</button>
+        </div>
+        <div class="photo-strip" id="helpPhotoStrip"></div>
+      </div>
+
+      <section class="help-card">
+        <div style="font-weight:900">Detail Laporan</div>
+        <label for="helpStaff">Nama Petugas</label>
+        <input class="help-input" id="helpStaff" placeholder="Nama petugas pelapor">
+
+        <label for="helpHub">Lokasi HUB / Staging</label>
+        <input class="help-input" id="helpHub" placeholder="Contoh: HUB JKT-WEST / HUB MLG">
+
+        <label for="helpAwb">Nomor AWB (opsional)</label>
+        <input class="help-input" id="helpAwb" placeholder="Otomatis dari barcode atau ketik manual">
+
+        <label for="helpType">Jenis Masalah</label>
+        <select class="help-select" id="helpType">
+          <option>AWB / label hilang</option>
+          <option>Barang bocor</option>
+          <option>Kemasan rusak</option>
+          <option>Lainnya</option>
+        </select>
+
+        <label for="helpDetail">Keterangan</label>
+        <textarea class="help-textarea" id="helpDetail" placeholder="Jelaskan kondisi paket atau kendala serah terima..."></textarea>
+
+        <button class="btn primary pre-save" id="helpSave">＋ Simpan Laporan</button>
+      </section>
+
+      <div class="pre-summary">
+        <span>RIWAYAT LAPORAN: <strong id="helpCount" style="color:var(--text)">0</strong></span>
+      </div>
+
+      <div class="help-footer">
+        <div id="helpReports">
+          <div class="last-box">Belum ada laporan Helpdesk.</div>
+        </div>
+        <button class="btn primary" id="btnExportHelp" style="width:100%;margin-top:14px;min-height:60px">
+          ▣ Download Excel + Foto Bukti
+        </button>
+      </div>
+    </section>
+
+    <!-- Bottom Navigation Bar (Mobile) -->
+    <nav class="bottom-nav">
+      <button class="nav active" onclick="page('prealert')" id="navPreAlert">
+        <span>📦</span>Pre-Alert
+      </button>
+      <button class="nav" onclick="page('helpdesk')" id="navHelpdesk">
+        <span>🚨</span>Helpdesk
+      </button>
+    </nav>
+  </main>
+
+  <!-- Modal Konfirmasi Download Helpdesk Kustom -->
+  <div class="modal" id="confirmDownloadModal">
+    <div class="sheet confirm-dialog">
+      <h3>Konfirmasi Unduh Laporan</h3>
+      <p>Apakah Anda yakin ingin mengunduh laporan Helpdesk beserta foto bukti ke dalam format Excel (.xlsx)?</p>
+      <div class="confirm-actions">
+        <button class="btn" id="btnCancelDownloadHelp">Batal</button>
+        <button class="btn primary" id="btnConfirmDownloadHelp">Ya, Unduh Excel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Konfirmasi Reset Helpdesk Kustom -->
+  <div class="modal" id="confirmResetModal">
+    <div class="sheet confirm-dialog">
+      <h3>Reset Riwayat Laporan?</h3>
+      <p>File Excel berhasil diunduh. Apakah Anda ingin mereset/mengosongkan seluruh riwayat laporan Helpdesk di perangkat ini?</p>
+      <div class="confirm-actions">
+        <button class="btn" id="btnKeepHelpHistory">Tetapkan Simpan</button>
+        <button class="btn danger" id="btnResetHelpHistory">Hapus & Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Element -->
+  <div class="toast" id="toast">Notifikasi</div>
+
+  <script>
+    // Utility Selector Helper
+    const $ = id => document.getElementById(id);
+    const safe = str => (str || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+
+    // Global App State
+    let activePage = 'prealert';
+    let currentTrip = 'Trip 1';
+    let preAlertData = JSON.parse(localStorage.getItem('prealert_data') || '{"Trip 1":[],"Trip 2":[],"Pending":[]}');
+    let lastScannedBagseal = '';
+    let scanThrottleTimeout = null;
+    
+    // Helpdesk State
+    let helpDb = null;
+    let helpReports = [];
+    let helpPhotos = [];
+
+    // Camera Handles
+    let streamPre = null;
+    let streamHelp = null;
+    let preScanInterval = null;
+
+    // Beep Audio Effect
+    function playBeep() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, ctx.currentTime);
+        gain.gain.setValueAtTime(0.1, ctx.currentTime);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.12);
+      } catch (e) {}
+    }
+
+    function toast(msg) {
+      const t = $('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2400);
+    }
+
+    // Navigation System
+    window.page = function(p) {
+      activePage = p;
+      document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.desktop-link').forEach(el => el.classList.remove('active'));
+
+      if (p === 'prealert') {
+        $('pagePreAlert').classList.add('active');
+        $('navPreAlert')?.classList.add('active');
+        document.querySelectorAll('.desktop-link')[0]?.classList.add('active');
+      } else if (p === 'helpdesk') {
+        $('pageHelpdesk').classList.add('active');
+        $('navHelpdesk')?.classList.add('active');
+        document.querySelectorAll('.desktop-link')[1]?.classList.add('active');
+      }
+
+      // Close camera if page changes
+      stopAllCameras();
+    };
+
+    function stopAllCameras() {
+      if (preScanInterval) { clearInterval(preScanInterval); preScanInterval = null; }
+      if (streamPre) { streamPre.getTracks().forEach(t => t.stop()); streamPre = null; }
+      if (streamHelp) { streamHelp.getTracks().forEach(t => t.stop()); streamHelp = null; }
+
+      $('preScanFrame').classList.remove('active');
+      $('helpScanFrame').classList.remove('active');
+
+      if ($('btnPreCam')) $('btnPreCam').textContent = '▶ Kamera Pre-Alert Scan';
+      if ($('btnHelpCam')) $('btnHelpCam').textContent = '▶ Kamera Helpdesk';
+    }
+
+    // --- MODUL 1: PRE-ALERT ---
+    function renderPreAlert() {
+      const list = preAlertData[currentTrip] || [];
+      const container = $('preGroupedRows');
+      
+      let totalBagseal = list.length;
+      let totalParcelSum = 0;
+      let totalWeightSum = 0;
+
+      list.forEach(x => {
+        totalParcelSum += (parseInt(x.total) || 0);
+        totalWeightSum += (parseFloat(x.weight) || 0);
+      });
+
+      $('preBagCount').textContent = totalBagseal + ' Bagseal';
+      $('preParcelSum').textContent = totalParcelSum + ' Parcel';
+      if ($('preWeightSum')) $('preWeightSum').textContent = totalWeightSum.toFixed(1) + ' Kg';
+
+      if (!list.length) {
+        container.innerHTML = '<div class="pre-list"><div class="pre-empty">Belum ada bagseal untuk trip ini. Aktifkan kamera lalu scan barcode.</div></div>';
+        return;
+      }
+
+      // Grouping data berdasarkan Staging / HUB
+      const grouped = {};
+      list.forEach((item, originalIndex) => {
+        const hubKey = (item.staging || 'TIDAK ADA TUJUAN HUB').toUpperCase();
+        if (!grouped[hubKey]) {
+          grouped[hubKey] = [];
+        }
+        grouped[hubKey].push({ ...item, originalIndex });
+      });
+
+      const currentSelectedHub = ($('preStaging').value || '').trim().toUpperCase();
+
+      let html = '';
+      Object.keys(grouped).forEach(hubName => {
+        const items = grouped[hubName];
+        let grpParcels = 0;
+        let grpWeight = 0;
+        items.forEach(it => {
+          grpParcels += (parseInt(it.total) || 0);
+          grpWeight += (parseFloat(it.weight) || 0);
+        });
+
+        const isSelected = hubName === currentSelectedHub;
+
+        html += `
+          <div style="margin-bottom: 16px; background: var(--panel); border: ${isSelected ? '2px solid var(--amber)' : '1px solid var(--line)'}; border-radius: 16px; padding: 12px; overflow: hidden;">
+            <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px solid #28303a;">
+              <div style="font-weight:900; color:var(--amber); font-size:15px; display:flex; align-items:center; gap:6px;">
+                <span>🎯</span> HUB: <span>${safe(hubName)}</span>
+                <button onclick="selectHubTarget('${safe(hubName)}')" style="margin-left:8px; background:${isSelected ? 'var(--amber)' : '#252c34'}; color:${isSelected ? '#111' : '#fff'}; border:none; padding:3px 8px; border-radius:6px; font-size:11px; font-weight:800; cursor:pointer;">
+                  ${isSelected ? '✓ Target Aktif' : 'Pilih Sebagai Target'}
+                </button>
+              </div>
+              <div style="font-size:12px; color:var(--muted); font-weight:800;">
+                <span style="color:var(--text); margin-right:8px;">${items.length} Bagseal</span>
+                <span style="color:var(--amber); margin-right:8px;">${grpParcels} Pcs</span>
+                <span style="color:var(--green);">${grpWeight.toFixed(1)} Kg</span>
+              </div>
+            </div>
+
+            <div class="pre-colhead" style="grid-template-columns: 1.2fr .6fr .6fr .8fr 1fr 40px;">
+              <span>NO BAGSEAL</span>
+              <span>QTY</span>
+              <span>BERAT (KG)</span>
+              <span>KATEGORI</span>
+              <span>CATATAN</span>
+              <span></span>
+            </div>
+
+            ${items.map(item => `
+              <div class="pre-row" style="grid-template-columns: 1.2fr .6fr .6fr .8fr 1fr 40px;">
+                <input value="${safe(item.bagseal)}" onchange="updatePreItem(${item.originalIndex}, 'bagseal', this.value)" placeholder="No. Bagseal">
+                <input type="number" value="${item.total}" onchange="updatePreItem(${item.originalIndex}, 'total', this.value)" placeholder="0">
+                <input type="number" step="0.1" value="${item.weight || ''}" onchange="updatePreItem(${item.originalIndex}, 'weight', this.value)" placeholder="0.0">
+                <input value="${safe(item.category)}" onchange="updatePreItem(${item.originalIndex}, 'category', this.value)" placeholder="Kategori">
+                <input value="${safe(item.notes)}" onchange="updatePreItem(${item.originalIndex}, 'notes', this.value)" placeholder="Catatan">
+                <button onclick="deletePreItem(${item.originalIndex})" style="background:none; border:none; color:var(--red); cursor:pointer; font-weight:bold; font-size:16px;">✕</button>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    window.selectHubTarget = function(hubName) {
+      $('preStaging').value = hubName;
+      renderPreAlert();
+      toast('Target Scan: ' + hubName);
+    };
+
+    // Auto Insert Bagseal from Camera Scan
+    function addScannedBagseal(bagsealCode) {
+      const staging = $('preStaging').value.trim();
+      if (!staging) {
+        toast('PILIH/INPUT TUJUAN HUB DAHULU SEBELUM SCAN!');
+        return;
+      }
+
+      if (lastScannedBagseal === bagsealCode) return;
+      lastScannedBagseal = bagsealCode;
+
+      clearTimeout(scanThrottleTimeout);
+      scanThrottleTimeout = setTimeout(() => { lastScannedBagseal = ''; }, 3000);
+
+      playBeep();
+      if (navigator.vibrate) navigator.vibrate(100);
+
+      if (!preAlertData[currentTrip]) preAlertData[currentTrip] = [];
+
+      // Cek apakah bagseal sudah ada di list trip ini
+      const existing = preAlertData[currentTrip].find(x => x.bagseal === bagsealCode);
+      if (existing) {
+        toast('⚠️ Bagseal ' + bagsealCode + ' sudah pernah discan!');
+        return;
+      }
+
+      preAlertData[currentTrip].unshift({
+        staging: staging,
+        bagseal: bagsealCode,
+        total: 1,
+        weight: 0,
+        category: 'Reg',
+        notes: '-'
+      });
+
+      localStorage.setItem('prealert_data', JSON.stringify(preAlertData));
+      renderPreAlert();
+      toast('✅ Added: ' + bagsealCode + ' ➔ ' + staging);
+    }
+
+    async function togglePreCam() {
+      if (streamPre) {
+        stopAllCameras();
+        return;
+      }
+
+      const staging = $('preStaging').value.trim();
+      if (!staging) {
+        toast('PILIH / INPUT TUJUAN (HUB) TERLEBIH DAHULU!');
+        $('preStaging').focus();
+        return;
+      }
+
+      try {
+        streamPre = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        const video = $('preWebcam');
+        video.srcObject = streamPre;
+        $('preScanFrame').classList.add('active');
+        $('btnPreCam').textContent = '⏹ Hentikan Kamera';
+
+        if ('BarcodeDetector' in window) {
+          const detector = new BarcodeDetector({ formats: ['code_128', 'qr_code', 'ean_13', 'code_39'] });
+          preScanInterval = setInterval(async () => {
+            try {
+              const barcodes = await detector.detect(video);
+              if (barcodes.length > 0) {
+                addScannedBagseal(barcodes[0].rawValue);
+              }
+            } catch (e) {}
+          }, 400);
+        } else {
+          toast('BarcodeDetector tidak didukung penuh di browser ini. Anda dapat memasukkan/edit manual.');
+        }
+      } catch (e) {
+        toast('Gagal membuka kamera: ' + e.message);
+      }
+    }
+    async function togglePreCam() {
+      if (streamPre) {
+        stopAllCameras();
+        return;
+      }
+
+      const staging = $('preStaging').value.trim();
+      if (!staging) {
+        toast('PILIH / INPUT TUJUAN (HUB) TERLEBIH DAHULU!');
+        $('preStaging').focus();
+        return;
+      }
+
+      // Cek apakah koneksi menggunakan HTTPS atau localhost (Persyaratan wajib akses kamera web)
+      if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+        toast('❌ Akses kamera diblokir browser: Web harus dijalankan via HTTPS!');
+        return;
+      }
+
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        toast('❌ Browser ini tidak mendukung akses kamera!');
+        return;
+      }
+
+      try {
+        // Coba minta akses kamera belakang terlebih dahulu, jika gagal coba kamera umum
+        try {
+          streamPre = await navigator.mediaDevices.getUserMedia({ 
+            video: { facingMode: { exact: "environment" } } 
+          });
+        } catch (errBack) {
+          streamPre = await navigator.mediaDevices.getUserMedia({ 
+            video: { facingMode: "environment" } 
+          });
+        }
+
+        const video = $('preWebcam');
+        video.srcObject = streamPre;
+        $('preScanFrame').classList.add('active');
+        $('btnPreCam').textContent = '⏹ Hentikan Kamera';
+        $('preCamStatus').textContent = 'Kamera Pemindai Aktif';
+
+        if ('BarcodeDetector' in window) {
+          const detector = new BarcodeDetector({ formats: ['code_128', 'qr_code', 'ean_13', 'code_39'] });
+          preScanInterval = setInterval(async () => {
+            try {
+              const barcodes = await detector.detect(video);
+              if (barcodes.length > 0) {
+                addScannedBagseal(barcodes[0].rawValue);
+              }
+            } catch (e) {}
+          }, 400);
+        } else {
+          toast('BarcodeDetector tidak didukung browser ini. Anda dapat ketik manual.');
+        }
+      } catch (e) {
+        let errMsg = e.message;
+        if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
+          errMsg = 'Izin kamera ditolak. Silakan izinkan akses kamera di ikon gembok/pengaturan browser Anda.';
+        } else if (e.name === 'NotFoundError' || e.name === 'DevicesNotFoundError') {
+          errMsg = 'Kamera tidak ditemukan pada perangkat ini.';
+        } else if (e.name === 'NotReadableError' || e.name === 'TrackStartError') {
+          errMsg = 'Kamera sedang digunakan oleh aplikasi lain.';
+        }
+        toast('❌ ' + errMsg);
+      }
+    }
+
+    function renderHelp() {
+      if (!$('helpReports')) return;
+      $('helpCount').textContent = helpReports.length;
+
+      $('helpReports').innerHTML = helpReports.length
+        ? helpReports.map(r => 
+            '<article class="help-report">' +
+              '<div class="help-report-header">' +
+                '<div>' +
+                  '<div class="help-report-title">' + safe(r.awb || 'AWB Tidak Tersedia') + '</div>' +
+                '</div>' +
+                '<div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">' +
+                  (r.hub ? '<span class="help-badge hub-badge">HUB: ' + safe(r.hub) + '</span>' : '') +
+                  '<span class="help-badge">' + safe(r.type) + '</span>' +
+                '</div>' +
+              '</div>' +
+              '<div class="help-meta">' +
+                '<span>👤 ' + safe(r.staff || 'Petugas belum diisi') + '</span>' +
+                '<span>🕒 ' + safe(new Date(r.createdAt).toLocaleString('id-ID')) + '</span>' +
+              '</div>' +
+              (r.detail ? '<div class="help-report-detail">' + safe(r.detail) + '</div>' : '') +
+              (r.photos && r.photos.length ? 
+                '<div class="help-report-photos">' + 
+                  r.photos.map(p => '<img src="' + p.data + '" alt="Foto bukti">').join('') + 
+                '</div>' : ''
+              ) +
+            '</article>'
+          ).join('')
+        : '<div class="last-box">Belum ada laporan Helpdesk.</div>';
+    }
+
+    function renderHelpPhotos() {
+      const container = $('helpPhotoStrip');
+      container.innerHTML = helpPhotos.map((p, idx) => `
+        <img class="photo-thumb" src="${p.data}" title="Hapus Foto" onclick="removePhoto(${idx})">
+      `).join('');
+    }
+
+    window.removePhoto = function(idx) {
+      helpPhotos.splice(idx, 1);
+      renderHelpPhotos();
+    };
+
+    function openHelpDb() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open('HelpdeskDB', 1);
+        req.onupgradeneeded = e => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains('reports')) {
+            db.createObjectStore('reports', { keyPath: 'id' });
+          }
+        };
+        req.onsuccess = e => {
+          helpDb = e.target.result;
+          resolve(helpDb);
+        };
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    async function loadHelpReports() {
+      try {
+        if (!helpDb) await openHelpDb();
+        const tx = helpDb.transaction('reports', 'readonly');
+        const store = tx.objectStore('reports');
+        const req = store.getAll();
+        req.onsuccess = () => {
+          helpReports = (req.result || []).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+          renderHelp();
+        };
+      } catch (e) {
+        console.error('Gagal memuat laporan Helpdesk:', e);
+      }
+    }
+
+    async function saveHelp() {
+      const staff = $('helpStaff').value.trim();
+      const hub = $('helpHub').value.trim();
+<!-- ... existing code -->
