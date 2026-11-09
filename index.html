@@ -46,7 +46,7 @@
       max-width: 720px;
       min-height: 100dvh;
       margin: auto;
-      padding: 26px 18px 112px;
+      padding: 16px 14px 112px;
     }
 
     /* Desktop Navigation Styling */
@@ -57,13 +57,9 @@
     @media(min-width: 650px) {
       .desktop-nav {
         display: flex;
-      /* Helpdesk Section Styling */
-      .help-head {
-        display: flex;
         justify-content: space-between;
         align-items: center;
-        gap: 12px;
-        margin: 4px 0 18px;
+        margin-bottom: 20px;
       }
 
       .desktop-brand {
@@ -119,9 +115,9 @@
 
     .eyebrow {
       color: var(--amber);
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 900;
-      letter-spacing: 2px;
+      letter-spacing: 1.5px;
     }
 
     .hero {
@@ -132,46 +128,17 @@
     }
 
     .hero h1 {
-      font-size: clamp(29px, 7vw, 42px);
+      font-size: clamp(26px, 7vw, 42px);
       line-height: 1.1;
       margin: 10px 0 18px;
       letter-spacing: -1.5px;
     }
 
-    .hero p {
-      color: #c0c8d2;
-      font-size: 17px;
-      margin: 0;
-    }
-
-    .count {
-      border: 1px solid #9b6413;
-      background: #282116;
-      border-radius: 22px;
-      min-width: 94px;
-      padding: 12px;
-      text-align: center;
-      color: #ffd05b;
-      height: max-content;
-    }
-
-    .count strong {
-      display: block;
-      font-size: 30px;
-    }
-
-    .count span {
-      font-size: 12px;
-      font-weight: 900;
-      color: var(--muted);
-    }
-
     .camera-card {
       background: var(--panel);
       border: 1px solid #202831;
-      border-radius: 30px;
-      padding: 24px 22px;
-      min-height: 465px;
+      border-radius: 20px;
+      padding: 16px;
       display: flex;
       flex-direction: column;
     }
@@ -182,74 +149,47 @@
       gap: 9px;
       background: #12171b;
       border-radius: 22px;
-      padding: 9px 16px;
-      font-size: 13px;
-      font-weight: 900;
+      padding: 7px 14px;
+      font-size: 12px;
+      font-weight: 800;
       width: max-content;
     }
 
     .dot {
-      width: 10px;
-      height: 10px;
+      width: 9px;
+      height: 9px;
       border-radius: 50%;
       background: var(--green);
     }
 
     .scan-frame {
-      flex: 1;
-      min-height: 300px;
+      min-height: 180px;
       position: relative;
       display: grid;
       place-items: center;
-      margin: 20px 0 8px;
+      margin: 12px 0 8px;
       overflow: hidden;
       background: #14191e;
-      border-radius: 16px;
+      border-radius: 14px;
     }
-
-    .corners {
-      position: absolute;
-      inset: 14px 5px;
-      pointer-events: none;
-      z-index: 2;
-    }
-
-    .corner {
-      position: absolute;
-      width: 74px;
-      height: 74px;
-      border-color: var(--amber);
-      border-style: solid;
-    }
-
-    .tl { top: 0; left: 0; border-width: 5px 0 0 5px; border-radius: 17px 0 0; }
-    .tr { top: 0; right: 0; border-width: 5px 5px 0 0; border-radius: 0 17px 0 0; }
-    .bl { bottom: 0; left: 0; border-width: 0 0 5px 5px; border-radius: 0 0 0 17px; }
-    .br { bottom: 0; right: 0; border-width: 0 5px 5px 0; border-radius: 0 0 17px 0; }
 
     .camera-placeholder {
       text-align: center;
       color: var(--muted);
-      padding: 20px;
+      padding: 16px;
     }
 
     .cam-icon {
-      font-size: 66px;
+      font-size: 36px;
       color: var(--amber);
-    }
-
-    .camera-placeholder h2 {
-      font-size: 22px;
-      color: var(--text);
-      margin: 18px 0 8px;
     }
 
     .scan-frame video {
       display: none;
       width: 100%;
-      max-height: 390px;
+      max-height: 300px;
       object-fit: cover;
-      border-radius: 16px;
+      border-radius: 14px;
     }
 
     .scan-frame.active video {
@@ -260,21 +200,14 @@
       display: none;
     }
 
-    .actions {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin: 18px 0 42px;
-    }
-
     .btn {
       border: 1px solid var(--line);
-      border-radius: 18px;
-      min-height: 64px;
-      padding: 14px;
+      border-radius: 14px;
+      min-height: 48px;
+      padding: 10px 14px;
       background: var(--panel2);
       color: var(--text);
-      font: 800 16px system-ui, sans-serif;
+      font: 800 14px system-ui, sans-serif;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
@@ -282,6 +215,7 @@
       gap: 8px;
       text-align: center;
       transition: background 0.2s, opacity 0.2s;
+      width: 100%;
     }
 
     .btn:active {
@@ -300,19 +234,11 @@
       color: white;
     }
 
-    .section-label {
-      font-size: 13px;
-      font-weight: 900;
-      letter-spacing: 1.6px;
-      color: var(--muted);
-      margin-bottom: 16px;
-    }
-
     .last-box {
       background: var(--panel);
       border: 1px solid var(--line);
-      border-radius: 22px;
-      padding: 26px 16px;
+      border-radius: 18px;
+      padding: 18px 14px;
       text-align: center;
       color: var(--muted);
     }
@@ -326,7 +252,7 @@
       border-top: 1px solid #28303a;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      padding: 10px 18px calc(12px + env(safe-area-inset-bottom));
+      padding: 8px 14px calc(8px + env(safe-area-inset-bottom));
       z-index: 5;
     }
 
@@ -336,13 +262,13 @@
       color: var(--muted);
       font-weight: 850;
       font-size: 12px;
-      padding: 7px;
+      padding: 6px;
       cursor: pointer;
     }
 
     .nav span {
       display: block;
-      font-size: 22px;
+      font-size: 20px;
       margin-bottom: 2px;
     }
 
@@ -358,136 +284,7 @@
       display: block;
     }
 
-    .list-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin: 5px 0 24px;
-    }
-
-    .list-head h1 {
-      font-size: 34px;
-      margin: 8px 0;
-    }
-
-    .clear {
-      width: 58px;
-      height: 58px;
-      border: 0;
-      border-radius: 50%;
-      background: var(--panel2);
-      color: var(--red);
-      display: grid;
-      place-items: center;
-      cursor: pointer;
-    }
-
-    .clear svg {
-      width: 25px;
-      height: 25px;
-      stroke: currentColor;
-      fill: none;
-      stroke-width: 2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-
-    .stats {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      margin-bottom: 28px;
-    }
-
-    .stat {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 24px;
-      padding: 22px;
-    }
-
-    .stat .ico {
-      font-size: 23px;
-      color: var(--amber);
-    }
-
-    .stat small {
-      display: block;
-      color: var(--muted);
-      font-weight: 900;
-      letter-spacing: 1px;
-      margin-top: 12px;
-    }
-
-    .stat strong {
-      font-size: 29px;
-    }
-
-    .search {
-      width: 100%;
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      background: var(--panel2);
-      color: white;
-      padding: 19px;
-      font: 16px system-ui, sans-serif;
-      margin-bottom: 18px;
-    }
-
-    .empty {
-      text-align: center;
-      padding: 80px 14px;
-      color: var(--muted);
-    }
-
-    .empty .empty-icon {
-      font-size: 56px;
-      color: var(--amber);
-    }
-
-    .empty h2 {
-      color: var(--text);
-      font-size: 22px;
-    }
-
-    .download-actions {
-      position: fixed;
-      bottom: calc(94px + env(safe-area-inset-bottom));
-      left: 18px;
-      right: 18px;
-      max-width: 684px;
-      margin: auto;
-      z-index: 4;
-      display: block;
-    }
-
-    .download-actions .btn {
-      width: 100%;
-      min-height: 60px;
-    }
-
-    .rows {
-      padding-bottom: 100px;
-    }
-
-    .item {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 18px;
-      margin: 9px 0;
-      display: block;
-    }
-
-    .item strong {
-      display: block;
-      overflow-wrap: anywhere;
-      font-size: 16px;
-      user-select: text;
-      -webkit-user-select: text;
-    }
-
-    /* Modal Styling */
+    /* Modal & Toast Styling */
     .modal {
       position: fixed;
       inset: 0;
@@ -509,48 +306,24 @@
       max-width: 520px;
       background: #20262d;
       border: 1px solid var(--line);
-      border-radius: 26px;
-      padding: 24px;
+      border-radius: 20px;
+      padding: 20px;
       box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-    }
-
-    .sheet p {
-      color: var(--muted);
-    }
-
-    .field {
-      width: 100%;
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      background: #12171b;
-      color: white;
-      padding: 17px;
-      font: 17px system-ui, sans-serif;
-    }
-
-    .sheet-actions {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 18px;
-    }
-
-    .sheet-actions .btn {
-      min-height: 52px;
     }
 
     .toast {
       position: fixed;
       left: 50%;
-      bottom: calc(102px + env(safe-area-inset-bottom));
+      bottom: calc(85px + env(safe-area-inset-bottom));
       transform: translate(-50%, 14px);
       opacity: 0;
       pointer-events: none;
       background: #29343c;
       color: white;
-      padding: 13px 18px;
-      border-radius: 14px;
+      padding: 11px 16px;
+      border-radius: 12px;
       font-weight: 800;
+      font-size: 13px;
       z-index: 120;
       transition: .18s;
       white-space: nowrap;
@@ -562,138 +335,64 @@
       transform: translate(-50%, 0);
     }
 
-    /* Custom Confirm Dialog */
     .confirm-dialog {
       text-align: center;
-    }
-
-    .confirm-dialog h3 {
-      font-size: 20px;
-      margin: 0 0 10px;
-      color: var(--text);
-    }
-
-    .confirm-dialog p {
-      font-size: 14px;
-      color: #c0c8d2;
-      margin: 0 0 20px;
-      line-height: 1.45;
     }
 
     .confirm-actions {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-
-    .confirm-actions .btn {
-      min-height: 52px;
-      font-size: 14px;
-    }
-
-    /* Pre-Alert Section Styling */
-    .pre-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
       gap: 10px;
-      margin: 4px 0 18px;
     }
 
+    /* Pre-Alert Responsive Layout */
     .pre-head h1 {
-      font-size: 30px;
-      margin: 6px 0;
+      font-size: 24px;
+      margin: 4px 0 14px;
     }
 
-    .trip-tabs {
+    .pre-form-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 7px;
-      margin: 14px 0;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
     }
 
-    .trip-tab {
-      border: 1px solid var(--line);
-      background: var(--panel);
-      color: var(--muted);
-      border-radius: 13px;
-      padding: 12px 4px;
-      font-weight: 850;
-      font-size: 13px;
-      cursor: pointer;
-
-    }
-
-    .trip-tab.active {
-      background: #332713;
-      border-color: var(--amber);
-      color: #ffd05b;
+    @media (min-width: 550px) {
+      .pre-form-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
     }
 
     .pre-camera {
       background: var(--panel);
       border: 1px solid var(--line);
-      border-radius: 20px;
+      border-radius: 18px;
       padding: 14px;
       margin-bottom: 14px;
     }
 
     .pre-camera .scan-frame {
-      min-height: 190px;
+      min-height: 180px;
       margin: 10px 0;
     }
 
-    .pre-camera .scan-frame video {
-      max-height: 230px;
-    }
-
-    .pre-form {
+    .pre-summary-box {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
       background: var(--panel);
       border: 1px solid var(--line);
-      border-radius: 20px;
-      padding: 14px;
+      border-radius: 14px;
+      padding: 12px 14px;
       margin: 12px 0;
     }
 
-    .pre-form label {
-      display: block;
-      color: var(--muted);
-      font-size: 11px;
-      font-weight: 900;
-      letter-spacing: .5px;
-      margin: 0 0 5px;
-    }
-
-    .pre-fields {
-      display: grid;
-      grid-template-columns: 1.45fr .8fr .8fr .62fr;
-      gap: 7px;
-    }
-
-    .pre-fields input {
-      min-width: 0;
-      width: 100%;
-      background: #12171b;
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      color: white;
-      padding: 12px 7px;
-      font: 600 13px system-ui, sans-serif;
-    }
-
-    .pre-save {
-      width: 100%;
-      min-height: 52px;
-      margin-top: 12px;
-    }
-
-    .pre-summary {
-      display: flex;
-      justify-content: space-between;
-      gap: 8px;
-      color: var(--muted);
-      font-size: 12px;
-      margin: 14px 2px;
+    @media (min-width: 500px) {
+      .pre-summary-box {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
     }
 
     .pre-list {
@@ -705,69 +404,70 @@
 
     .pre-row {
       display: grid;
-      grid-template-columns: 1.45fr .8fr .8fr .62fr;
-      gap: 7px;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
       align-items: center;
       padding: 10px 0;
       border-bottom: 1px solid var(--line);
     }
 
-    .pre-row:last-child {
-      border-bottom: 0;
+    @media (min-width: 600px) {
+      .pre-row {
+        grid-template-columns: 1.1fr .5fr .5fr .9fr .9fr .9fr 35px;
+      }
     }
 
-    .pre-row input {
+    .pre-row input, .pre-row select {
       min-width: 0;
       width: 100%;
       background: #12171b;
       border: 1px solid #343e49;
       border-radius: 8px;
       color: white;
-      padding: 9px 5px;
-      font: 600 11px system-ui, sans-serif;
+      padding: 8px 6px;
+      font: 600 12px system-ui, sans-serif;
     }
 
     .pre-colhead {
-      display: grid;
-      grid-template-columns: 1.45fr .8fr .8fr .62fr;
-      gap: 7px;
-      padding: 5px 0 9px;
-      color: var(--muted);
-      font-size: 9px;
-      font-weight: 900;
+      display: none;
+    }
+
+    @media (min-width: 600px) {
+      .pre-colhead {
+        display: grid;
+        grid-template-columns: 1.1fr .5fr .5fr .9fr .9fr .9fr 35px;
+        gap: 7px;
+        padding: 5px 0 9px;
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 900;
+      }
     }
 
     .pre-actions {
       display: flex;
+      flex-direction: column;
       gap: 8px;
       margin-top: 14px;
     }
 
-    .pre-actions .btn {
-      min-height: 48px;
-      flex: 1;
-      font-size: 13px;
+    @media (min-width: 500px) {
+      .pre-actions {
+        flex-direction: row;
+      }
     }
 
     /* Helpdesk Section Styling */
-    .help-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      margin: 4px 0 18px;
-    }
-
     .help-head h1 {
-      font-size: 30px;
-      margin: 6px 0;
+      font-size: 24px;
+      margin: 4px 0 14px;
     }
 
     .help-card {
       background: var(--panel);
       border: 1px solid var(--line);
-      border-radius: 20px;
-      padding: 16px;
+      border-radius: 18px;
+      padding: 14px;
       margin: 12px 0;
     }
 
@@ -776,7 +476,7 @@
       color: var(--muted);
       font-size: 11px;
       font-weight: 900;
-      margin: 12px 0 5px;
+      margin: 10px 0 4px;
     }
 
     .problem-buttons-sm {
@@ -812,20 +512,14 @@
     }
 
     .help-input,
-    .help-select,
-    .help-textarea {
+    .help-select {
       width: 100%;
       background: #12171b;
       border: 1px solid var(--line);
-      border-radius: 11px;
+      border-radius: 10px;
       color: white;
-      padding: 13px;
+      padding: 10px 12px;
       font: 14px system-ui, sans-serif;
-    }
-
-    .help-textarea {
-      min-height: 78px;
-      resize: vertical;
     }
 
     .awb-item-card {
@@ -836,72 +530,29 @@
       margin-top: 10px;
     }
 
-    .help-camera .scan-frame {
-      min-height: 190px;
-      margin: 10px 0;
-    }
-
-    .help-camera .scan-frame video {
-      max-height: 260px;
-    }
-
-    .help-actions {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-    }
-
-    .help-actions .btn {
-      min-height: 52px;
-      font-size: 13px;
-    }
-
-    .photo-strip {
-      display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      margin-top: 10px;
-    }
-
-    .photo-thumb {
-      width: 82px;
-      height: 82px;
-      object-fit: cover;
-      border-radius: 10px;
-      border: 1px solid var(--line);
-      flex: 0 0 auto;
-    }
-
     .help-report {
       background: var(--panel);
       border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 16px;
-      margin: 12px 0;
+      border-radius: 16px;
+      padding: 14px;
+      margin: 10px 0;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
     }
 
     .help-report-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      gap: 10px;
-    }
-
-    .help-report-title {
-      font-weight: 800;
-      font-size: 16px;
-      color: #ffffff;
-      word-break: break-word;
+      gap: 8px;
     }
 
     .help-badge {
       display: inline-block;
-      padding: 4px 10px;
-      border-radius: 8px;
-      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 10px;
       font-weight: 800;
       background: #252c34;
       color: var(--amber);
@@ -918,43 +569,21 @@
     .help-meta {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px 14px;
-      font-size: 12px;
+      gap: 6px 12px;
+      font-size: 11px;
       color: var(--muted);
       padding-bottom: 4px;
       border-bottom: 1px dashed #26303a;
     }
 
-    .help-meta span {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-    }
-
     .help-report-detail {
-      font-size: 13px;
+      font-size: 12px;
       color: #c0c8d2;
-      line-height: 1.45;
+      line-height: 1.4;
       background: #12171b;
-      padding: 10px 12px;
-      border-radius: 10px;
+      padding: 8px 10px;
+      border-radius: 8px;
       border: 1px solid #202831;
-    }
-
-    .help-report-photos {
-      display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      padding-top: 4px;
-    }
-
-    .help-report-photos img {
-      width: 72px;
-      height: 72px;
-      object-fit: cover;
-      border-radius: 10px;
-      border: 1px solid var(--line);
-      flex: 0 0 auto;
     }
 
     .help-footer {
@@ -987,7 +616,7 @@
 
       <!-- Informasi Tanggal, Batch & PIC Pengirim -->
       <div class="pre-form" style="margin-bottom: 12px; background: var(--panel); padding: 14px; border-radius: 16px;">
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px;">
+        <div class="pre-form-grid">
           <div>
             <label style="color:var(--muted); font-size:11px; font-weight:900; display:block; margin-bottom:4px;">TANGGAL</label>
             <input type="date" id="preDate" style="width:100%; background:#12171b; border:1px solid var(--line); border-radius:10px; color:white; padding:9px 10px; font-weight:700;">
@@ -1010,16 +639,16 @@
       <!-- Selector Tujuan Active / HUB Utama -->
       <div class="pre-form" style="margin-bottom: 14px;">
         <div style="padding: 12px; background: #12171b; border: 1px dashed var(--amber); border-radius: 14px;">
-          <label style="color:var(--amber); font-weight:900; font-size:12px; display:block; margin-bottom:6px;">
+          <label style="color:var(--amber); font-weight:900; font-size:11px; display:block; margin-bottom:6px;">
             🎯 TARGET TUJUAN / HUB SAAT INI (HASIL SCAN KAMERA AKAN MASUK KE SINI)
           </label>
-          <div style="display:flex; gap:8px; margin-bottom:4px;">
-            <input id="preStaging" placeholder="Ketik atau pilih HUB (cth: HUB JKT-WEST)" style="flex:1; font-weight:800; font-size:15px; color:#ffd05b; background:#1b2026; border:1px solid var(--amber); border-radius:10px; padding:12px 10px;">
-            <button class="btn primary" id="btnQuickAddStaging" style="min-height: auto; padding: 0 16px; font-size: 13px; font-weight:800;">＋ Target HUB Baru</button>
+          <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:4px;">
+            <input id="preStaging" placeholder="Ketik atau pilih HUB (cth: HUB JKT-WEST)" style="width:100%; font-weight:800; font-size:14px; color:#ffd05b; background:#1b2026; border:1px solid var(--amber); border-radius:10px; padding:10px;">
+            <button class="btn primary" id="btnQuickAddStaging" style="min-height:40px; padding:0 14px; font-size:12px; font-weight:800;">＋ Target HUB Baru</button>
           </div>
           <div style="margin-top:6px;">
-            <label style="color:var(--muted); font-size:11px; font-weight:900; display:block; margin-bottom:4px;">PENERIMA UNTUK TARGET HUB INI (OPTIONAL)</label>
-            <input id="preReceiver" placeholder="Nama / Kontak Penerima di Tujuan HUB ini" style="width:100%; background:#1b2026; border:1px solid var(--line); border-radius:10px; color:white; padding:9px 10px; font-size:13px; font-weight:600;">
+            <label style="color:var(--muted); font-size:10px; font-weight:900; display:block; margin-bottom:4px;">PENERIMA UNTUK TARGET HUB INI (OPTIONAL)</label>
+            <input id="preReceiver" placeholder="Nama / Kontak Penerima di Tujuan HUB ini" style="width:100%; background:#1b2026; border:1px solid var(--line); border-radius:10px; color:white; padding:8px 10px; font-size:12px; font-weight:600;">
           </div>
         </div>
       </div>
@@ -1031,23 +660,23 @@
         </div>
         <div class="scan-frame" id="preScanFrame">
           <div class="camera-placeholder">
-            <div class="cam-icon" style="font-size:36px;">🔍</div>
-            <p style="margin:4px 0 0;font-size:13px;">Arahkan Kamera ke Barcode Bagseal</p>
+            <div class="cam-icon">🔍</div>
+            <p style="margin:4px 0 0;font-size:12px;">Arahkan Kamera ke Barcode Bagseal</p>
           </div>
           <video id="preWebcam" playsinline autoplay muted></video>
         </div>
-        <div class="help-actions">
+        <div>
           <button class="btn primary" id="btnPreCam">▶ Kamera Pre-Alert Scan</button>
         </div>
       </div>
 
-      <div class="pre-summary" style="align-items:center;">
-        <div>
+      <div class="pre-summary-box">
+        <div style="font-size:13px;">
           <span>TERCATAT: <strong id="preBagCount" style="color:var(--text)">0 Bagseal</strong></span> |
           <span>TOTAL PARCEL: <strong id="preParcelSum" style="color:var(--amber)">0 Parcel</strong></span> |
           <span>BERAT: <strong id="preWeightSum" style="color:var(--green)">0 Kg</strong></span>
         </div>
-        <button class="btn primary" id="btnExportPreTop" style="min-height:40px; padding:6px 14px; font-size:13px; font-weight:800;">📥 Unduh Excel Pra-Alert</button>
+        <button class="btn primary" id="btnExportPreTop" style="min-height:38px; padding:6px 14px; font-size:12px; font-weight:800;">📥 Unduh Excel Pra-Alert</button>
       </div>
 
       <div id="preGroupedRows">
@@ -1056,9 +685,9 @@
         </div>
       </div>
 
-      <div class="pre-actions" style="margin-top:18px;">
+      <div class="pre-actions">
         <button class="btn danger" id="btnClearPre">🗑 Hapus Trip Tanggal Ini</button>
-        <button class="btn primary" id="btnExportPre" style="font-size:15px; font-weight:900;">📥 Unduh Excel Pra-Alert (CSC HLM)</button>
+        <button class="btn primary" id="btnExportPre" style="font-size:14px; font-weight:900;">📥 Unduh Excel Pra-Alert (CSC HLM)</button>
       </div>
     </section>
 
