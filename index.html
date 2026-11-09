@@ -965,8 +965,25 @@
         const staff = $('helpStaff').value.trim();
         const hub = $('helpHub').value.trim();
 
-        if (!shipDate || !staff || !hub || !bagshieldVal) {
-          toast('❌ Silakan lengkapi Tanggal, Nama Petugas, HUB, dan No Bagshield!');
+        // Check for empty fields and give clear feedback
+        if (!shipDate) {
+          toast('❌ Mohon isi Tanggal Pengiriman!');
+          $('helpShipDate').focus();
+          return;
+        }
+        if (!staff) {
+          toast('❌ Mohon isi Nama Petugas!');
+          $('helpStaff').focus();
+          return;
+        }
+        if (!hub) {
+          toast('❌ Mohon isi Lokasi HUB / Staging!');
+          $('helpHub').focus();
+          return;
+        }
+        if (!bagshieldVal) {
+          toast('❌ Mohon isi atau scan Nomor Bagshield!');
+          $('helpBagshield').focus();
           return;
         }
 
