@@ -452,6 +452,20 @@
             </div>
           </div>
 
+          <!-- Kamera Scanner Khusus Tampil di Step 2 -->
+          <div class="help-card help-camera" id="helpCameraCardStep2" style="display:none; border:2px solid var(--amber);">
+            <div class="status">
+              <span class="dot"></span>
+              <span id="helpCamStatusStep2">Scan Barcode AWB Aktif</span>
+            </div>
+            <div class="scan-frame active" id="helpScanFrameStep2">
+              <div id="html5qr-helpdesk-reader-step2" style="width:100%;"></div>
+            </div>
+            <div style="text-align:center; margin-top:10px;">
+              <button class="btn danger" id="btnCloseHelpCamStep2" style="min-height:40px; padding:6px 16px; font-size:12px;">⏹ Tutup Kamera</button>
+            </div>
+          </div>
+
           <div class="help-card">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
               <div style="font-weight:900;">Daftar AWB dalam Bagshield (<span id="awbListCount">0</span>)</div>
@@ -565,6 +579,7 @@
       }
 
       if ($('helpCameraCard')) $('helpCameraCard').style.display = 'none';
+      if ($('helpCameraCardStep2')) $('helpCameraCardStep2').style.display = 'none';
       if ($('btnHelpCam')) $('btnHelpCam').textContent = '▶ Bukalah Kamera Scan AWB';
     }
 
@@ -579,12 +594,19 @@
 
       stopAllCameras();
 
-      $('helpCameraCard').style.display = 'block';
-      $('helpCamStatus').textContent = mode === 'bagshield' ? 'Scan Barcode Bagshield Aktif' : 'Scan Barcode AWB Aktif';
-      if ($('btnHelpCam') && mode === 'awb') $('btnHelpCam').textContent = '⏹ Hentikan Kamera AWB';
+      const containerId = mode === 'bagshield' ? 'html5qr-helpdesk-reader' : 'html5qr-helpdesk-reader-step2';
+      const cardId = mode === 'bagshield' ? 'helpCameraCard' : 'helpCameraCardStep2';
+
+      $(cardId).style.display = 'block';
+      if (mode === 'bagshield') {
+        $('helpCamStatus').textContent = 'Scan Barcode Bagshield Aktif';
+      } else {
+        $('helpCamStatusStep2').textContent = 'Scan Barcode AWB Aktif';
+        if ($('btnHelpCam')) $('btnHelpCam').textContent = '⏹ Hentikan Kamera AWB';
+      }
 
       try {
-        html5QrScannerHelp = new Html5Qrcode("html5qr-helpdesk-reader");
+        html5QrScannerHelp = new Html5Qrcode(containerId);
         const config = { fps: 10, qrbox: { width: 250, height: 180 } };
 
         await html5QrScannerHelp.start(
@@ -608,7 +630,7 @@
       } catch (err) {
         console.error('Camera start error:', err);
         toast('Gagal mengaktifkan kamera. Pastikan izin kamera telah diberikan.');
-        $('helpCameraCard').style.display = 'none';
+        $(cardId).style.display = 'none';
         html5QrScannerHelp = null;
       }
     }
@@ -692,7 +714,7 @@
     }
 
     window.takePhotoForAwb = function(id) {
-      const video = document.querySelector('#html5qr-helpdesk-reader video');
+      const video = document.querySelector('#html5qr-helpdesk-reader-step2 video') || document.querySelector('#html5qr-helpdesk-reader video');
       if (!html5QrScannerHelp || !video || video.paused) {
         toast('Nyalakan Kamera terlebih dahulu untuk mengambil foto!');
         return;
@@ -925,6 +947,7 @@
 
       $('btnScanBagshieldCam')?.addEventListener('click', () => toggleHelpCam('bagshield'));
       $('btnCloseHelpCam')?.addEventListener('click', () => stopAllCameras());
+      $('btnCloseHelpCamStep2')?.addEventListener('click', () => stopAllCameras());
       $('btnHelpCam')?.addEventListener('click', () => toggleHelpCam('awb'));
 
       $('btnLoadSavedBagshield')?.addEventListener('click', () => {
