@@ -1,1515 +1,2751 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="id">
 <head>
+  <base target="_top">
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#111518">
-  <meta name="description" content="Aplikasi pemindai dan pencatat AWB Anteraja.">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Helpdesk Scan Pro">
-  <title>Helpdesk Kendala Serah Terima | Anteraja</title>
-  
-  <!-- External Libraries -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#bd1455">
+  <title>Helpdesk Kendala Serah Terima Paket</title>
+
   <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
   <style>
-    :root {
-      color-scheme: dark;
-      --bg: #111518;
-      --panel: #1b2026;
-      --panel2: #252c34;
-      --line: #303943;
-      --text: #f3f5f8;
-      --muted: #929eae;
-      --amber: #ffa500;
-      --green: #16b887;
-      --red: #f05b62;
+    :root{
+      --magenta:#c2185b;
+      --magenta2:#9f1248;
+      --orange:#ff8a00;
+      --bg:#f5f6fa;
+      --card:#fff;
+      --ink:#20232b;
+      --muted:#727987;
+      --line:#e5e7ed;
+      --green:#12865b;
+      --red:#d9344b;
+      --shadow:0 8px 28px rgba(32,35,43,.07)
     }
 
-    * {
-      box-sizing: border-box;
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--ink);
+      font:15px/1.5 Inter,system-ui,-apple-system,"Segoe UI",sans-serif
     }
 
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--text);
-      font: 16px/1.45 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+
+    .app{
+      max-width:960px;
+      margin:auto;
+      padding:18px 14px 48px
     }
 
-    .app {
-      max-width: 720px;
-      min-height: 100dvh;
-      margin: auto;
-      padding: 20px 14px 40px;
+    header{
+      background:linear-gradient(120deg,var(--magenta2),var(--magenta) 62%,#e34a61);
+      color:#fff;
+      padding:20px;
+      border-radius:20px;
+      box-shadow:var(--shadow);
+      margin-bottom:16px
     }
 
-    /* Header Styling */
-    .app-brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-weight: 900;
-      font-size: 20px;
-      color: var(--amber);
-      letter-spacing: 1px;
-      margin-bottom: 6px;
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px
     }
 
-    .eyebrow {
-      color: var(--amber);
-      font-size: 11px;
-      font-weight: 900;
-      letter-spacing: 1.5px;
+    .brand-icon{
+      width:44px;
+      height:44px;
+      border-radius:14px;
+      background:rgba(255,255,255,.16);
+      display:grid;
+      place-items:center;
+      font-size:23px
     }
 
-    .status {
-      display: inline-flex;
-      align-items: center;
-      gap: 9px;
-      background: #12171b;
-      border-radius: 22px;
-      padding: 7px 14px;
-      font-size: 12px;
-      font-weight: 800;
-      width: max-content;
+    .brand h1{
+      font-size:20px;
+      line-height:1.2;
+      margin:0;
+      font-weight:900
     }
 
-    .dot {
-      width: 9px;
-      height: 9px;
-      border-radius: 50%;
-      background: var(--green);
+    .brand p{
+      font-size:12px;
+      margin:4px 0 0;
+      opacity:.88
     }
 
-    .scan-frame {
-      min-height: 180px;
-      position: relative;
-      display: grid;
-      place-items: center;
-      margin: 12px 0 8px;
-      overflow: hidden;
-      background: #14191e;
-      border-radius: 14px;
+    .topline{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-top:16px;
+      flex-wrap:wrap
     }
 
-    .btn {
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      min-height: 48px;
-      padding: 10px 14px;
-      background: var(--panel2);
-      color: var(--text);
-      font: 800 14px system-ui, sans-serif;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      text-align: center;
-      transition: background 0.2s, opacity 0.2s;
-      width: 100%;
+    .steps{
+      display:flex;
+      gap:7px;
+      flex-wrap:wrap
     }
 
-    .btn:active {
-      opacity: 0.8;
+    .step-chip{
+      font-size:11px;
+      font-weight:800;
+      padding:6px 10px;
+      border-radius:99px;
+      background:rgba(255,255,255,.15);
+      color:#fff
     }
 
-    .btn:disabled {
-      opacity: 0.55;
-      cursor: wait;
+    .step-chip.active{
+      background:#fff;
+      color:var(--magenta)
     }
 
-    input, select, button {
-      max-width: 100%;
+    .connection{
+      font-size:11px;
+      color:#fff;
+      opacity:.92
     }
 
-    .help-report-title {
-      min-width: 0;
-      overflow-wrap: anywhere;
+    .card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:18px;
+      margin:14px 0;
+      box-shadow:var(--shadow)
     }
 
-    @media (max-width: 480px) {
-      .app { padding-left: 10px; padding-right: 10px; }
-      .help-head h1 { font-size: 23px; }
-      .sheet { padding: 16px; }
-      .help-report-header { flex-direction: column; }
+    .card-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:10px;
+      margin-bottom:14px
     }
 
-    .btn.primary {
-      background: var(--amber);
-      border-color: var(--amber);
-      color: #17191b;
+    .card h2{
+      font-size:17px;
+      margin:0;
+      font-weight:900
     }
 
-    .btn.danger {
-      background: var(--red);
-      border-color: var(--red);
-      color: white;
+    .sub{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:3px
     }
 
-    .last-box {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 18px 14px;
-      text-align: center;
-      color: var(--muted);
+    .eyebrow{
+      font-size:10px;
+      letter-spacing:1.2px;
+      color:var(--magenta);
+      font-weight:900;
+      margin-bottom:4px
     }
 
-    /* Modal & Toast Styling */
-    .modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 10, 18, 0.82);
-      backdrop-filter: blur(4px);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 100;
-      padding: 18px;
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:12px
     }
 
-    .modal.show {
-      display: flex;
+    .field{min-width:0}
+
+    .field label{
+      display:block;
+      font-size:12px;
+      font-weight:800;
+      color:#525968;
+      margin:0 0 6px
     }
 
-    .sheet {
-      width: 100%;
-      max-width: 520px;
-      background: #20262d;
-      border: 1px solid var(--line);
-      border-radius: 20px;
-      padding: 20px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    .field input,
+    .field select,
+    .field textarea{
+      width:100%;
+      border:1px solid #dce0e8;
+      background:#fff;
+      border-radius:11px;
+      padding:11px 12px;
+      outline:none;
+      color:var(--ink)
     }
 
-    .toast {
-      position: fixed;
-      left: 50%;
-      bottom: 24px;
-      transform: translate(-50%, 14px);
-      opacity: 0;
-      pointer-events: none;
-      background: #29343c;
-      color: white;
-      padding: 11px 16px;
-      border-radius: 12px;
-      font-weight: 800;
-      font-size: 13px;
-      z-index: 120;
-      transition: .18s;
-      white-space: nowrap;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    .field textarea{
+      min-height:82px;
+      resize:vertical
     }
 
-    .toast.show {
-      opacity: 1;
-      transform: translate(-50%, 0);
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus{
+      border-color:var(--magenta);
+      box-shadow:0 0 0 3px rgba(194,24,91,.1)
     }
 
-    .confirm-dialog {
-      text-align: center;
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      border:1px solid var(--line);
+      background:#fff;
+      color:var(--ink);
+      border-radius:11px;
+      padding:10px 14px;
+      min-height:42px;
+      font-weight:800;
+      font-size:13px
     }
 
-    .confirm-actions {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
+    .btn.primary{
+      background:var(--magenta);
+      border-color:var(--magenta);
+      color:#fff
     }
 
-    /* Step 2 Fullscreen Overlay Layout */
-    .step2-overlay {
-      position: fixed;
-      inset: 0;
-      background: var(--bg);
-      z-index: 90;
-      overflow-y: auto;
-      padding: 16px 14px 40px;
-      display: none;
+    .btn.orange{
+      background:var(--orange);
+      border-color:var(--orange);
+      color:#251600
     }
 
-    .step2-overlay.active {
-      display: block;
+    .btn.soft{
+      background:#fff1f6;
+      border-color:#f3c5d7;
+      color:var(--magenta)
     }
 
-    .step2-container {
-      max-width: 720px;
-      margin: 0 auto;
+    .btn.danger{
+      color:var(--red);
+      border-color:#f1c4cb;
+      background:#fff7f8
     }
 
-    /* Helpdesk Section Styling */
-    .help-head h1 {
-      font-size: 26px;
-      margin: 4px 0 14px;
-      letter-spacing: -0.5px;
+    .btn:disabled{
+      opacity:.45;
+      cursor:not-allowed
     }
 
-    .help-card {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 14px;
-      margin: 12px 0;
+    .btn.full{width:100%}
+
+    .actions{
+      display:flex;
+      gap:9px;
+      flex-wrap:wrap;
+      margin-top:15px
     }
 
-    .help-card label {
-      display: block;
-      color: var(--muted);
-      font-size: 11px;
-      font-weight: 900;
-      margin: 10px 0 4px;
+    .right{margin-left:auto}
+
+    .notice{
+      padding:11px 13px;
+      background:#fff7e9;
+      border:1px solid #ffe2b5;
+      border-radius:12px;
+      color:#754b0c;
+      font-size:12px
     }
 
-    .problem-buttons-sm {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
-      margin-top: 4px;
+    .success-note{
+      background:#eaf8f1;
+      border-color:#c5ebd8;
+      color:#176444
     }
 
-    .problem-btn-sm {
-      background: #12171b;
-      border: 1px solid var(--line);
-      color: var(--text);
-      padding: 6px 10px;
-      border-radius: 8px;
-      font-size: 11px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      flex: 1 1 calc(50% - 4px);
-      text-align: center;
+    .status-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:5px 9px;
+      border-radius:99px;
+      background:#f0f2f6;
+      color:#566070;
+      font-size:11px;
+      font-weight:800
     }
 
-    .problem-btn-sm:hover {
-      background: var(--panel2);
+    .dot{
+      width:7px;
+      height:7px;
+      border-radius:50%;
+      background:#9aa3b2
     }
 
-    .problem-btn-sm.active {
-      background: #332713;
-      border-color: var(--amber);
-      color: #ffd05b;
-      font-weight: 900;
+    .dot.green{background:#159966}
+
+    .hidden{display:none!important}
+
+    .bagshield-box{
+      border:1px solid #f0c8d7;
+      border-radius:16px;
+      padding:15px;
+      background:linear-gradient(180deg,#fff8fb,#fff);
+      margin-top:14px
     }
 
-    .help-input,
-    .help-select {
-      width: 100%;
-      background: #12171b;
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      color: white;
-      padding: 10px 12px;
-      font: 14px system-ui, sans-serif;
+    .bag-title{
+      font-weight:900;
+      color:var(--magenta);
+      font-size:15px
     }
 
-    .awb-item-card {
-      background: #12171b;
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 12px;
-      margin-top: 10px;
+    .scan-row{
+      display:flex;
+      gap:8px
     }
 
-    .help-report {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 14px;
-      margin: 10px 0;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+    .scan-row input{
+      flex:1;
+      min-width:0
     }
 
-    .help-report-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 8px;
+    .scan-row .btn{white-space:nowrap}
+
+    .toggle{
+      display:flex;
+      gap:8px;
+      background:#f1f2f6;
+      padding:5px;
+      border-radius:12px;
+      width:fit-content
     }
 
-    .help-badge {
-      display: inline-block;
-      padding: 3px 8px;
-      border-radius: 6px;
-      font-size: 10px;
-      font-weight: 800;
-      background: #252c34;
-      color: var(--amber);
-      border: 1px solid #3d3422;
-      white-space: nowrap;
+    .toggle button{
+      border:0;
+      background:transparent;
+      border-radius:9px;
+      padding:8px 12px;
+      font-size:12px;
+      font-weight:900;
+      color:#636b78
     }
 
-    .help-badge.hub-badge {
-      background: #182824;
-      color: var(--green);
-      border-color: #174236;
+    .toggle button.active{
+      background:#fff;
+      color:var(--magenta);
+      box-shadow:0 2px 7px rgba(0,0,0,.08)
     }
 
-    .help-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px 12px;
-      font-size: 11px;
-      color: var(--muted);
-      padding-bottom: 4px;
-      border-bottom: 1px dashed #26303a;
+    .package-form{
+      margin-top:13px;
+      padding:14px;
+      border:1px dashed #d8dce5;
+      border-radius:14px;
+      background:#fbfcfe
     }
 
-    .help-report-detail {
-      font-size: 12px;
-      color: #c0c8d2;
-      line-height: 1.4;
-      background: #12171b;
-      padding: 8px 10px;
-      border-radius: 8px;
-      border: 1px solid #202831;
+    .photo-row{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap
     }
 
-    .pre-summary {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 20px;
-      font-size: 13px;
-      font-weight: 800;
+    .photo-preview{
+      width:76px;
+      height:76px;
+      border:1px solid var(--line);
+      border-radius:10px;
+      object-fit:cover;
+      background:#f2f2f2
     }
 
-    .help-footer {
-      margin-top: 10px;
+    .file-label{
+      display:inline-flex;
+      align-items:center;
+      gap:7px;
+      border:1px solid #efbdd0;
+      background:#fff3f8;
+      color:var(--magenta);
+      padding:9px 12px;
+      border-radius:10px;
+      font-size:12px;
+      font-weight:800;
+      cursor:pointer
     }
 
-    .sync-status {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      border-radius: 7px;
-      padding: 4px 8px;
-      font-size: 10px;
-      font-weight: 800;
-      border: 1px solid var(--line);
-      background: #12171b;
-      color: var(--muted);
-    }
-    .sync-status.synced { color: #7ce0bd; border-color: #1d654c; background: #14251f; }
-    .sync-status.pending { color: #ffd05b; border-color: #6b5121; background: #2b2416; }
-    .sync-status.error { color: #ff9297; border-color: #71353a; background: #2d1a1c; }
-    .sync-actions { display:flex; flex-wrap:wrap; align-items:center; gap:7px; margin-top:8px; }
-    .sync-retry-btn { background:#252c34; border:1px solid #596575; color:#f3f5f8; padding:6px 10px; border-radius:8px; font-size:11px; font-weight:800; cursor:pointer; }
-    .sync-retry-btn:disabled { opacity:.55; cursor:wait; }
+    .file-label input{display:none}
 
+    .counter{
+      font-size:11px;
+      color:var(--muted);
+      font-weight:700
+    }
+
+    .list{
+      display:grid;
+      gap:9px;
+      margin-top:13px
+    }
+
+    .package-item,
+    .saved-item{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:flex-start;
+      border:1px solid var(--line);
+      border-radius:13px;
+      padding:12px;
+      background:#fff
+    }
+
+    .package-left{min-width:0}
+
+    .package-title{
+      font-size:13px;
+      font-weight:900;
+      overflow-wrap:anywhere
+    }
+
+    .package-desc{
+      font-size:11px;
+      color:var(--muted);
+      margin-top:3px;
+      overflow-wrap:anywhere
+    }
+
+    .thumb{
+      width:54px;
+      height:54px;
+      border-radius:9px;
+      object-fit:cover;
+      border:1px solid var(--line);
+      flex:none
+    }
+
+    .item-actions{
+      display:flex;
+      gap:5px;
+      flex:none
+    }
+
+    .mini{
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:8px;
+      padding:6px 8px;
+      font-size:11px;
+      font-weight:800
+    }
+
+    .mini.delete{color:var(--red)}
+
+    .saved-list{
+      display:grid;
+      gap:10px
+    }
+
+    .saved-item{align-items:center}
+
+    .saved-main{
+      min-width:0;
+      flex:1
+    }
+
+    .saved-name{
+      font-size:14px;
+      font-weight:900
+    }
+
+    .saved-meta{
+      font-size:11px;
+      color:var(--muted);
+      margin-top:3px
+    }
+
+    .summary-strip{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:8px;
+      margin:12px 0
+    }
+
+    .metric{
+      background:#f7f7fa;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:10px
+    }
+
+    .metric b{
+      display:block;
+      font-size:19px
+    }
+
+    .metric span{
+      font-size:10px;
+      color:var(--muted);
+      font-weight:800
+    }
+
+    .modal{
+      position:fixed;
+      inset:0;
+      background:rgba(12,15,20,.75);
+      z-index:20;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:16px
+    }
+
+    .modal.show{display:flex}
+
+    .modal-box{
+      background:#fff;
+      border-radius:17px;
+      width:min(520px,100%);
+      padding:16px
+    }
+
+    .modal-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      font-weight:900;
+      margin-bottom:10px
+    }
+
+    #reader{
+      width:100%;
+      overflow:hidden;
+      border-radius:12px
+    }
+
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:20px;
+      transform:translate(-50%,20px);
+      opacity:0;
+      pointer-events:none;
+      background:#252a34;
+      color:#fff;
+      padding:11px 16px;
+      border-radius:12px;
+      font-size:12px;
+      font-weight:800;
+      z-index:50;
+      transition:.2s;
+      max-width:calc(100% - 28px);
+      text-align:center
+    }
+
+    .toast.show{
+      opacity:1;
+      transform:translate(-50%,0)
+    }
+
+    .progress{
+      height:7px;
+      background:#f0e7eb;
+      border-radius:9px;
+      overflow:hidden;
+      margin-top:10px
+    }
+
+    .progress>span{
+      height:100%;
+      display:block;
+      width:0;
+      background:linear-gradient(90deg,var(--magenta),var(--orange));
+      transition:width .2s
+    }
+
+    .footer-note{
+      text-align:center;
+      color:#8c929d;
+      font-size:10px;
+      margin-top:18px
+    }
+
+    @media(max-width:680px){
+      .app{padding:10px 10px 34px}
+      .grid{grid-template-columns:1fr}
+      .card{padding:14px}
+      .brand h1{font-size:18px}
+      .actions .btn{flex:1}
+      .scan-row .btn{padding:8px}
+      .summary-strip{grid-template-columns:repeat(3,1fr)}
+      .saved-item{align-items:flex-start}
+    }
   </style>
 </head>
 
 <body>
-  <main class="app">
-    <!-- Brand Header -->
-    <div class="app-brand">
-      <span>🚨</span> Helpdesk Kendala Paket
+<div class="app">
+
+  <header>
+    <div class="brand">
+      <div class="brand-icon">📦</div>
+      <div>
+        <h1>Helpdesk Kendala Serah Terima Paket</h1>
+        <p>Pencatatan Bagshield dan paket bermasalah</p>
+      </div>
     </div>
 
-    <!-- Halaman Utama: Helpdesk Kendala Paket -->
-    <section id="pageHelpdesk">
-      <div class="help-head">
+    <div class="topline">
+      <div class="steps">
+        <span class="step-chip active" id="chipMain">1. Data Utama</span>
+        <span class="step-chip" id="chipBag">2. Data Bagshield</span>
+        <span class="step-chip" id="chipFinish">3. Simpan & Download</span>
+      </div>
+      <div class="connection" id="connectionStatus">Menghubungkan ke Google...</div>
+    </div>
+  </header>
+
+  <section class="card" id="mainStep">
+
+    <div class="card-head">
+      <div>
+        <div class="eyebrow">STEP 1</div>
+        <h2>Pengisian Data Utama</h2>
+        <div class="sub">Isi informasi pengiriman sebelum mulai mencatat Bagshield.</div>
+      </div>
+
+      <span class="status-pill">
+        <span class="dot green"></span>Data laporan
+      </span>
+    </div>
+
+    <div class="grid">
+      <div class="field">
+        <label for="shipDate">Tanggal Pengiriman *</label>
+        <input type="date" id="shipDate">
+      </div>
+
+      <div class="field">
+        <label for="staff">Nama Petugas *</label>
+        <input id="staff" placeholder="Nama petugas pelapor" autocomplete="name">
+      </div>
+
+      <div class="field">
+        <label for="hub">HUB Pengirim *</label>
+        <input id="hub" placeholder="Contoh: HUB MND / STAGING BJM">
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary full" id="btnContinue">
+        Lanjut ke Pengisian Bagshield →
+      </button>
+    </div>
+
+  </section>
+
+  <section id="bagStep" class="hidden">
+
+    <div class="card">
+
+      <div class="card-head">
         <div>
-          <div class="eyebrow">PENCATATAN & KENDALA SERAH TERIMA</div>
-          <h1>Laporan Kendala</h1>
+          <div class="eyebrow">STEP 2</div>
+          <h2>Daftar Bagshield</h2>
+          <div class="sub">
+            Simpan sementara setiap Bagshield setelah seluruh paket di dalamnya dicatat.
+          </div>
+        </div>
+
+        <button class="btn soft" id="btnEditMain">✎ Data Utama</button>
+      </div>
+
+      <div class="summary-strip">
+        <div class="metric">
+          <b id="bagCount">0</b>
+          <span>BAGSHIELD</span>
+        </div>
+
+        <div class="metric">
+          <b id="packageCount">0</b>
+          <span>TOTAL PAKET</span>
+        </div>
+
+        <div class="metric">
+          <b id="noResiCount">0</b>
+          <span>TANPA RESI</span>
         </div>
       </div>
 
-      <!-- Kamera Scanner Shared untuk Helpdesk (Bagshield & AWB) -->
-      <div class="help-card help-camera" id="helpCameraCard" style="display:none; border:2px solid var(--amber);">
-        <div class="status">
-          <span class="dot"></span>
-          <span id="helpCamStatus">Kamera Pemindai Off</span>
+      <div class="notice">
+        Alur: scan/input nomor Bagshield → masukkan setiap paket.
+        Jika paket tidak memiliki resi, foto bukti dan ciri-ciri paket wajib diisi.
+        Tekan <b>Simpan Sementara Bagshield</b> untuk menambahkan Bagshield berikutnya.
+      </div>
+
+      <div class="bagshield-box" id="bagEditor">
+
+        <div class="card-head">
+          <div>
+            <div class="bag-title" id="bagEditorTitle">Bagshield Baru</div>
+            <div class="sub">Nomor Bagshield / barcode pengikat karung</div>
+          </div>
+
+          <span class="status-pill" id="bagEditorStatus">Belum disimpan</span>
         </div>
-        <div class="scan-frame active" id="helpScanFrame">
-          <div id="html5qr-helpdesk-reader" style="width:100%;"></div>
+
+        <div class="field">
+          <label for="bagshieldNo">Nomor Bagshield *</label>
+
+          <div class="scan-row">
+            <input
+              id="bagshieldNo"
+              placeholder="Scan barcode atau ketik nomor Bagshield"
+            >
+
+            <button class="btn soft" id="btnScanBag" type="button">
+              ▦ Scan
+            </button>
+          </div>
         </div>
-        <div style="text-align:center; margin-top:10px;">
-          <button class="btn danger" id="btnCloseHelpCam" style="min-height:40px; padding:6px 16px; font-size:12px;">⏹ Tutup Kamera</button>
+
+        <div style="margin-top:16px">
+          <div class="field">
+            <label>Status Resi Paket</label>
+          </div>
+
+          <div class="toggle">
+            <button type="button" id="modeHasResi" class="active">
+              Ada Resi
+            </button>
+
+            <button type="button" id="modeNoResi">
+              Tidak Ada Resi
+            </button>
+          </div>
+        </div>
+
+        <div class="package-form" id="packageForm">
+
+          <div id="resiFields">
+
+            <div class="field">
+              <label for="awb">Nomor Resi / AWB *</label>
+
+              <div class="scan-row">
+                <input id="awb" placeholder="Scan atau ketik nomor resi">
+
+                <button class="btn soft" id="btnScanAwb" type="button">
+                  ▦ Scan
+                </button>
+              </div>
+            </div>
+
+            <div class="field" style="margin-top:10px">
+              <label for="awbNotes">Keterangan paket (opsional)</label>
+              <textarea
+                id="awbNotes"
+                placeholder="Contoh: kondisi kemasan / ciri tambahan"
+              ></textarea>
+            </div>
+
+          </div>
+
+          <div id="noResiFields" class="hidden">
+
+            <div class="notice">
+              Paket tanpa nomor resi wajib dilengkapi
+              <b>foto bukti</b> dan <b>ciri-ciri paket</b>
+              agar dapat diidentifikasi.
+            </div>
+
+            <div class="field" style="margin-top:10px">
+              <label for="packageCharacteristics">Ciri-ciri Paket *</label>
+
+              <textarea
+                id="packageCharacteristics"
+                placeholder="Contoh: kardus cokelat ukuran sedang, lakban hitam, terdapat label tujuan..., bentuk/warna/merk/isi yang terlihat."
+              ></textarea>
+            </div>
+
+          </div>
+
+          <div class="field" style="margin-top:12px">
+
+            <label>
+              Foto Bukti
+              <span id="photoRequiredLabel" style="color:var(--red)">
+                (Wajib untuk paket tanpa resi)
+              </span>
+            </label>
+
+            <div class="photo-row">
+
+              <label class="file-label">
+                📷 Ambil / Pilih Foto
+                <input
+                  id="packagePhoto"
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                >
+              </label>
+
+              <img
+                id="photoPreview"
+                class="photo-preview hidden"
+                alt="Preview foto"
+              >
+
+              <span class="counter" id="photoInfo">Belum ada foto</span>
+
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="btn primary full" id="btnAddPackage">
+              ＋ Tambahkan Paket ke Bagshield
+            </button>
+          </div>
+
+        </div>
+
+        <div style="margin-top:15px;display:flex;justify-content:space-between;align-items:center;gap:8px">
+
+          <b style="font-size:13px">Paket dalam Bagshield ini</b>
+
+          <span class="status-pill" id="activePackageCount">0 paket</span>
+
+        </div>
+
+        <div id="activePackageList" class="list">
+          <div class="sub">Belum ada paket yang ditambahkan.</div>
+        </div>
+
+        <div class="actions">
+
+          <button class="btn orange full" id="btnSaveBag">
+            ▣ Simpan Sementara Bagshield
+          </button>
+
+          <button class="btn danger hidden" id="btnCancelBagEdit">
+            Batal Revisi
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="card">
+
+      <div class="card-head">
+        <div>
+          <h2>Bagshield yang Sudah Disimpan Sementara</h2>
+          <div class="sub">
+            Daftar ini akan digabung menjadi satu laporan akhir.
+          </div>
+        </div>
+
+        <span class="status-pill" id="savedBagBadge">0 tersimpan</span>
+      </div>
+
+      <div id="savedBagList" class="saved-list">
+        <div class="notice">
+          Belum ada Bagshield. Isi Bagshield pertama di atas.
         </div>
       </div>
 
-      <!-- Step 1: Data Utama & Scan Bagshield -->
-      <section class="help-card" id="helpStep1">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-          <div style="font-weight:900; color:var(--amber); font-size:16px;">STEP 1: Scan / Input Nomor Bagshield</div>
-          <span id="editingBadge" style="display:none; background:var(--green); color:#fff; font-size:11px; padding:3px 8px; border-radius:6px; font-weight:800;">Mode Edit</span>
-        </div>
+      <div class="actions">
 
-        <!-- Google Sheets Sync Configuration Box -->
-        <div style="background:#17221e; border:1px solid #1a5336; border-radius:12px; padding:10px; margin-bottom:14px;">
-          <label style="color:var(--green); font-size:11px; font-weight:900; margin:0 0 4px; display:block;">📊 KONFIGURASI SINKRONISASI GOOGLE SHEETS</label>
-          <input class="help-input" id="sheetsWebhookUrl" value="https://script.google.com/macros/s/AKfycbzXTyCoRm9j_uTlOFD1-1iPZthJHdQLfSQuG-lXhDxgaQR_REf9tZ0feEJ0lhohQuM/exec" style="font-size:11px; padding:8px 10px; border-color:#236140;" placeholder="Tempel URL Web App Google Apps Script">
-          <span style="font-size:10px; color:var(--muted); margin-top:4px; display:block;">Aplikasi akan mencoba mengirim ringkasan laporan ke URL webhook saat disimpan. Karena menggunakan mode no-cors, browser tidak dapat memastikan apakah Google Sheets benar-benar menerima data.</span>
-        </div>
-
-        <!-- Pilihan Bagshield Yang Sudah Pernah Diproses -->
-        <div style="background:#12171b; border:1px solid #332713; border-radius:12px; padding:10px; margin-bottom:14px;">
-          <label style="color:var(--amber); font-size:11px; font-weight:900; margin:0 0 4px; display:block;">📂 REVISI / TAMBAH AWB DARI LIST BAGSHIELD SEBELUMNYA</label>
-          <div style="display:flex; gap:8px;">
-            <select id="savedBagshieldSelect" class="help-select" style="padding:8px; font-size:12px; flex:1;">
-              <option value="">-- Pilih Dari List Bagshield --</option>
-            </select>
-            <button type="button" class="btn primary" id="btnLoadSavedBagshield" style="min-height:auto; padding:0 12px; font-size:12px; font-weight:800;">📂 Edit Bagshield Ini</button>
-          </div>
-        </div>
-        
-        <label for="helpShipDate">Tanggal Pengiriman</label>
-        <input class="help-input" type="date" id="helpShipDate">
-
-        <label for="helpStaff">Nama Petugas</label>
-        <input class="help-input" id="helpStaff" placeholder="Nama petugas pelapor">
-
-        <label for="helpHub">Lokasi HUB / Staging</label>
-        <input class="help-input" id="helpHub" placeholder="Contoh: HUB JKT-WEST / HUB MLG">
-
-        <label for="helpBagshield">No Bagshield (Pengikat Karung)</label>
-        <div style="display:flex; gap:8px;">
-          <input class="help-input" id="helpBagshield" placeholder="Scan barcode Bagshield atau ketik manual">
-          <button class="btn primary" id="btnScanBagshieldCam" type="button" style="min-height:auto; padding:0 14px; font-size:13px; white-space:nowrap;">📷 Scan Bagshield</button>
-        </div>
-
-        <button class="btn primary pre-save" id="btnNextToAwb" style="margin-top:16px; font-weight:900; font-size:15px;">➡️ Lanjutkan ke Scan AWB</button>
-      </section>
-
-      <!-- Step 2: Fullscreen Overlay untuk Scan Barcode AWB & Detail List -->
-      <div id="helpStep2" class="step2-overlay">
-        <div class="step2-container">
-          <div class="help-card" style="border: 2px solid var(--amber);">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-              <div style="font-weight:900; color:var(--amber); font-size:16px;">🔒 BAGSHIELD: <span id="displayActiveBagshield" style="color:#fff;">-</span></div>
-              <button class="btn" id="btnBackToStep1" style="min-height:auto; width:auto; padding:6px 14px; font-size:12px; background:#252c34; border-color:var(--line);">⬅ Kembali ke Step 1</button>
-            </div>
-            <div style="font-size:12px; color:var(--muted);">Silakan scan barcode AWB di dalam Bagshield ini. Hasil scan akan langsung masuk ke daftar di bawah.</div>
-            <div style="margin-top:10px;">
-              <button class="btn primary" id="btnHelpCam" style="width:100%; min-height:46px; font-size:14px; font-weight:800;">▶ Bukalah Kamera Scan AWB</button>
-            </div>
-          </div>
-
-          <!-- Kamera Scanner Khusus Tampil di Step 2 -->
-          <div class="help-card help-camera" id="helpCameraCardStep2" style="display:none; border:2px solid var(--amber);">
-            <div class="status">
-              <span class="dot"></span>
-              <span id="helpCamStatusStep2">Scan Barcode AWB Aktif</span>
-            </div>
-            <div class="scan-frame active" id="helpScanFrameStep2">
-              <div id="html5qr-helpdesk-reader-step2" style="width:100%;"></div>
-            </div>
-            <div style="text-align:center; margin-top:10px;">
-              <button class="btn danger" id="btnCloseHelpCamStep2" style="min-height:40px; padding:6px 16px; font-size:12px;">⏹ Tutup Kamera</button>
-            </div>
-          </div>
-
-          <div class="help-card">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-              <div style="font-weight:900;">Daftar AWB dalam Bagshield (<span id="awbListCount">0</span>)</div>
-              <button class="btn primary" id="btnAddManualAwb" style="min-height:auto; width:auto; padding:6px 12px; font-size:12px;">＋ Tambah Manual</button>
-            </div>
-
-            <div id="helpAwbListContainer">
-              <div class="last-box" style="padding:16px;">Belum ada AWB di-scan. Nyalakan kamera atau tambah manual.</div>
-            </div>
-
-            <button class="btn primary pre-save" id="helpSave" style="margin-top:16px; font-size:15px; font-weight:900;">💾 Simpan Seluruh Laporan Bagshield Ini</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="pre-summary">
-        <span>RIWAYAT LAPORAN TERMASUK: <strong id="helpCount" style="color:var(--text)">0 Bagshield</strong></span>
-      </div>
-
-      <div class="help-footer">
-        <div id="helpReports">
-          <div class="last-box">Belum ada laporan Helpdesk.</div>
-        </div>
-        <button class="btn primary" id="btnExportHelp" style="width:100%;margin-top:14px;min-height:54px">
-          ▣ Download Excel + Foto Bukti
+        <button class="btn soft" id="btnNewBag">
+          ＋ Tambah Bagshield Baru
         </button>
-      </div>
-    </section>
-  </main>
 
-  <!-- Modal Konfirmasi Download Helpdesk Kustom -->
-  <div class="modal" id="confirmDownloadModal">
-    <div class="sheet confirm-dialog">
-      <h3>Konfirmasi Unduh Laporan</h3>
-      <p>Apakah Anda yakin ingin mengunduh laporan Helpdesk beserta foto bukti ke dalam format Excel (.xlsx)?</p>
-      <div class="confirm-actions">
-        <button class="btn" id="btnCancelDownloadHelp">Batal</button>
-        <button class="btn primary" id="btnConfirmDownloadHelp">Ya, Unduh Excel</button>
+        <button class="btn primary right" id="btnFinalize" disabled>
+          Selesai → Simpan & Download Excel
+        </button>
+
       </div>
+
+      <div class="progress hidden" id="progressWrap">
+        <span id="progressBar"></span>
+      </div>
+
+      <div class="sub hidden" id="progressText" style="margin-top:7px"></div>
+
     </div>
+
+  </section>
+
+  <div class="footer-note">
+    Data draft disimpan sementara di browser.
+    Saat proses akhir, foto diunggah ke Google Drive
+    dan data direkap ke Google Sheets.
   </div>
 
-  <!-- Modal Konfirmasi Reset Helpdesk Kustom -->
-  <div class="modal" id="confirmResetModal">
-    <div class="sheet confirm-dialog">
-      <h3>Reset Riwayat Laporan?</h3>
-      <p>File Excel berhasil diunduh. Apakah Anda ingin menghapus riwayat laporan yang tersimpan di browser/perangkat ini? Penghapusan ini tidak menghapus data di Google Sheets.</p>
-      <div class="confirm-actions">
-        <button class="btn" id="btnKeepHelpHistory">Tetapkan Simpan</button>
-        <button class="btn danger" id="btnResetHelpHistory">Hapus & Reset</button>
-      </div>
+</div>
+
+<div class="modal" id="scanModal">
+
+  <div class="modal-box">
+
+    <div class="modal-head">
+      <span id="scanTitle">Scan Barcode</span>
+      <button class="btn danger" id="btnCloseScanner">Tutup</button>
     </div>
+
+    <div id="reader"></div>
+
+    <div class="sub" style="margin-top:8px">
+      Arahkan kamera ke barcode.
+      Pastikan browser mendapatkan izin akses kamera
+      dan aplikasi dibuka melalui HTTPS.
+    </div>
+
   </div>
 
-  <!-- Toast Element -->
-  <div class="toast" id="toast">Notifikasi</div>
+</div>
 
-  <script>
-    'use strict';
+<div class="toast" id="toast"></div>
 
-    // ------------------------------
-    // HELPDESK KENDALA PAKET - CORE
-    // ------------------------------
-    const $ = id => document.getElementById(id);
-    const safe = value => String(value ?? '').replace(/[&<>"']/g, ch => ({
-      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-    }[ch]));
+<script>
+(() => {
 
-    const DEFAULT_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbzXTyCoRm9j_uTlOFD1-1iPZthJHdQLfSQuG-lXhDxgaQR_REf9tZ0feEJ0lhohQuM/exec';
-    const DB_NAME = 'HelpdeskScanDB';
-    const DB_VERSION = 1;
+  const $ = id => document.getElementById(id);
 
-    let helpDb = null;
-    let helpDbPromise = null;
-    let helpReports = [];
-    let currentBagshieldAwbs = [];
-    let activeBagshieldNo = '';
-    let editingReportId = null;
+  const DB_NAME = 'HelpdeskSerahTerimaDraft';
+  const DB_STORE = 'drafts';
 
-    let html5QrScannerHelp = null;
-    let cameraSession = 0;
-    let cameraBusy = false;
-    let lastScannedAwb = '';
-    let helpAwbThrottle = null;
-    let toastTimer = null;
-    let isSavingReport = false;
-    const syncInProgress = new Set();
+  let db = null;
+  let scanner = null;
+  let scanTarget = '';
+  let photoDataUrl = '';
+  let packageMode = 'hasResi';
+  let appInfo = null;
+  let isSaving = false;
+  let toastTimer = null;
 
-    function localDateString(date = new Date()) {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
-    }
+  const state = {
+    reportId: makeId('R'),
+    main: {
+      shipDate: localDate(),
+      staff: '',
+      hub: ''
+    },
+    bagshields: [],
+    activeBag: null,
+    editingBagId: null
+  };
 
-    function normalizeAwb(value) {
-      return String(value ?? '').trim().replace(/\s+/g, '').toUpperCase();
-    }
+  function makeId(prefix) {
 
-    function toast(message) {
-      const element = $('toast');
-      if (!element) return;
-      element.textContent = message;
-      element.classList.add('show');
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => element.classList.remove('show'), 3000);
-    }
-
-    function playBeep() {
-      try {
-        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-        if (!AudioContextClass) return;
-        const context = new AudioContextClass();
-        const oscillator = context.createOscillator();
-        const gain = context.createGain();
-        oscillator.type = 'sine';
-        oscillator.frequency.setValueAtTime(880, context.currentTime);
-        gain.gain.setValueAtTime(0.08, context.currentTime);
-        oscillator.connect(gain);
-        gain.connect(context.destination);
-        oscillator.start();
-        oscillator.stop(context.currentTime + 0.12);
-        oscillator.onended = () => context.close().catch(() => {});
-      } catch (error) {
-        // Audio tidak wajib untuk menjalankan proses scan.
-      }
-    }
-
-    // ------------------------------
-    // CAMERA / BARCODE SCANNER
-    // ------------------------------
-    async function stopAllCameras() {
-      cameraSession += 1;
-      const scanner = html5QrScannerHelp;
-      html5QrScannerHelp = null;
-
-      if (scanner) {
-        try {
-          await scanner.stop();
-        } catch (error) {
-          // Bisa terjadi bila kamera belum selesai start atau sudah berhenti.
-        }
-        try {
-          scanner.clear();
-        } catch (error) {
-          // Abaikan bila elemen scanner sudah dibersihkan.
-        }
-      }
-
-      if ($('helpCameraCard')) $('helpCameraCard').style.display = 'none';
-      if ($('helpCameraCardStep2')) $('helpCameraCardStep2').style.display = 'none';
-      if ($('btnHelpCam')) $('btnHelpCam').textContent = '▶ Bukalah Kamera Scan AWB';
-    }
-
-    async function toggleHelpCam(mode = 'awb') {
-      if (cameraBusy) return;
-      if (html5QrScannerHelp) {
-        await stopAllCameras();
-        return;
-      }
-
-      if (!window.isSecureContext && location.hostname !== 'localhost') {
-        toast('Kamera memerlukan HTTPS. Buka aplikasi melalui alamat HTTPS.');
-        return;
-      }
-      if (typeof Html5Qrcode === 'undefined') {
-        toast('Library pemindai gagal dimuat. Periksa koneksi internet lalu muat ulang.');
-        return;
-      }
-
-      cameraBusy = true;
-      const thisSession = ++cameraSession;
-      const containerId = mode === 'bagshield'
-        ? 'html5qr-helpdesk-reader'
-        : 'html5qr-helpdesk-reader-step2';
-      const cardId = mode === 'bagshield' ? 'helpCameraCard' : 'helpCameraCardStep2';
-
-      await stopScannerElementOnly(containerId);
-      $(cardId).style.display = 'block';
-      if (mode === 'bagshield') {
-        $('helpCamStatus').textContent = 'Mengaktifkan kamera Bagshield...';
-      } else {
-        $('helpCamStatusStep2').textContent = 'Mengaktifkan kamera AWB...';
-        if ($('btnHelpCam')) $('btnHelpCam').textContent = '⏹ Hentikan Kamera AWB';
-      }
-
-      const scanner = new Html5Qrcode(containerId, { verbose: false });
-      html5QrScannerHelp = scanner;
-      try {
-        await scanner.start(
-          { facingMode: 'environment' },
-          { fps: 10, qrbox: { width: 250, height: 180 }, aspectRatio: 1.5 },
-          decodedText => {
-            if (thisSession !== cameraSession) return;
-            const code = String(decodedText || '').trim();
-            if (!code) return;
-            if (mode === 'bagshield') {
-              $('helpBagshield').value = code;
-              playBeep();
-              if (navigator.vibrate) navigator.vibrate(80);
-              toast('✅ No Bagshield terbaca: ' + code);
-              stopAllCameras();
-            } else {
-              addAwbToList(code);
-            }
-          },
-          () => { /* Pesan gagal decode per frame memang normal, abaikan. */ }
+    const uuid =
+      (window.crypto && crypto.randomUUID)
+        ? crypto.randomUUID()
+        : (
+          Date.now().toString(36) +
+          Math.random().toString(36).slice(2)
         );
 
-        if (thisSession !== cameraSession) {
-          try { await scanner.stop(); } catch (error) {}
-          try { scanner.clear(); } catch (error) {}
-          if (html5QrScannerHelp === scanner) html5QrScannerHelp = null;
-        } else {
-          if (mode === 'bagshield') $('helpCamStatus').textContent = 'Kamera Bagshield Aktif';
-          else $('helpCamStatusStep2').textContent = 'Kamera AWB Aktif';
+    return prefix + '_' +
+      uuid.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 30);
+  }
+
+  function localDate() {
+
+    const d = new Date();
+
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+
+  }
+
+  function esc(s) {
+
+    return String(s == null ? '' : s).replace(
+      /[&<>"']/g,
+      c => ({
+        '&':'&amp;',
+        '<':'&lt;',
+        '>':'&gt;',
+        '"':'&quot;',
+        "'":'&#39;'
+      }[c])
+    );
+
+  }
+
+  function toast(msg) {
+
+    const el = $('toast');
+
+    el.textContent = msg;
+    el.classList.add('show');
+
+    clearTimeout(toastTimer);
+
+    toastTimer = setTimeout(
+      () => el.classList.remove('show'),
+      2800
+    );
+
+  }
+
+  function clone(obj) {
+    return JSON.parse(JSON.stringify(obj));
+  }
+
+  // DATABASE DRAFT BROWSER
+  function openDb() {
+
+    return new Promise((resolve, reject) => {
+
+      const req = indexedDB.open(DB_NAME, 1);
+
+      req.onupgradeneeded = e => {
+
+        const d = e.target.result;
+
+        if (!d.objectStoreNames.contains(DB_STORE)) {
+          d.createObjectStore(
+            DB_STORE,
+            {keyPath:'key'}
+          );
         }
-      } catch (error) {
-        console.error('Camera start error:', error);
-        if (html5QrScannerHelp === scanner) html5QrScannerHelp = null;
-        try { scanner.clear(); } catch (clearError) {}
-        $(cardId).style.display = 'none';
-        if ($('btnHelpCam')) $('btnHelpCam').textContent = '▶ Bukalah Kamera Scan AWB';
-        const message = error && error.name === 'NotAllowedError'
-          ? 'Izin kamera ditolak. Aktifkan izin kamera pada browser.'
-          : 'Kamera gagal aktif. Pastikan kamera tidak dipakai aplikasi lain.';
-        toast(message);
-      } finally {
-        cameraBusy = false;
-      }
-    }
 
-    async function stopScannerElementOnly(containerId) {
-      const container = $(containerId);
-      if (container) container.innerHTML = '';
-    }
-
-    function addAwbToList(rawAwb) {
-      const awbCode = normalizeAwb(rawAwb);
-      if (!awbCode) return;
-
-      const exists = currentBagshieldAwbs.some(item => normalizeAwb(item.awb) === awbCode);
-      if (exists) {
-        toast('⚠️ AWB ' + awbCode + ' sudah ada di daftar.');
-        return;
-      }
-      if (lastScannedAwb === awbCode) return;
-
-      lastScannedAwb = awbCode;
-      clearTimeout(helpAwbThrottle);
-      helpAwbThrottle = setTimeout(() => { lastScannedAwb = ''; }, 1200);
-
-      currentBagshieldAwbs.unshift({
-        id: `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-        awb: awbCode,
-        problemType: 'AWB Hilang',
-        notes: '',
-        photo: null
-      });
-
-      playBeep();
-      if (navigator.vibrate) navigator.vibrate(80);
-      renderHelpAwbList();
-      toast('✅ AWB ditambahkan: ' + awbCode);
-    }
-
-    function renderHelpAwbList() {
-      const container = $('helpAwbListContainer');
-      if (!container) return;
-      $('awbListCount').textContent = currentBagshieldAwbs.length;
-
-      if (!currentBagshieldAwbs.length) {
-        container.innerHTML = '<div class="last-box" style="padding:16px;">Belum ada AWB di-scan. Nyalakan kamera atau tambah manual.</div>';
-        return;
-      }
-
-      container.innerHTML = currentBagshieldAwbs.map((item, index) => `
-        <div class="awb-item-card">
-          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
-            <strong style="color:var(--amber); font-size:15px; overflow-wrap:anywhere;">#${currentBagshieldAwbs.length - index}. ${safe(item.awb)}</strong>
-            <button type="button" onclick="removeAwbItem('${safe(item.id)}')" style="background:none; border:none; color:var(--red); cursor:pointer; font-weight:bold; font-size:13px; white-space:nowrap;">✕ Hapus</button>
-          </div>
-          <div style="margin-top:8px;">
-            <label style="color:var(--muted); font-size:10px; font-weight:900; display:block; margin-bottom:4px;">JENIS MASALAH</label>
-            <div class="problem-buttons-sm">
-              ${['AWB Hilang', 'Barang Bocor', 'Kemasan Rusak', 'Lainnya'].map(problem => `
-                <button type="button" class="problem-btn-sm ${item.problemType === problem ? 'active' : ''}" onclick="selectAwbProblem('${safe(item.id)}', '${problem}')">${problem}</button>
-              `).join('')}
-            </div>
-          </div>
-          <div style="margin-top:8px;">
-            <label style="color:var(--muted); font-size:10px; font-weight:900; display:block; margin-bottom:4px;">KETERANGAN (OPSIONAL)</label>
-            <input class="help-input" style="padding:7px 10px; font-size:12px;" value="${safe(item.notes)}" onchange="updateAwbNotes('${safe(item.id)}', this.value)" placeholder="Tambah keterangan detail...">
-          </div>
-          <div style="margin-top:10px; padding-top:8px; border-top:1px dashed var(--line); display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-            ${item.photo ? `
-              <img src="${item.photo}" alt="Foto bukti ${safe(item.awb)}" style="width:64px; height:64px; object-fit:cover; border-radius:8px; border:1px solid var(--amber);">
-              <div style="flex:1; min-width:120px;">
-                <span style="color:var(--green); font-size:11px; font-weight:800; display:block;">✓ Foto Resi Tersedia</span>
-                <button type="button" onclick="takePhotoForAwb('${safe(item.id)}')" style="background:#252c34; border:none; color:white; padding:6px 8px; border-radius:6px; font-size:10px; margin-top:4px; cursor:pointer;">📷 Foto Ulang</button>
-              </div>
-            ` : `
-              <button type="button" class="btn primary" onclick="takePhotoForAwb('${safe(item.id)}')" style="min-height:36px; padding:6px 12px; font-size:11px; font-weight:800; width:auto;">📷 Ambil Foto Resi Ini</button>
-              <span style="color:var(--muted); font-size:11px;">Belum ada foto</span>
-            `}
-          </div>
-        </div>
-      `).join('');
-    }
-
-    window.takePhotoForAwb = function(id) {
-      const video = document.querySelector('#html5qr-helpdesk-reader-step2 video')
-        || document.querySelector('#html5qr-helpdesk-reader video');
-      if (!html5QrScannerHelp || !video || video.readyState < 2 || video.videoWidth <= 0) {
-        toast('Nyalakan kamera dan tunggu gambar tampil sebelum mengambil foto.');
-        return;
-      }
-
-      const target = currentBagshieldAwbs.find(item => String(item.id) === String(id));
-      if (!target) return;
-
-      try {
-        const maxWidth = 1280;
-        const scale = Math.min(1, maxWidth / video.videoWidth);
-        const canvas = document.createElement('canvas');
-        canvas.width = Math.max(1, Math.round(video.videoWidth * scale));
-        canvas.height = Math.max(1, Math.round(video.videoHeight * scale));
-        const context = canvas.getContext('2d', { alpha: false });
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        target.photo = canvas.toDataURL('image/jpeg', 0.65);
-        renderHelpAwbList();
-        toast('📷 Foto bukti berhasil ditambahkan ke AWB.');
-      } catch (error) {
-        console.error('Photo capture error:', error);
-        toast('Foto gagal diambil. Coba ulangi saat kamera aktif.');
-      }
-    };
-
-    window.selectAwbProblem = function(id, problem) {
-      const allowed = ['AWB Hilang', 'Barang Bocor', 'Kemasan Rusak', 'Lainnya'];
-      if (!allowed.includes(problem)) return;
-      const target = currentBagshieldAwbs.find(item => String(item.id) === String(id));
-      if (target) {
-        target.problemType = problem;
-        renderHelpAwbList();
-      }
-    };
-
-    window.updateAwbNotes = function(id, value) {
-      const target = currentBagshieldAwbs.find(item => String(item.id) === String(id));
-      if (target) target.notes = String(value ?? '').trim();
-    };
-
-    window.removeAwbItem = function(id) {
-      currentBagshieldAwbs = currentBagshieldAwbs.filter(item => String(item.id) !== String(id));
-      renderHelpAwbList();
-      toast('AWB dihapus dari daftar.');
-    };
-
-    // ------------------------------
-    // INDEXEDDB - LOCAL DATA STORAGE
-    // ------------------------------
-    function requestToPromise(request) {
-      return new Promise((resolve, reject) => {
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error || new Error('Database request gagal.'));
-      });
-    }
-
-    function transactionToPromise(transaction) {
-      return new Promise((resolve, reject) => {
-        transaction.oncomplete = () => resolve();
-        transaction.onerror = () => reject(transaction.error || new Error('Transaksi database gagal.'));
-        transaction.onabort = () => reject(transaction.error || new Error('Transaksi database dibatalkan.'));
-      });
-    }
-
-    async function initHelpDb() {
-      if (!('indexedDB' in window)) {
-        throw new Error('Browser ini tidak mendukung IndexedDB. Gunakan Chrome/Edge versi terbaru.');
-      }
-      const request = indexedDB.open(DB_NAME, DB_VERSION);
-      request.onupgradeneeded = event => {
-        const db = event.target.result;
-        if (!db.objectStoreNames.contains('reports')) {
-          db.createObjectStore('reports', { keyPath: 'id', autoIncrement: true });
-        }
       };
-      helpDb = await requestToPromise(request);
-      helpDb.onversionchange = () => {
-        helpDb.close();
-        helpDb = null;
+
+      req.onsuccess = e => {
+        db = e.target.result;
+        resolve(db);
       };
-      await loadHelpReports();
-      return helpDb;
-    }
 
-    async function loadHelpReports() {
-      if (!helpDb) return;
-      const transaction = helpDb.transaction('reports', 'readonly');
-      const request = transaction.objectStore('reports').getAll();
-      const rows = await requestToPromise(request);
-      helpReports = Array.isArray(rows) ? rows : [];
-      helpReports.sort((a, b) => Number(a.id) - Number(b.id));
-      renderHelpReports();
-      updateSavedBagshieldDropdown();
-    }
+      req.onerror = () => reject(req.error);
 
-    function updateSavedBagshieldDropdown() {
-      const select = $('savedBagshieldSelect');
-      if (!select) return;
-      if (!helpReports.length) {
-        select.innerHTML = '<option value="">-- Belum Ada Bagshield Tersimpan --</option>';
-        return;
-      }
-      select.innerHTML = '<option value="">-- Pilih Bagshield Yang Sudah Ada --</option>' +
-        helpReports.slice().reverse().map(report => `
-          <option value="${Number(report.id)}">🛡️ Bagshield: ${safe(report.bagshield)} (${Array.isArray(report.awbList) ? report.awbList.length : 0} AWB) - ${safe(report.hub)}</option>
-        `).join('');
-    }
-
-    function renderHelpReports() {
-      const container = $('helpReports');
-      if (!container) return;
-      $('helpCount').textContent = `${helpReports.length} Bagshield`;
-      if (!helpReports.length) {
-        container.innerHTML = '<div class="last-box">Belum ada laporan Helpdesk.</div>';
-        return;
-      }
-
-      container.innerHTML = helpReports.slice().reverse().map(report => {
-        const awbs = Array.isArray(report.awbList) ? report.awbList : [];
-        const status = report.syncStatus || 'unknown';
-        const isSynced = status === 'synced';
-        const statusLabel = isSynced ? 'Google Sheets terverifikasi' :
-          status === 'pending' ? 'Menunggu sinkronisasi' :
-          status === 'error' ? 'Belum tersinkron' : 'Status sinkronisasi belum diketahui';
-        const statusClass = isSynced ? 'synced' : status === 'pending' ? 'pending' : 'error';
-        const retryButton = isSynced ? '' : `
-          <button type="button" class="sync-retry-btn" onclick="retryReportSync(${Number(report.id)})" ${syncInProgress.has(Number(report.id)) ? 'disabled' : ''}>
-            ↻ ${syncInProgress.has(Number(report.id)) ? 'Mengirim...' : 'Kirim Ulang ke Sheets'}
-          </button>`;
-        return `
-          <div class="help-report">
-            <div class="help-report-header">
-              <div class="help-report-title">🛡️ Bagshield: ${safe(report.bagshield || 'N/A')}</div>
-              <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">
-                <span class="help-badge hub-badge">${safe(report.hub || 'HUB N/A')}</span>
-                <button type="button" onclick="editSavedReport(${Number(report.id)})" style="background:#332713; border:1px solid var(--amber); color:#ffd05b; padding:6px 12px; border-radius:8px; font-size:12px; font-weight:900; cursor:pointer;">✏️ Revisi</button>
-              </div>
-            </div>
-            <div class="help-meta">
-              <span>📅 ${safe(report.shipDate || '-')}</span>
-              <span>👤 ${safe(report.staff || '-')}</span>
-              <span>📦 ${awbs.length} AWB Kendala</span>
-            </div>
-            <div class="sync-actions">
-              <span class="sync-status ${statusClass}">${isSynced ? '✓' : status === 'pending' ? '…' : '!'} ${statusLabel}</span>
-              ${retryButton}
-            </div>
-            ${report.syncMessage ? `<div style="font-size:10px;color:var(--muted);margin-top:4px;">${safe(report.syncMessage)}</div>` : ''}
-            ${awbs.length ? `
-              <div style="margin-top:6px;">
-                ${awbs.map(item => `
-                  <div class="help-report-detail" style="margin-bottom:6px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
-                    <div style="min-width:0; overflow-wrap:anywhere;">
-                      <strong style="color:var(--amber);">AWB: ${safe(item.awb)}</strong> | <span class="help-badge">${safe(item.problemType || '-')}</span>
-                      ${item.notes ? `<div style="font-size:11px; margin-top:3px; color:var(--muted);">${safe(item.notes)}</div>` : ''}
-                    </div>
-                    ${item.photo ? `<img src="${item.photo}" alt="Foto bukti" style="width:48px; height:48px; flex:0 0 48px; object-fit:cover; border-radius:6px; border:1px solid var(--amber);">` : ''}
-                  </div>
-                `).join('')}
-              </div>
-            ` : '<div class="help-report-detail">Tidak ada rincian AWB.</div>'}
-          </div>
-        `;
-      }).join('');
-    }
-
-    window.editSavedReport = function(id) {
-      const numericId = Number(id);
-      const report = helpReports.find(item => Number(item.id) === numericId);
-      if (!report) {
-        toast('Laporan tidak ditemukan. Muat ulang daftar lalu coba lagi.');
-        return;
-      }
-
-      editingReportId = numericId;
-      activeBagshieldNo = String(report.bagshield || '');
-      $('editingBadge').style.display = 'inline-block';
-      $('helpShipDate').value = report.shipDate || '';
-      $('helpStaff').value = report.staff || '';
-      $('helpHub').value = report.hub || '';
-      $('helpBagshield').value = report.bagshield || '';
-      $('displayActiveBagshield').textContent = activeBagshieldNo || '-';
-      currentBagshieldAwbs = (Array.isArray(report.awbList) ? report.awbList : []).map(item => ({
-        id: item.id || `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-        awb: String(item.awb || ''),
-        problemType: item.problemType || 'AWB Hilang',
-        notes: item.notes || '',
-        photo: item.photo || null
-      }));
-
-      stopAllCameras();
-      $('helpStep2').classList.add('active');
-      renderHelpAwbList();
-      toast('Bagshield dibuka untuk direvisi: ' + activeBagshieldNo);
-    };
-
-    async function saveReportLocally(reportData) {
-      if (!helpDb) throw new Error('Database lokal belum siap.');
-      const transaction = helpDb.transaction('reports', 'readwrite');
-      const done = transactionToPromise(transaction);
-      const store = transaction.objectStore('reports');
-      let localId;
-      if (editingReportId !== null) {
-        reportData.id = editingReportId;
-        localId = editingReportId;
-        store.put(reportData);
-      } else {
-        localId = await requestToPromise(store.add(reportData));
-      }
-      await done;
-      return Number(localId);
-    }
-
-    function makeReportId() {
-      if (window.crypto && typeof window.crypto.randomUUID === 'function') {
-        return window.crypto.randomUUID();
-      }
-      return 'RPT-' + Date.now() + '-' + Math.random().toString(36).slice(2, 12);
-    }
-
-    function waitMs(ms) {
-      return new Promise(resolve => setTimeout(resolve, ms));
-    }
-
-    function buildSheetsPayload(report) {
-      return {
-        reportId: report.reportId,
-        shipDate: report.shipDate,
-        staff: report.staff,
-        hub: report.hub,
-        bagshield: report.bagshield,
-        awbList: (report.awbList || []).map(item => ({
-          awb: normalizeAwb(item.awb),
-          problemType: item.problemType || 'AWB Hilang',
-          notes: String(item.notes || '').trim(),
-          // Hanya status foto yang dikirim ke Google Sheets, bukan foto Base64.
-          photo: item.photo ? 'YA (Ada Foto)' : 'TIDAK'
-        })),
-        createdAt: report.createdAt || '',
-        updatedAt: report.updatedAt || ''
-      };
-    }
-
-    async function getSheetsStatusJsonp(reportId, timeoutMs = 2500) {
-      const webhookUrl = $('sheetsWebhookUrl')?.value.trim();
-      if (!webhookUrl) throw new Error('URL Web App Google Apps Script belum diisi.');
-
-      return new Promise((resolve, reject) => {
-        const callbackName = '__helpdeskStatus_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
-        const script = document.createElement('script');
-        let finished = false;
-        const cleanup = () => {
-          if (finished) return;
-          finished = true;
-          clearTimeout(timer);
-          script.onerror = null;
-          script.remove();
-          try { delete window[callbackName]; } catch (error) { window[callbackName] = undefined; }
-        };
-        const timer = setTimeout(() => {
-          cleanup();
-          reject(new Error('Tidak mendapat jawaban verifikasi dari Google Apps Script.'));
-        }, timeoutMs);
-
-        window[callbackName] = data => {
-          cleanup();
-          if (!data || data.ok !== true) {
-            reject(new Error(data?.message || 'Jawaban status dari Google Sheets tidak valid.'));
-            return;
-          }
-          resolve(data);
-        };
-        script.onerror = () => {
-          cleanup();
-          reject(new Error('Endpoint status Google Apps Script tidak dapat diakses.'));
-        };
-
-        try {
-          const url = new URL(webhookUrl);
-          url.searchParams.set('action', 'status');
-          url.searchParams.set('reportId', reportId);
-          url.searchParams.set('callback', callbackName);
-          url.searchParams.set('_', String(Date.now()));
-          script.src = url.toString();
-          document.head.appendChild(script);
-        } catch (error) {
-          cleanup();
-          reject(new Error('URL Web App tidak valid.'));
-        }
-      });
-    }
-
-    async function sendReportToSheets(report) {
-      const webhookUrl = $('sheetsWebhookUrl')?.value.trim();
-      if (!webhookUrl) return { ok: false, message: 'URL Web App Google Sheets kosong.' };
-
-      let postError = null;
-      try {
-        // Apps Script menerima payload text/plain; no-cors dipakai agar browser
-        // tidak menggagalkan POST lintas domain. Keberhasilan diverifikasi via JSONP.
-        const controller = new AbortController();
-        const postTimeout = setTimeout(() => controller.abort(), 10000);
-        try {
-          await fetch(webhookUrl, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify(buildSheetsPayload(report)),
-            signal: controller.signal
-          });
-        } finally {
-          clearTimeout(postTimeout);
-        }
-      } catch (error) {
-        postError = error;
-        console.warn('POST Google Sheets tidak terkonfirmasi:', error);
-      }
-
-      // Tunggu sampai doPost selesai menulis semua AWB, lalu periksa ID laporan.
-      let lastError = null;
-      for (let attempt = 0; attempt < 6; attempt++) {
-        try {
-          const status = await getSheetsStatusJsonp(report.reportId, 2500);
-          if (status.found && Number(status.awbCount) === (report.awbList || []).length) {
-            return { ok: true, message: `${status.awbCount} AWB terverifikasi masuk Google Sheets.` };
-          }
-          lastError = new Error('Laporan belum ditemukan lengkap di Google Sheets.');
-        } catch (error) {
-          lastError = error;
-        }
-        if (attempt < 5) await waitMs(500);
-      }
-
-      const detail = lastError?.message || postError?.message || 'Belum ada konfirmasi dari server.';
-      return { ok: false, message: `Belum terverifikasi di Google Sheets. Data lokal tetap aman. ${detail}` };
-    }
-
-    async function updateLocalSyncStatus(localId, status, message) {
-      if (!helpDb) throw new Error('Database lokal belum siap.');
-      const transaction = helpDb.transaction('reports', 'readwrite');
-      const done = transactionToPromise(transaction);
-      const store = transaction.objectStore('reports');
-      const request = store.get(Number(localId));
-      request.onsuccess = () => {
-        const record = request.result;
-        if (record) {
-          record.syncStatus = status;
-          record.syncMessage = message || '';
-          record.lastSyncAttempt = new Date().toISOString();
-          store.put(record);
-        }
-      };
-      await done;
-    }
-
-    window.retryReportSync = async function(localId) {
-      const numericId = Number(localId);
-      if (!numericId || syncInProgress.has(numericId)) return;
-      const report = helpReports.find(item => Number(item.id) === numericId);
-      if (!report) {
-        toast('Laporan tidak ditemukan di penyimpanan perangkat.');
-        return;
-      }
-
-      syncInProgress.add(numericId);
-      renderHelpReports();
-      try {
-        if (helpDbPromise) await helpDbPromise;
-        report.reportId = report.reportId || makeReportId();
-        // Simpan ID dan status pending untuk data lokal versi lama maupun baru.
-        report.syncStatus = 'pending';
-        report.syncMessage = 'Mengirim ulang laporan ke Google Sheets...';
-        report.lastSyncAttempt = new Date().toISOString();
-        const tx = helpDb.transaction('reports', 'readwrite');
-        const done = transactionToPromise(tx);
-        tx.objectStore('reports').put(report);
-        await done;
-
-        const result = await sendReportToSheets(report);
-        await updateLocalSyncStatus(numericId, result.ok ? 'synced' : 'error', result.message);
-        await loadHelpReports();
-        toast(result.ok ? '✅ ' + result.message : '⚠️ ' + result.message);
-      } catch (error) {
-        console.error('Retry sync error:', error);
-        await updateLocalSyncStatus(numericId, 'error', error.message || 'Gagal mengirim ulang.');
-        await loadHelpReports();
-        toast('⚠️ Gagal sinkronisasi. Data lokal tetap tersimpan.');
-      } finally {
-        syncInProgress.delete(numericId);
-        renderHelpReports();
-      }
-    };
-
-    async function saveHelpdeskReport() {
-      if (isSavingReport) return;
-      isSavingReport = true;
-      const saveButton = $('helpSave');
-      if (saveButton) {
-        saveButton.disabled = true;
-        saveButton.textContent = '⏳ Menyimpan Laporan...';
-      }
-      try {
-        if (helpDbPromise) await helpDbPromise;
-        if (!helpDb) throw new Error('Database lokal belum siap. Muat ulang aplikasi.');
-
-        const shipDate = $('helpShipDate').value;
-        const staff = $('helpStaff').value.trim();
-        const hub = $('helpHub').value.trim();
-        const bagshield = String(activeBagshieldNo || $('helpBagshield').value).trim();
-
-        if (!shipDate || !staff || !hub || !bagshield) {
-          toast('❌ Lengkapi Tanggal, Nama Petugas, HUB, dan Bagshield.');
-          return;
-        }
-        if (!currentBagshieldAwbs.length) {
-          toast('❌ Minimal tambahkan 1 AWB ke dalam daftar Bagshield.');
-          return;
-        }
-
-        const now = new Date().toLocaleString('id-ID');
-        const existing = editingReportId !== null
-          ? helpReports.find(item => Number(item.id) === Number(editingReportId))
-          : null;
-        const localReportData = {
-          shipDate,
-          staff,
-          hub,
-          bagshield,
-          reportId: existing?.reportId || makeReportId(),
-          awbList: currentBagshieldAwbs.map(item => ({
-            id: item.id,
-            awb: normalizeAwb(item.awb),
-            problemType: item.problemType || 'AWB Hilang',
-            notes: String(item.notes || '').trim(),
-            photo: item.photo || null
-          })),
-          createdAt: existing?.createdAt || now,
-          updatedAt: now,
-          syncStatus: 'pending',
-          syncMessage: 'Data tersimpan di perangkat. Menunggu verifikasi Google Sheets.'
-        };
-
-        // Simpan lokal lebih dahulu sehingga laporan tidak hilang bila koneksi putus.
-        const localId = await saveReportLocally(localReportData);
-        await loadHelpReports();
-        toast('✅ Laporan aman tersimpan di perangkat. Memeriksa Google Sheets...');
-
-        const syncResult = await sendReportToSheets(localReportData);
-        await updateLocalSyncStatus(localId, syncResult.ok ? 'synced' : 'error', syncResult.message);
-        await loadHelpReports();
-
-        if (syncResult.ok) toast('✅ ' + syncResult.message);
-        else toast('⚠️ Tersimpan lokal, tetapi belum terverifikasi di Sheets. Gunakan Kirim Ulang.');
-
-        editingReportId = null;
-        activeBagshieldNo = '';
-        currentBagshieldAwbs = [];
-        $('editingBadge').style.display = 'none';
-        $('helpStep2').classList.remove('active');
-        $('helpBagshield').value = '';
-        renderHelpAwbList();
-        await stopAllCameras();
-      } catch (error) {
-        console.error('Save report error:', error);
-        toast('❌ Gagal menyimpan laporan: ' + (error.message || 'Kesalahan database.'));
-      } finally {
-        isSavingReport = false;
-        if (saveButton) {
-          saveButton.disabled = false;
-          saveButton.textContent = '💾 Simpan Seluruh Laporan Bagshield Ini';
-        }
-      }
-    }
-
-    // ------------------------------
-    // EXCEL EXPORT
-    // ------------------------------
-    async function exportHelpdeskExcel() {
-      if (!helpReports.length) {
-        toast('⚠️ Belum ada data laporan untuk diunduh.');
-        return;
-      }
-      if (typeof ExcelJS === 'undefined') {
-        toast('Library Excel gagal dimuat. Periksa koneksi internet lalu muat ulang.');
-        return;
-      }
-
-      const button = $('btnConfirmDownloadHelp');
-      if (button) {
-        button.disabled = true;
-        button.textContent = 'Menyiapkan...';
-      }
-      try {
-        const workbook = new ExcelJS.Workbook();
-        workbook.creator = 'Helpdesk Kendala Paket';
-        workbook.created = new Date();
-        const worksheet = workbook.addWorksheet('Laporan Kendala', {
-          views: [{ state: 'frozen', ySplit: 1 }]
-        });
-
-        worksheet.columns = [
-          { header: 'No', key: 'no', width: 6 },
-          { header: 'Tanggal Pengiriman', key: 'shipDate', width: 18 },
-          { header: 'Nama Petugas', key: 'staff', width: 20 },
-          { header: 'Lokasi HUB / Staging', key: 'hub', width: 22 },
-          { header: 'No Bagshield', key: 'bagshield', width: 22 },
-          { header: 'No AWB', key: 'awb', width: 24 },
-          { header: 'Jenis Masalah', key: 'problemType', width: 20 },
-          { header: 'Keterangan Detail', key: 'notes', width: 34 },
-          { header: 'Waktu Input', key: 'createdAt', width: 22 },
-          { header: 'Foto Bukti', key: 'photoLabel', width: 20 }
-        ];
-        worksheet.autoFilter = { from: 'A1', to: 'J1' };
-        worksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
-        worksheet.getRow(1).height = 24;
-        worksheet.getRow(1).alignment = { vertical: 'middle', wrapText: true };
-
-        let rowNumber = 1;
-        for (const report of helpReports) {
-          const awbs = Array.isArray(report.awbList) ? report.awbList : [];
-          for (const awbItem of awbs) {
-            const row = worksheet.addRow({
-              no: rowNumber++,
-              shipDate: report.shipDate || '-',
-              staff: report.staff || '-',
-              hub: report.hub || '-',
-              bagshield: report.bagshield || '-',
-              awb: awbItem.awb || '-',
-              problemType: awbItem.problemType || '-',
-              notes: awbItem.notes || '-',
-              createdAt: report.createdAt || '-',
-              photoLabel: awbItem.photo ? 'Terlampir' : 'Tidak ada'
-            });
-            row.alignment = { vertical: 'middle', wrapText: true };
-            if (awbItem.photo) {
-              try {
-                const imageId = workbook.addImage({ base64: awbItem.photo, extension: 'jpeg' });
-                worksheet.addImage(imageId, {
-                  tl: { col: 9, row: row.number - 1 },
-                  ext: { width: 100, height: 75 }
-                });
-                row.height = 60;
-              } catch (imageError) {
-                console.warn('Foto tidak dapat dimasukkan ke Excel:', imageError);
-                row.getCell(10).value = 'Gagal dilampirkan';
-              }
-            }
-          }
-        }
-
-        const buffer = await workbook.xlsx.writeBuffer();
-        const blob = new Blob([buffer], {
-          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        });
-        const objectUrl = URL.createObjectURL(blob);
-        const anchor = document.createElement('a');
-        anchor.href = objectUrl;
-        anchor.download = `Laporan_Kendala_Helpdesk_${localDateString()}.xlsx`;
-        document.body.appendChild(anchor);
-        anchor.click();
-        anchor.remove();
-        setTimeout(() => URL.revokeObjectURL(objectUrl), 30000);
-
-        $('confirmDownloadModal').classList.remove('show');
-        toast('✅ File Excel berhasil disiapkan.');
-        setTimeout(() => $('confirmResetModal').classList.add('show'), 700);
-      } catch (error) {
-        console.error('Excel export error:', error);
-        toast('❌ Gagal mengunduh Excel: ' + (error.message || 'Kesalahan ekspor.'));
-      } finally {
-        if (button) {
-          button.disabled = false;
-          button.textContent = 'Ya, Unduh Excel';
-        }
-      }
-    }
-
-    async function resetLocalHistory() {
-      try {
-        if (!helpDb && helpDbPromise) await helpDbPromise;
-        if (!helpDb) throw new Error('Database belum tersedia.');
-        const transaction = helpDb.transaction('reports', 'readwrite');
-        const done = transactionToPromise(transaction);
-        transaction.objectStore('reports').clear();
-        await done;
-        helpReports = [];
-        editingReportId = null;
-        activeBagshieldNo = '';
-        currentBagshieldAwbs = [];
-        $('helpStep2').classList.remove('active');
-        $('helpBagshield').value = '';
-        $('editingBadge').style.display = 'none';
-        renderHelpAwbList();
-        await loadHelpReports();
-        toast('🗑️ Riwayat lokal di perangkat ini berhasil dihapus.');
-      } catch (error) {
-        console.error('Reset error:', error);
-        toast('Gagal menghapus riwayat lokal.');
-      }
-    }
-
-    // ------------------------------
-    // INITIALIZATION + EVENT HANDLERS
-    // ------------------------------
-    window.addEventListener('DOMContentLoaded', () => {
-      $('helpShipDate').value = localDateString();
-      $('sheetsWebhookUrl').value = DEFAULT_WEBHOOK_URL;
-
-      // Simpan promise agar tombol Simpan dapat menunggu database siap.
-      helpDbPromise = initHelpDb().catch(error => {
-        console.error('IndexedDB initialization error:', error);
-        toast('❌ Database lokal gagal dibuka: ' + (error.message || 'Periksa browser.'));
-        throw error;
-      });
-      helpDbPromise.catch(() => {}); // Hindari unhandled rejection; pesan sudah ditampilkan.
-
-      $('btnScanBagshieldCam')?.addEventListener('click', () => toggleHelpCam('bagshield'));
-      $('btnCloseHelpCam')?.addEventListener('click', () => stopAllCameras());
-      $('btnCloseHelpCamStep2')?.addEventListener('click', () => stopAllCameras());
-      $('btnHelpCam')?.addEventListener('click', () => toggleHelpCam('awb'));
-
-      $('btnLoadSavedBagshield')?.addEventListener('click', () => {
-        const selectedId = Number($('savedBagshieldSelect').value);
-        if (selectedId) window.editSavedReport(selectedId);
-        else toast('⚠️ Pilih Bagshield dari daftar terlebih dahulu.');
-      });
-
-      $('btnNextToAwb')?.addEventListener('click', async () => {
-        const bagshield = $('helpBagshield').value.trim();
-        const required = [
-          ['helpShipDate', 'Tanggal Pengiriman'],
-          ['helpStaff', 'Nama Petugas'],
-          ['helpHub', 'Lokasi HUB / Staging'],
-          ['helpBagshield', 'Nomor Bagshield']
-        ];
-        for (const [id, label] of required) {
-          if (!$(`${id}`).value.trim()) {
-            toast('❌ Mohon isi ' + label + '.');
-            $(id).focus();
-            return;
-          }
-        }
-        if (!helpDb && helpDbPromise) {
-          try { await helpDbPromise; } catch (error) { return; }
-        }
-        activeBagshieldNo = bagshield;
-        $('displayActiveBagshield').textContent = activeBagshieldNo;
-        if (editingReportId === null) {
-          currentBagshieldAwbs = [];
-          renderHelpAwbList();
-        }
-        await stopAllCameras();
-        $('helpStep2').classList.add('active');
-        toast('🔓 Ruang scan AWB dibuka untuk Bagshield: ' + activeBagshieldNo);
-      });
-
-      $('btnBackToStep1')?.addEventListener('click', async () => {
-        await stopAllCameras();
-        $('helpStep2').classList.remove('active');
-      });
-
-      $('btnAddManualAwb')?.addEventListener('click', () => {
-        const manualCode = prompt('Masukkan Nomor AWB Manual:');
-        if (manualCode && normalizeAwb(manualCode)) addAwbToList(manualCode);
-      });
-
-      $('helpSave')?.addEventListener('click', saveHelpdeskReport);
-      $('btnExportHelp')?.addEventListener('click', () => {
-        if (!helpReports.length) {
-          toast('⚠️ Belum ada data laporan untuk diunduh.');
-          return;
-        }
-        $('confirmDownloadModal').classList.add('show');
-      });
-      $('btnCancelDownloadHelp')?.addEventListener('click', () => $('confirmDownloadModal').classList.remove('show'));
-      $('btnConfirmDownloadHelp')?.addEventListener('click', exportHelpdeskExcel);
-      $('btnKeepHelpHistory')?.addEventListener('click', () => $('confirmResetModal').classList.remove('show'));
-      $('btnResetHelpHistory')?.addEventListener('click', async () => {
-        $('confirmResetModal').classList.remove('show');
-        await resetLocalHistory();
-      });
-
-      // Jangan biarkan kamera tetap hidup ketika tab ditinggalkan.
-      document.addEventListener('visibilitychange', () => {
-        if (document.hidden && html5QrScannerHelp) stopAllCameras();
-      });
-      window.addEventListener('pagehide', () => {
-        if (html5QrScannerHelp) stopAllCameras();
-      });
     });
-  </script>
+
+  }
+
+  function saveDraft() {
+
+    if (!db) return Promise.resolve();
+
+    return new Promise((resolve, reject) => {
+
+      const tx = db.transaction(DB_STORE, 'readwrite');
+
+      tx.objectStore(DB_STORE).put({
+        key:'active',
+        savedAt:new Date().toISOString(),
+        data:state
+      });
+
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error);
+
+    });
+
+  }
+
+  function readDraft() {
+
+    return new Promise((resolve, reject) => {
+
+      const tx = db.transaction(DB_STORE, 'readonly');
+
+      const req = tx.objectStore(DB_STORE).get('active');
+
+      req.onsuccess = () => {
+        resolve(req.result ? req.result.data : null);
+      };
+
+      req.onerror = () => reject(req.error);
+
+    });
+
+  }
+
+  function clearDraft() {
+
+    return new Promise((resolve, reject) => {
+
+      const tx = db.transaction(DB_STORE, 'readwrite');
+
+      tx.objectStore(DB_STORE).delete('active');
+
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error);
+
+    });
+
+  }
+
+  function setConnection(text, ok) {
+
+    $('connectionStatus').textContent = text;
+
+    $('connectionStatus').style.color =
+      ok ? '#ffe4ef' : '#ffe5a7';
+
+  }
+
+  // HUBUNGAN KE APPS SCRIPT
+  function callServer(method, payload) {
+
+    return new Promise((resolve, reject) => {
+
+      if (
+        typeof google === 'undefined' ||
+        !google.script ||
+        !google.script.run
+      ) {
+
+        reject(
+          new Error(
+            'Aplikasi harus dibuka dari URL Web App Google Apps Script.'
+          )
+        );
+
+        return;
+
+      }
+
+      const runner = google.script.run
+        .withSuccessHandler(resolve)
+        .withFailureHandler(err => {
+
+          reject(
+            new Error(
+              err && err.message
+                ? err.message
+                : String(err)
+            )
+          );
+
+        });
+
+      if (payload === undefined) {
+        runner[method]();
+      } else {
+        runner[method](payload);
+      }
+
+    });
+
+  }
+
+  // INISIALISASI
+  async function init() {
+
+    $('shipDate').value = state.main.shipDate;
+
+    try {
+
+      await openDb();
+
+      const saved = await readDraft();
+
+      if (saved) {
+
+        Object.assign(state, saved);
+
+        populateMain();
+
+        if (state.main.staff && state.main.hub) {
+          showBagStep();
+        }
+
+        if (!state.activeBag) {
+          state.activeBag = newEmptyBag();
+        }
+
+        renderAll();
+
+        toast('Draft sebelumnya berhasil dipulihkan.');
+
+      }
+
+    } catch(e) {
+
+      toast(
+        'Penyimpanan draft browser tidak tersedia: ' +
+        e.message
+      );
+
+    }
+
+    try {
+
+      appInfo = await callServer('getAppInfo');
+
+      if (!appInfo.ok) {
+        throw new Error(appInfo.message);
+      }
+
+      setConnection(
+        '● Google Sheets & Drive terhubung',
+        true
+      );
+
+    } catch(e) {
+
+      setConnection(
+        '● Koneksi Google perlu diperiksa',
+        false
+      );
+
+      console.error(e);
+
+      toast(
+        'Koneksi Google belum siap. Pastikan aplikasi dibuka dari Web App Apps Script.'
+      );
+
+    }
+
+    if (!state.activeBag) {
+      state.activeBag = newEmptyBag();
+    }
+
+    renderAll();
+
+  }
+
+  function populateMain() {
+
+    $('shipDate').value =
+      state.main.shipDate || localDate();
+
+    $('staff').value = state.main.staff || '';
+
+    $('hub').value = state.main.hub || '';
+
+  }
+
+  function readMain() {
+
+    return {
+      shipDate: $('shipDate').value,
+      staff: $('staff').value.trim(),
+      hub: $('hub').value.trim()
+    };
+
+  }
+
+  function newEmptyBag() {
+
+    return {
+      id: makeId('B'),
+      bagshieldNo: '',
+      packages: []
+    };
+
+  }
+
+  function showBagStep() {
+
+    $('mainStep').classList.add('hidden');
+    $('bagStep').classList.remove('hidden');
+
+    $('chipMain').classList.remove('active');
+    $('chipBag').classList.add('active');
+
+  }
+
+  function showMainStep() {
+
+    $('bagStep').classList.add('hidden');
+    $('mainStep').classList.remove('hidden');
+
+    $('chipBag').classList.remove('active');
+    $('chipMain').classList.add('active');
+
+  }
+
+  function setMode(mode) {
+
+    packageMode = mode;
+
+    $('modeHasResi').classList.toggle(
+      'active',
+      mode === 'hasResi'
+    );
+
+    $('modeNoResi').classList.toggle(
+      'active',
+      mode === 'noResi'
+    );
+
+    $('resiFields').classList.toggle(
+      'hidden',
+      mode !== 'hasResi'
+    );
+
+    $('noResiFields').classList.toggle(
+      'hidden',
+      mode !== 'noResi'
+    );
+
+    $('photoRequiredLabel').textContent =
+      mode === 'noResi'
+        ? '(Wajib untuk paket tanpa resi)'
+        : '(Opsional bila diperlukan)';
+
+  }
+
+  function resetPackageForm() {
+
+    $('awb').value = '';
+    $('awbNotes').value = '';
+    $('packageCharacteristics').value = '';
+    $('packagePhoto').value = '';
+
+    photoDataUrl = '';
+
+    $('photoPreview').classList.add('hidden');
+    $('photoPreview').src = '';
+
+    $('photoInfo').textContent = 'Belum ada foto';
+
+    setMode('hasResi');
+
+  }
+
+  // TAMPILKAN PAKET DALAM BAGSHIELD AKTIF
+  function renderActiveBag() {
+
+    if (!state.activeBag) return;
+
+    $('bagshieldNo').value =
+      state.activeBag.bagshieldNo || '';
+
+    $('bagEditorTitle').textContent =
+      state.editingBagId
+        ? 'Revisi Bagshield'
+        : 'Bagshield Baru';
+
+    $('bagEditorStatus').textContent =
+      state.editingBagId
+        ? 'Sedang direvisi'
+        : 'Belum disimpan';
+
+    $('btnCancelBagEdit').classList.toggle(
+      'hidden',
+      !state.editingBagId
+    );
+
+    $('activePackageCount').textContent =
+      (state.activeBag.packages || []).length +
+      ' paket';
+
+    const arr = state.activeBag.packages || [];
+
+    $('activePackageList').innerHTML = arr.length
+      ? arr.map((p,i) => `
+
+        <div class="package-item">
+
+          <div class="package-left">
+
+            <div class="package-title">
+              ${i+1}.
+              ${
+                p.hasResi
+                  ? '📦 ' + esc(p.awb)
+                  : '⚠️ Paket tanpa resi'
+              }
+            </div>
+
+            <div class="package-desc">
+              ${
+                p.hasResi
+                  ? 'Ada resi'
+                  : 'Ciri-ciri: ' + esc(p.characteristics)
+              }
+              ${p.notes ? ' · ' + esc(p.notes) : ''}
+            </div>
+
+            ${
+              p.photoDataUrl
+                ? '<div class="package-desc">Foto bukti sudah dipilih</div>'
+                : ''
+            }
+
+          </div>
+
+          ${
+            p.photoDataUrl
+              ? `<img class="thumb" src="${p.photoDataUrl}" alt="Foto paket">`
+              : ''
+          }
+
+          <div class="item-actions">
+
+            <button
+              class="mini delete"
+              data-remove-package="${esc(p.id)}"
+            >
+              Hapus
+            </button>
+
+          </div>
+
+        </div>
+
+      `).join('')
+
+      : '<div class="sub">Belum ada paket yang ditambahkan.</div>';
+
+    $('activePackageList')
+      .querySelectorAll('[data-remove-package]')
+      .forEach(b => {
+
+        b.addEventListener(
+          'click',
+          () => removePackage(b.dataset.removePackage)
+        );
+
+      });
+
+  }
+
+  // TAMPILKAN DAFTAR BAGSHIELD SEMENTARA
+  function renderSavedBags() {
+
+    $('bagCount').textContent =
+      state.bagshields.length;
+
+    const total = state.bagshields.reduce(
+      (n,b) => n + (b.packages || []).length,
+      0
+    );
+
+    const noResi = state.bagshields.reduce(
+      (n,b) =>
+        n + (b.packages || []).filter(p => !p.hasResi).length,
+      0
+    );
+
+    $('packageCount').textContent = total;
+
+    $('noResiCount').textContent = noResi;
+
+    $('savedBagBadge').textContent =
+      state.bagshields.length + ' tersimpan';
+
+    $('btnFinalize').disabled =
+      isSaving ||
+      state.bagshields.length === 0 ||
+      !!state.editingBagId ||
+      !!(
+        state.activeBag &&
+        (state.activeBag.bagshieldNo || '').trim()
+      );
+
+    $('savedBagList').innerHTML =
+      state.bagshields.length
+
+        ? state.bagshields.map((b,i) => `
+
+          <div class="saved-item">
+
+            <div class="saved-main">
+
+              <div class="saved-name">
+                🛡️ ${i+1}. ${esc(b.bagshieldNo)}
+              </div>
+
+              <div class="saved-meta">
+                ${(b.packages || []).length} paket ·
+                ${(b.packages || []).filter(p => p.hasResi).length} ada resi ·
+                ${(b.packages || []).filter(p => !p.hasResi).length} tanpa resi
+              </div>
+
+            </div>
+
+            <div class="item-actions">
+
+              <button
+                class="mini"
+                data-edit-bag="${esc(b.id)}"
+              >
+                Revisi
+              </button>
+
+              <button
+                class="mini delete"
+                data-delete-bag="${esc(b.id)}"
+              >
+                Hapus
+              </button>
+
+            </div>
+
+          </div>
+
+        `).join('')
+
+        : '<div class="notice">Belum ada Bagshield yang disimpan sementara.</div>';
+
+    $('savedBagList')
+      .querySelectorAll('[data-edit-bag]')
+      .forEach(b => {
+
+        b.addEventListener(
+          'click',
+          () => editBag(b.dataset.editBag)
+        );
+
+      });
+
+    $('savedBagList')
+      .querySelectorAll('[data-delete-bag]')
+      .forEach(b => {
+
+        b.addEventListener(
+          'click',
+          () => deleteBag(b.dataset.deleteBag)
+        );
+
+      });
+
+  }
+
+  function renderAll() {
+
+    renderActiveBag();
+    renderSavedBags();
+
+  }
+
+  // KOMPRES FOTO SEBELUM DISIMPAN
+  async function compressImage(file) {
+
+    if (!file) return '';
+
+    if (!file.type.startsWith('image/')) {
+      throw new Error(
+        'File yang dipilih harus berupa gambar.'
+      );
+    }
+
+    const src = await new Promise((resolve,reject) => {
+
+      const r = new FileReader();
+
+      r.onload = () => resolve(r.result);
+
+      r.onerror = () => reject(
+        new Error('Gagal membaca foto.')
+      );
+
+      r.readAsDataURL(file);
+
+    });
+
+    const img = await new Promise((resolve,reject) => {
+
+      const im = new Image();
+
+      im.onload = () => resolve(im);
+
+      im.onerror = () => reject(
+        new Error('Foto tidak dapat dibuka.')
+      );
+
+      im.src = src;
+
+    });
+
+    const max = 1280;
+
+    const scale = Math.min(
+      1,
+      max / Math.max(img.width,img.height)
+    );
+
+    const canvas = document.createElement('canvas');
+
+    canvas.width = Math.max(
+      1,
+      Math.round(img.width * scale)
+    );
+
+    canvas.height = Math.max(
+      1,
+      Math.round(img.height * scale)
+    );
+
+    canvas
+      .getContext('2d')
+      .drawImage(
+        img,
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
+
+    return canvas.toDataURL('image/jpeg',0.78);
+
+  }
+
+  // TAMBAH PAKET / RESI
+  async function addPackage() {
+
+    if (!state.activeBag) {
+      state.activeBag = newEmptyBag();
+    }
+
+    const hasResi = packageMode === 'hasResi';
+
+    const awb = $('awb').value.trim();
+
+    const characteristics = hasResi
+      ? $('awbNotes').value.trim()
+      : $('packageCharacteristics').value.trim();
+
+    if (hasResi && !awb) {
+
+      toast(
+        'Masukkan atau scan nomor resi terlebih dahulu.'
+      );
+
+      $('awb').focus();
+
+      return;
+
+    }
+
+    if (!hasResi && characteristics.length < 5) {
+
+      toast(
+        'Ciri-ciri paket tanpa resi wajib diisi dengan jelas.'
+      );
+
+      $('packageCharacteristics').focus();
+
+      return;
+
+    }
+
+    if (!hasResi && !photoDataUrl) {
+
+      toast(
+        'Foto bukti wajib untuk paket tanpa resi.'
+      );
+
+      return;
+
+    }
+
+    if (
+      hasResi &&
+      (state.activeBag.packages || []).some(
+        p =>
+          p.hasResi &&
+          p.awb.toLowerCase() === awb.toLowerCase()
+      )
+    ) {
+
+      toast(
+        'Nomor resi tersebut sudah ada di Bagshield ini.'
+      );
+
+      return;
+
+    }
+
+    const p = {
+      id: makeId('P'),
+      hasResi: hasResi,
+      awb: hasResi ? awb : '',
+      characteristics: characteristics,
+      notes: hasResi ? characteristics : '',
+      photoDataUrl: photoDataUrl || '',
+      photoUrl: '',
+      photoName: ''
+    };
+
+    state.activeBag.packages.push(p);
+
+    resetPackageForm();
+
+    renderActiveBag();
+    renderSavedBags();
+
+    await saveDraft();
+
+    toast(
+      'Paket berhasil ditambahkan ke daftar Bagshield.'
+    );
+
+  }
+
+  function removePackage(id) {
+
+    state.activeBag.packages =
+      state.activeBag.packages.filter(
+        x => x.id !== id
+      );
+
+    renderActiveBag();
+    renderSavedBags();
+
+    saveDraft();
+
+  }
+
+  // SIMPAN SEMENTARA BAGSHIELD
+  async function saveCurrentBag() {
+
+    const bagNo = $('bagshieldNo').value.trim();
+
+    if (!bagNo) {
+
+      toast('Nomor Bagshield wajib diisi.');
+
+      $('bagshieldNo').focus();
+
+      return;
+
+    }
+
+    if (!state.activeBag.packages.length) {
+
+      toast(
+        'Tambahkan minimal satu paket untuk Bagshield ini.'
+      );
+
+      return;
+
+    }
+
+    const duplicate = state.bagshields.find(
+      b =>
+        b.bagshieldNo.toLowerCase() === bagNo.toLowerCase() &&
+        b.id !== state.editingBagId
+    );
+
+    if (duplicate) {
+
+      toast(
+        'Nomor Bagshield sudah ada dalam laporan ini.'
+      );
+
+      return;
+
+    }
+
+    state.activeBag.bagshieldNo = bagNo;
+
+    if (state.editingBagId) {
+
+      const idx = state.bagshields.findIndex(
+        b => b.id === state.editingBagId
+      );
+
+      if (idx >= 0) {
+        state.bagshields[idx] = clone(state.activeBag);
+      }
+
+      state.editingBagId = null;
+
+      toast(
+        'Revisi Bagshield berhasil disimpan sementara.'
+      );
+
+    } else {
+
+      state.bagshields.push(
+        clone(state.activeBag)
+      );
+
+      toast(
+        'Bagshield berhasil disimpan sementara.'
+      );
+
+    }
+
+    state.activeBag = newEmptyBag();
+
+    resetPackageForm();
+
+    renderAll();
+
+    await saveDraft();
+
+    $('bagshieldNo').focus();
+
+  }
+
+  // REVISI BAGSHIELD
+  async function editBag(id) {
+
+    if (
+      state.activeBag &&
+      (
+        state.activeBag.bagshieldNo ||
+        state.activeBag.packages.length
+      )
+    ) {
+
+      const ok = confirm(
+        'Bagshield yang sedang dikerjakan belum disimpan. Ganti dengan data revisi?'
+      );
+
+      if (!ok) return;
+
+    }
+
+    const bag = state.bagshields.find(
+      x => x.id === id
+    );
+
+    if (!bag) return;
+
+    state.activeBag = clone(bag);
+
+    state.editingBagId = id;
+
+    resetPackageForm();
+
+    renderAll();
+
+    $('bagshieldNo').focus();
+
+    await saveDraft();
+
+    toast('Mode revisi Bagshield aktif.');
+
+  }
+
+  async function deleteBag(id) {
+
+    if (!confirm('Hapus Bagshield ini dari draft?')) {
+      return;
+    }
+
+    state.bagshields = state.bagshields.filter(
+      x => x.id !== id
+    );
+
+    if (state.editingBagId === id) {
+
+      state.editingBagId = null;
+
+      state.activeBag = newEmptyBag();
+
+    }
+
+    renderAll();
+
+    await saveDraft();
+
+  }
+
+  async function cancelBagEdit() {
+
+    if (!state.editingBagId) return;
+
+    state.editingBagId = null;
+
+    state.activeBag = newEmptyBag();
+
+    resetPackageForm();
+
+    renderAll();
+
+    await saveDraft();
+
+  }
+
+  // SCAN BARCODE BAGSHIELD DAN AWB
+  async function startScanner(target) {
+
+    if (typeof Html5Qrcode === 'undefined') {
+
+      toast(
+        'Library pemindai tidak berhasil dimuat. Periksa koneksi internet.'
+      );
+
+      return;
+
+    }
+
+    await stopScanner();
+
+    scanTarget = target;
+
+    $('scanTitle').textContent =
+      target === 'bag'
+        ? 'Scan Nomor Bagshield'
+        : 'Scan Nomor Resi / AWB';
+
+    $('scanModal').classList.add('show');
+
+    try {
+
+      scanner = new Html5Qrcode('reader');
+
+      await scanner.start(
+
+        { facingMode: 'environment' },
+
+        {
+          fps: 10,
+          qrbox: {
+            width: 260,
+            height: 150
+          }
+        },
+
+        decoded => {
+
+          const code = String(
+            decoded || ''
+          ).trim();
+
+          if (!code) return;
+
+          if (scanTarget === 'bag') {
+
+            $('bagshieldNo').value = code;
+
+            state.activeBag.bagshieldNo = code;
+
+          } else {
+
+            $('awb').value = code;
+
+          }
+
+          stopScanner();
+
+          $('scanModal').classList.remove('show');
+
+          toast(
+            'Barcode terbaca: ' + code
+          );
+
+        }
+
+      );
+
+    } catch(err) {
+
+      console.error(err);
+
+      toast(
+        'Kamera gagal dibuka. Izinkan akses kamera dan coba kembali.'
+      );
+
+      await stopScanner();
+
+      $('scanModal').classList.remove('show');
+
+    }
+
+  }
+
+  async function stopScanner() {
+
+    if (scanner) {
+
+      try {
+
+        if (scanner.isScanning) {
+          await scanner.stop();
+        }
+
+        scanner.clear();
+
+      } catch(e) {}
+
+      scanner = null;
+
+    }
+
+  }
+
+  // PROGRESS SIMPAN
+  function setProgress(done,total,msg) {
+
+    $('progressWrap').classList.remove('hidden');
+
+    $('progressText').classList.remove('hidden');
+
+    $('progressBar').style.width =
+      Math.round(done / total * 100) + '%';
+
+    $('progressText').textContent = msg;
+
+  }
+
+  // UPLOAD SEMUA FOTO KE DRIVE
+  async function uploadAllPhotos() {
+
+    const all = [];
+
+    state.bagshields.forEach(b =>
+
+      (b.packages || []).forEach(p => {
+
+        if (p.photoDataUrl && !p.photoUrl) {
+          all.push({
+            bag:b,
+            pkg:p
+          });
+        }
+
+      })
+
+    );
+
+    for (let i = 0; i < all.length; i++) {
+
+      const item = all[i];
+
+      setProgress(
+        i,
+        Math.max(1,all.length+1),
+        `Mengunggah foto ${i+1} dari ${all.length} ke Google Drive...`
+      );
+
+      const result = await callServer(
+        'uploadPhoto',
+        {
+          reportId:state.reportId,
+          bagshieldId:item.bag.id,
+          packageId:item.pkg.id,
+          dataUrl:item.pkg.photoDataUrl
+        }
+      );
+
+      if (!result || !result.ok) {
+
+        throw new Error(
+          result && result.message
+            ? result.message
+            : 'Upload foto gagal.'
+        );
+
+      }
+
+      item.pkg.photoUrl = result.url;
+
+      item.pkg.photoName = result.fileName;
+
+      await saveDraft();
+
+    }
+
+  }
+
+  // FINALISASI LAPORAN
+  async function finalize() {
+
+    if (isSaving) return;
+
+    if (state.editingBagId) {
+
+      toast(
+        'Selesaikan revisi Bagshield terlebih dahulu.'
+      );
+
+      return;
+
+    }
+
+    if (
+      state.activeBag &&
+      (
+        (state.activeBag.bagshieldNo || '').trim() ||
+        state.activeBag.packages.length
+      )
+    ) {
+
+      toast(
+        'Masih ada Bagshield yang belum disimpan sementara. Tekan Simpan Sementara Bagshield.'
+      );
+
+      return;
+
+    }
+
+    if (!state.bagshields.length) {
+
+      toast('Tambahkan minimal satu Bagshield.');
+
+      return;
+
+    }
+
+    const main = readMain();
+
+    if (!main.shipDate || !main.staff || !main.hub) {
+
+      toast(
+        'Lengkapi data utama terlebih dahulu.'
+      );
+
+      showMainStep();
+
+      return;
+
+    }
+
+    for (const b of state.bagshields) {
+
+      if (!b.packages.length) {
+
+        toast(
+          'Bagshield ' + b.bagshieldNo +
+          ' belum memiliki paket.'
+        );
+
+        return;
+
+      }
+
+      for (const p of b.packages) {
+
+        if (
+          !p.hasResi &&
+          (
+            (!p.photoDataUrl && !p.photoUrl) ||
+            !p.characteristics
+          )
+        ) {
+
+          toast(
+            'Paket tanpa resi harus memiliki foto dan ciri-ciri.'
+          );
+
+          return;
+
+        }
+
+      }
+
+    }
+
+    if (!appInfo || !appInfo.ok) {
+
+      try {
+
+        appInfo = await callServer('getAppInfo');
+
+        if (!appInfo.ok) {
+          throw new Error(appInfo.message);
+        }
+
+      } catch(e) {
+
+        toast(
+          'Google Sheets/Drive belum terhubung: ' +
+          e.message
+        );
+
+        return;
+
+      }
+
+    }
+
+    if (typeof ExcelJS === 'undefined') {
+
+      toast(
+        'Library Excel tidak termuat. Periksa koneksi internet lalu muat ulang.'
+      );
+
+      return;
+
+    }
+
+    isSaving = true;
+
+    $('btnFinalize').disabled = true;
+
+    $('btnFinalize').textContent = 'Memproses...';
+
+    try {
+
+      await uploadAllPhotos();
+
+      setProgress(
+        Math.max(
+          1,
+          state.bagshields.reduce(
+            (n,b) =>
+              n + b.packages.filter(
+                p => p.photoDataUrl || p.photoUrl
+              ).length,
+            0
+          )
+        ),
+        100,
+        'Menyimpan rekap ke Google Sheets...'
+      );
+
+      const payload = {
+
+        reportId:state.reportId,
+
+        main:main,
+
+        bagshields:state.bagshields.map(b => ({
+
+          id:b.id,
+
+          bagshieldNo:b.bagshieldNo,
+
+          packages:b.packages.map(p => ({
+
+            id:p.id,
+
+            hasResi:p.hasResi,
+
+            awb:p.awb || '',
+
+            characteristics:p.characteristics || '',
+
+            photoUrl:p.photoUrl || '',
+
+            photoName:p.photoName || ''
+
+          }))
+
+        }))
+
+      };
+
+      const result = await callServer(
+        'saveReport',
+        payload
+      );
+
+      if (!result || !result.ok) {
+
+        throw new Error(
+          result && result.message
+            ? result.message
+            : 'Penyimpanan Google Sheets gagal.'
+        );
+
+      }
+
+      setProgress(
+        100,
+        100,
+        'Data tersimpan. Menyiapkan Excel...'
+      );
+
+      await exportExcel(
+        result,
+        main,
+        state.bagshields
+      );
+
+      toast(
+        'Berhasil! Data masuk Google Sheets, foto tersimpan di Drive, dan Excel diunduh.'
+      );
+
+      await clearDraft();
+
+      resetAppAfterSuccess();
+
+      $('progressWrap').classList.add('hidden');
+
+      $('progressText').classList.add('hidden');
+
+      $('connectionStatus').innerHTML =
+        '● Tersimpan · <a href="' +
+        esc(result.spreadsheetUrl) +
+        '" target="_blank" style="color:#fff;text-decoration:underline">Buka Spreadsheet</a>';
+
+    } catch(err) {
+
+      console.error(err);
+
+      toast(
+        'Belum selesai: ' +
+        err.message +
+        '. Draft tetap tersimpan; silakan coba lagi.'
+      );
+
+      $('progressText').textContent =
+        'Gagal: ' +
+        err.message +
+        ' — draft tetap tersimpan.';
+
+    } finally {
+
+      isSaving = false;
+
+      $('btnFinalize').textContent =
+        'Selesai → Simpan & Download Excel';
+
+      renderSavedBags();
+
+    }
+
+  }
+
+  // GENERATE EXCEL
+  async function exportExcel(result,main,bags) {
+
+    const wb = new ExcelJS.Workbook();
+
+    wb.creator = 'Helpdesk Serah Terima Paket';
+
+    wb.created = new Date();
+
+    const ws1 = wb.addWorksheet(
+      'Rekap Bagshield',
+      {views:[{state:'frozen',ySplit:1}]}
+    );
+
+    ws1.columns = [
+
+      {header:'No',key:'no',width:7},
+
+      {header:'Tanggal Pengiriman',key:'date',width:19},
+
+      {header:'Nama Petugas',key:'staff',width:22},
+
+      {header:'HUB Pengirim',key:'hub',width:22},
+
+      {header:'No Bagshield',key:'bag',width:25},
+
+      {header:'Total Paket',key:'total',width:14},
+
+      {header:'Ada Resi',key:'with',width:13},
+
+      {header:'Tanpa Resi',key:'without',width:13}
+
+    ];
+
+    bags.forEach((b,i) => {
+
+      ws1.addRow({
+
+        no:i+1,
+
+        date:main.shipDate,
+
+        staff:main.staff,
+
+        hub:main.hub,
+
+        bag:b.bagshieldNo,
+
+        total:b.packages.length,
+
+        with:b.packages.filter(p => p.hasResi).length,
+
+        without:b.packages.filter(p => !p.hasResi).length
+
+      });
+
+    });
+
+    const ws2 = wb.addWorksheet(
+      'Detail Paket',
+      {views:[{state:'frozen',ySplit:1}]}
+    );
+
+    ws2.columns = [
+
+      {header:'No',key:'no',width:7},
+
+      {header:'Tanggal Pengiriman',key:'date',width:19},
+
+      {header:'Nama Petugas',key:'staff',width:22},
+
+      {header:'HUB Pengirim',key:'hub',width:22},
+
+      {header:'No Bagshield',key:'bag',width:25},
+
+      {header:'Status Resi',key:'status',width:16},
+
+      {header:'No Resi / AWB',key:'awb',width:25},
+
+      {header:'Ciri-ciri / Keterangan Paket',key:'desc',width:45},
+
+      {header:'Link Foto Google Drive',key:'photo',width:42}
+
+    ];
+
+    let n = 1;
+
+    bags.forEach(b =>
+
+      b.packages.forEach(p => {
+
+        const row = ws2.addRow({
+
+          no:n++,
+
+          date:main.shipDate,
+
+          staff:main.staff,
+
+          hub:main.hub,
+
+          bag:b.bagshieldNo,
+
+          status:p.hasResi
+            ? 'ADA RESI'
+            : 'TANPA RESI',
+
+          awb:p.awb || '-',
+
+          desc:p.characteristics || '-',
+
+          photo:p.photoUrl || '-'
+
+        });
+
+        if (p.photoUrl) {
+
+          const c = row.getCell(9);
+
+          c.value = {
+            text:'Buka Foto Bukti',
+            hyperlink:p.photoUrl
+          };
+
+          c.font = {
+            color:{argb:'FF0563C8'},
+            underline:true
+          };
+
+        }
+
+      })
+
+    );
+
+    [ws1,ws2].forEach(ws => {
+
+      const h = ws.getRow(1);
+
+      h.height = 30;
+
+      h.eachCell(c => {
+
+        c.fill = {
+          type:'pattern',
+          pattern:'solid',
+          fgColor:{argb:'FFC2185B'}
+        };
+
+        c.font = {
+          bold:true,
+          color:{argb:'FFFFFFFF'}
+        };
+
+        c.alignment = {
+          vertical:'middle',
+          wrapText:true
+        };
+
+      });
+
+      ws.autoFilter = {
+        from:{row:1,column:1},
+        to:{row:1,column:ws.columnCount}
+      };
+
+      ws.eachRow((r,i) => {
+
+        if (i > 1) {
+          r.alignment = {
+            vertical:'top',
+            wrapText:true
+          };
+        }
+
+      });
+
+    });
+
+    const buffer = await wb.xlsx.writeBuffer();
+
+    const blob = new Blob(
+      [buffer],
+      {
+        type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      }
+    );
+
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+
+    a.href = url;
+
+    a.download =
+      `Helpdesk_Serah_Terima_${main.shipDate}_${safeFile(main.hub)}.xlsx`;
+
+    document.body.appendChild(a);
+
+    a.click();
+
+    a.remove();
+
+    setTimeout(
+      () => URL.revokeObjectURL(url),
+      5000
+    );
+
+  }
+
+  function safeFile(s) {
+
+    return String(s || 'HUB')
+      .replace(/[^a-z0-9_-]/gi,'_')
+      .slice(0,35);
+
+  }
+
+  // RESET SETELAH LAPORAN BERHASIL
+  function resetAppAfterSuccess() {
+
+    state.reportId = makeId('R');
+
+    state.main = {
+      shipDate:localDate(),
+      staff:'',
+      hub:''
+    };
+
+    state.bagshields = [];
+
+    state.activeBag = newEmptyBag();
+
+    state.editingBagId = null;
+
+    populateMain();
+
+    showMainStep();
+
+    renderAll();
+
+    resetPackageForm();
+
+    $('bagshieldNo').value = '';
+
+    $('progressBar').style.width = '0%';
+
+  }
+
+  // EVENT TOMBOL
+  $('btnContinue').addEventListener(
+    'click',
+    async () => {
+
+      const m = readMain();
+
+      if (!m.shipDate || !m.staff || !m.hub) {
+
+        toast(
+          'Tanggal, nama petugas, dan HUB Pengirim wajib diisi.'
+        );
+
+        return;
+
+      }
+
+      state.main = m;
+
+      if (!state.activeBag) {
+        state.activeBag = newEmptyBag();
+      }
+
+      showBagStep();
+
+      await saveDraft();
+
+      renderAll();
+
+    }
+  );
+
+  $('btnEditMain').addEventListener(
+    'click',
+    () => {
+
+      state.main = readMain();
+
+      populateMain();
+
+      showMainStep();
+
+    }
+  );
+
+  $('btnNewBag').addEventListener(
+    'click',
+    async () => {
+
+      if (
+        state.activeBag &&
+        (
+          state.activeBag.bagshieldNo ||
+          state.activeBag.packages.length
+        )
+      ) {
+
+        toast(
+          'Simpan sementara Bagshield yang sedang dikerjakan terlebih dahulu.'
+        );
+
+        return;
+
+      }
+
+      state.activeBag = newEmptyBag();
+
+      state.editingBagId = null;
+
+      resetPackageForm();
+
+      renderAll();
+
+      await saveDraft();
+
+      $('bagshieldNo').focus();
+
+    }
+  );
+
+  $('btnAddPackage').addEventListener(
+    'click',
+    addPackage
+  );
+
+  $('btnSaveBag').addEventListener(
+    'click',
+    saveCurrentBag
+  );
+
+  $('btnCancelBagEdit').addEventListener(
+    'click',
+    cancelBagEdit
+  );
+
+  $('btnFinalize').addEventListener(
+    'click',
+    finalize
+  );
+
+  $('modeHasResi').addEventListener(
+    'click',
+    () => setMode('hasResi')
+  );
+
+  $('modeNoResi').addEventListener(
+    'click',
+    () => setMode('noResi')
+  );
+
+  $('btnScanBag').addEventListener(
+    'click',
+    () => startScanner('bag')
+  );
+
+  $('btnScanAwb').addEventListener(
+    'click',
+    () => startScanner('awb')
+  );
+
+  $('btnCloseScanner').addEventListener(
+    'click',
+    async () => {
+
+      await stopScanner();
+
+      $('scanModal').classList.remove('show');
+
+    }
+  );
+
+  // FOTO PAKET
+  $('packagePhoto').addEventListener(
+    'change',
+    async e => {
+
+      const f =
+        e.target.files &&
+        e.target.files[0];
+
+      if (!f) return;
+
+      try {
+
+        photoDataUrl = await compressImage(f);
+
+        $('photoPreview').src = photoDataUrl;
+
+        $('photoPreview').classList.remove('hidden');
+
+        $('photoInfo').textContent =
+          'Foto siap (' +
+          Math.round(photoDataUrl.length/1024) +
+          ' KB)';
+
+      } catch(err) {
+
+        toast(err.message);
+
+      }
+
+    }
+  );
+
+  $('bagshieldNo').addEventListener(
+    'input',
+    () => {
+
+      if (state.activeBag) {
+        state.activeBag.bagshieldNo =
+          $('bagshieldNo').value;
+      }
+
+    }
+  );
+
+  window.addEventListener(
+    'beforeunload',
+    () => {
+
+      if (db) saveDraft();
+
+    }
+  );
+
+  document.addEventListener(
+    'visibilitychange',
+    () => {
+
+      if (
+        document.visibilityState === 'hidden' &&
+        db
+      ) {
+        saveDraft();
+      }
+
+    }
+  );
+
+  init();
+
+})();
+</script>
+
 </body>
 </html>
